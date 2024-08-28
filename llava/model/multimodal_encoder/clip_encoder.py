@@ -148,10 +148,8 @@ class CLIPVisionTower(nn.Module):
             
         # Prepare the return tuple
         if router_logits is not None:
-            print(f'image feature shape after processing: {image_features.shape}')
             return image_features, router_logits
         else:
-            print(f'image feature shape after processing: {image_features.shape}')
             return image_features      
 
     @property
