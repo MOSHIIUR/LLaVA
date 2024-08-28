@@ -22,6 +22,7 @@ import copy
 import pprint
 
 from torch.nn.utils.rnn import pad_sequence
+from transformers import CLIPConfig, CLIPVisionModel
 from .multimodal_encoder.builder import build_vision_tower
 from .co_attention.cross_attention import get_co_attention
 from .multimodal_projector.builder import build_vision_projector
@@ -56,7 +57,6 @@ class LlavaMetaModel:
         print('Inside initialize_vision_modules')
         # vision_tower = openai/clip-vit-large-patch14
         vision_tower = model_args.vision_tower
-        print(f'vision tower: {vision_tower}')
         mm_vision_select_layer = model_args.mm_vision_select_layer
         mm_vision_select_feature = model_args.mm_vision_select_feature
         pretrain_mm_mlp_adapter = model_args.pretrain_mm_mlp_adapter
@@ -64,6 +64,14 @@ class LlavaMetaModel:
         share_moe = model_args.share_moe
         co_attention = model_args.cross_attention
 
+        # preparing vision projection
+        self.config.mm_projector_type = getattr(model_args, 'mm_projector_type', 'linear')
+        self.config.num_experts = getattr(model_args, 'num_experts', 1)
+        self.config.num_experts_per_tok = getattr(model_args, 'num_experts_per_tok', 1)
+        self.config.aux_loss_coef = getattr(model_args, 'aux_loss_coef', 0.01)
+        # gettting the config for the vision tower
+        vision_tower_config = CLIPConfig.from_pretrained(vision_tower)
+        self.config.mm_hidden_size = vision_tower_config.vision_config.hidden_size
         self.config.mm_vision_tower = vision_tower
 
         if getattr(self, 'mm_projector', None) is None:
@@ -106,11 +114,6 @@ class LlavaMetaModel:
             vision_tower.load_model()
 
         self.config.use_mm_proj = True
-        self.config.mm_projector_type = getattr(model_args, 'mm_projector_type', 'linear')
-        self.config.num_experts = getattr(model_args, 'num_experts', 1)
-        self.config.num_experts_per_tok = getattr(model_args, 'num_experts_per_tok', 1)
-        self.config.aux_loss_coef = getattr(model_args, 'aux_loss_coef', 0.01)
-        self.config.mm_hidden_size = vision_tower.hidden_size
         self.hidden_size = self.config.hidden_size
         self.config.mm_vision_select_layer = mm_vision_select_layer
         self.config.mm_vision_select_feature = mm_vision_select_feature

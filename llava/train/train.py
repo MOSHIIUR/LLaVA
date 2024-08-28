@@ -40,6 +40,7 @@ from llava.train.llava_trainer import LLaVATrainer
 
 from llava import conversation as conversation_lib
 from llava.model import *
+from llava.model.multimodal_projector.builder import build_vision_projector
 from llava.mm_utils import tokenizer_image_token
 
 from PIL import Image
@@ -1070,12 +1071,18 @@ def train(attn_implementation=None):
 
     if model_args.vision_tower is not None:
 
+
         
         model.get_model().initialize_vision_modules(
             model_args=model_args,
             fsdp=training_args.fsdp
         )
         
+        # print('-'*100)
+        # print('-'*40+'Model After Initializing vision Module'+'-'*40)
+        # print(model)
+        # print('-'*100)
+
         vision_tower = model.get_vision_tower()
 
 
