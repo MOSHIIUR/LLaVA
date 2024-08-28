@@ -1159,7 +1159,6 @@ def train(attn_implementation=None):
     # model.base_model.model.lm_head.weight.data = model.base_model.model.lm_head.weight.data.float()
 
 
-    print(data_args)
     # data module contain train_datset and data_collector instance
     data_module = make_supervised_data_module(tokenizer=tokenizer,
                                               data_args=data_args)
