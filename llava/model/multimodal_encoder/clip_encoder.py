@@ -53,7 +53,7 @@ class CLIPVisionTower(nn.Module):
             for i, encoder_layer in enumerate(self.vision_tower.vision_model.encoder.layers):
                 self.vision_tower.vision_model.encoder.layers[i] = ModifiedEncoderLayer(encoder_layer, hidden_size, sparseMoE)
 
-            print('moe block initialized in the encoder')
+            print('shared moe encoder initialized')
 
             # Wrap the model with the LogitCollectorWrapper
             self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
@@ -141,6 +141,7 @@ class CLIPVisionTower(nn.Module):
             else: 
                 image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
                 image_features = self.feature_select(image_forward_outs).to(images.dtype)
+                print(f'image feature shape after processing: {image_features.shape}')
                 return image_features
 
             
