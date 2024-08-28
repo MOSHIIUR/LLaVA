@@ -200,7 +200,7 @@ class LlavaMetaForCausalLM(ABC):
         print(f'image shape got by encode_images-{images.shape}')
         # get image features from vision encoder
         image_features = self.get_model().get_vision_tower()(images)
-        print(f'image shape got by encode_images-{images.shape}')
+        print(f'image shape after processing-{image_features.shape}')
 
         try:
             # Try to unpack image_features, assuming it contains two values
