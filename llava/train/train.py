@@ -743,7 +743,6 @@ class LazySupervisedDataset(Dataset):
         self.tokenizer = tokenizer
         self.list_data_dict = list_data_dict
         self.data_args = data_args
-        print(self.data_args)
 
     def __len__(self):
         return len(self.list_data_dict)

@@ -54,7 +54,7 @@ class LlavaMetaModel:
         return vision_tower
     
     def initialize_vision_modules(self, model_args, fsdp=None):
-        print('Inside initialize_vision_modules')
+        # print('Inside initialize_vision_modules')
         # vision_tower = openai/clip-vit-large-patch14
         vision_tower = model_args.vision_tower
         mm_vision_select_layer = model_args.mm_vision_select_layer
@@ -203,7 +203,6 @@ class LlavaMetaForCausalLM(ABC):
             # Try to unpack image_features, assuming it contains two values
             image_features, gate_logits_encoder = output_features
             # Process image_features if unpacking was successful
-            print(f'(share-moe)-image shape passed-{image_features.shape}')
             image_features = self.get_model().mm_projector(image_features)
             
 
@@ -211,7 +210,6 @@ class LlavaMetaForCausalLM(ABC):
             # If unpacking fails, only image_features is returned and gate_logits_encoder should be None
             gate_logits_encoder = None
             image_features = output_features
-            print(f'(no-share)inside value error: shape of image {image_features.shape}')
             image_features = self.get_model().mm_projector(image_features)
 
 
@@ -320,10 +318,6 @@ class LlavaMetaForCausalLM(ABC):
         
         vision_tower = self.get_vision_tower()
         cross_attention  = self.get_cross_attention()
-
-        # print(f'Cross attension {cross_attention}')
-        # print(f'Input ids shape: {input_ids.shape}')
-        print(f'images shape: {images.shape}')
 
         gate_logits = None
         align_loss = None
