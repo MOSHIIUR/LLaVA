@@ -93,11 +93,6 @@ class LlavaMetaModel:
 
             else: vision_tower = build_vision_tower(model_args)
 
-            print('-' * 140)
-            print('*'*40+'build vision tower'+'*'*40)
-            print(vision_tower)
-            print('-' * 140)
-
             if fsdp is not None and len(fsdp) > 0:
                 self.vision_tower = [vision_tower]
             else:
@@ -199,28 +194,33 @@ class LlavaMetaForCausalLM(ABC):
 
     def encode_images(self, images):
         
+        print(f'image shape got by encode_images-{images.shape}')
         # get image features from vision encoder
         image_features = self.get_model().get_vision_tower()(images)
 
         try:
+            # Try to unpack image_features, assuming it contains two values
             image_features, gate_logits_encoder = image_features
-            # print(f'shape of image features: {image_features.shape}')
+            # Process image_features if unpacking was successful
+            image_features = self.get_model().mm_projector(image_features)
+            print(f'(share moe)-image shape got by encode_images-{image_features.shape}')
 
-        
         except ValueError:
-            # If unpacking fails, set gate_logits_encoder to None
+            # If unpacking fails, only image_features is returned and gate_logits_encoder should be None
             gate_logits_encoder = None
             image_features = self.get_model().mm_projector(image_features)
-        
-        else:
-            image_features = self.get_model().mm_projector(image_features)
-            # print(f'shape of image features: {image_features.shape}')
+            print(f'(no share) -image shape got by encode_images-{image_features.shape}')
+
 
         try:
+            # Attempt to unpack the processed image_features again, assuming it could yield two values
             image_features, gate_logits = image_features
+
         except ValueError:
-            # Handle the case where only one value is returned
+            # If unpacking fails, gate_logits should be None
             gate_logits = None
+
+        # Return the appropriate output based on whether gate_logits_encoder is None
         if gate_logits_encoder is None:
             return image_features, gate_logits
         else:
@@ -320,7 +320,7 @@ class LlavaMetaForCausalLM(ABC):
 
         # print(f'Cross attension {cross_attention}')
         # print(f'Input ids shape: {input_ids.shape}')
-        # print(f'images shape: {images.shape}')
+        print(f'images shape: {images.shape}')
 
         gate_logits = None
         align_loss = None
@@ -402,6 +402,7 @@ class LlavaMetaForCausalLM(ABC):
         
         else:
             # Image Feature shape: torch.Size([4, 256, 5120]) -> [batch_size, sequence_length, embed_dim]
+            print(f'images shape before passing to encode image: {images.shape}')
             result = self.encode_images(images)
 
     
