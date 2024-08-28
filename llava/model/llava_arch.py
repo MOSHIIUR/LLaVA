@@ -205,8 +205,9 @@ class LlavaMetaForCausalLM(ABC):
             # Try to unpack image_features, assuming it contains two values
             image_features, gate_logits_encoder = image_features
             # Process image_features if unpacking was successful
-            image_features = self.get_model().mm_projector(image_features)
             print(f'(share moe)-image shape passed from projectore-{image_features.shape}')
+            image_features = self.get_model().mm_projector(image_features)
+            
 
         except ValueError:
             # If unpacking fails, only image_features is returned and gate_logits_encoder should be None
