@@ -199,12 +199,12 @@ class LlavaMetaForCausalLM(ABC):
         
         print(f'image shape got by encode_images-{images.shape}')
         # get image features from vision encoder
-        image_features = self.get_model().get_vision_tower()(images)
-        print(f'image shape after processing-{image_features.shape}')
+        output_features = self.get_model().get_vision_tower()(images)
+        print(f'image shape after processing-{output_features.shape}')
 
         try:
             # Try to unpack image_features, assuming it contains two values
-            image_features, gate_logits_encoder = image_features
+            image_features, gate_logits_encoder = output_features
             # Process image_features if unpacking was successful
             print(f'(share moe)-image shape passed-{image_features.shape}')
             image_features = self.get_model().mm_projector(image_features)
@@ -213,6 +213,7 @@ class LlavaMetaForCausalLM(ABC):
         except ValueError:
             # If unpacking fails, only image_features is returned and gate_logits_encoder should be None
             gate_logits_encoder = None
+            image_features = output_features
             print(f'inside value error: shape of image {image_features.shape}')
             image_features = self.get_model().mm_projector(image_features)
             print(f'(no share) -image shape passed from projectore-{image_features.shape}')
