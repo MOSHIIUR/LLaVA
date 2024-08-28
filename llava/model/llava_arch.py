@@ -211,6 +211,7 @@ class LlavaMetaForCausalLM(ABC):
         except ValueError:
             # If unpacking fails, only image_features is returned and gate_logits_encoder should be None
             gate_logits_encoder = None
+            print(f'inside value error: shape of image {image_features.shape}')
             image_features = self.get_model().mm_projector(image_features)
             print(f'(no share) -image shape passed from projectore-{image_features.shape}')
 
