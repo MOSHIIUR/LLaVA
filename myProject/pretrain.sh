@@ -1,6 +1,7 @@
 #!/bin/bash
 
 deepspeed llava/train/train_mem.py \
+    --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
     --deepspeed ./scripts/zero2.json \
     --model_name_or_path lmsys/vicuna-7b-v1.5 \
     --version plain \
@@ -8,27 +9,26 @@ deepspeed llava/train/train_mem.py \
     --image_folder ./playground/data/images \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --tune_mm_mlp_adapter True \
-    --tune_embed_tokens True \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
     --bf16 True \
-    --output_dir ./ckpts/llava-tune_embed \
-    --max_steps 10 \
+    --output_dir ./ckpts/llava-vicuna-v2-3-lora-7b \
+    --num_train_epochs 1 \
     --num_experts_per_tok 2 \
     --num_experts 4 \
     --num_layers 2 \
     --num_heads 2 \
     --aux_loss_coef 0.01 \
     --share_moe False \
-    --cross_attention False \
-    --mm_projector_type 'mlp2x_gelu' \
-    --per_device_train_batch_size 32 \
+    --cross_attention True \
+    --mm_projector_type 'mlp2x_gelu'\
+    --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 1 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 5 \
+    --save_steps 24000 \
     --save_total_limit 1 \
     --learning_rate 2e-3 \
     --weight_decay 0. \
@@ -41,4 +41,4 @@ deepspeed llava/train/train_mem.py \
     --dataloader_num_workers 4 \
     --lazy_preprocess True \
     --report_to wandb \
-    --run_name "Pretrain-tune_embed"
+    --run_name "UVA-Pretrain-lora"

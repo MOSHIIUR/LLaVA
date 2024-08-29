@@ -231,7 +231,6 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
         if getattr(trainer.args, "cross_attention", False):
             keys_to_match.extend(['co_attention'])
 
-        rank0_print(keys_to_match)
 
         # Extract the relevant parameters
         weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer.model.named_parameters(), keys_to_match)
@@ -249,7 +248,6 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
                 component_folder = os.path.join(parent_folder, "components")
                 os.makedirs(component_folder, exist_ok=True)
                 for key in keys_to_match:
-                    print(f'Saving key: {key}')
                     component_weights = {k: v for k, v in weight_to_save.items() if key in k}
                     torch.save(component_weights, os.path.join(component_folder, f'{key}_{current_folder}.bin'))
             else:
