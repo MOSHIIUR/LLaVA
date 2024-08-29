@@ -249,6 +249,8 @@ class LLaVATrainer(Trainer):
             if getattr(self.args, "cross_attention", False):
                 keys_to_match.extend(['cross_attention'])
             
+            print(keys_to_match)
+
             # Extract the relevant parameters
             weight_to_save = get_mm_adapter_state_maybe_zero_3(self.model.named_parameters(), keys_to_match)
 
@@ -258,6 +260,7 @@ class LLaVATrainer(Trainer):
                 
                 # Save each component separately
                 for key in keys_to_match:
+                    print(f'Saving key: {key}')
                     component_weights = {k: v for k, v in weight_to_save.items() if key in k}
                     torch.save(component_weights, os.path.join(output_dir, f'{key}.bin'))
 
