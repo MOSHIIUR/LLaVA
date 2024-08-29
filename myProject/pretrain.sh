@@ -14,7 +14,7 @@ deepspeed llava/train/train_mem.py \
     --mm_use_im_patch_token False \
     --bf16 True \
     --output_dir ./ckpts/llava-tune_embed \
-    --max_steps 1- \
+    --max_steps 10 \
     --num_experts_per_tok 2 \
     --num_experts 4 \
     --num_layers 2 \
@@ -28,7 +28,7 @@ deepspeed llava/train/train_mem.py \
     --gradient_accumulation_steps 1 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 1 \
+    --save_steps 5 \
     --save_total_limit 1 \
     --learning_rate 2e-3 \
     --weight_decay 0. \

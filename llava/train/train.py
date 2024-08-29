@@ -1100,6 +1100,8 @@ def train(attn_implementation=None):
         # mlp_adapter is mumtimodal projector
         # making it freez/tune based on the model 
         model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
+        model.config.tune_embed_tokens = training_args.tune_embed_tokens = model_args.tune_embed_tokens
+        model.config.cross_attention = training_args.cross_attention = model_args.cross_attention
 
         if model_args.tune_mm_mlp_adapter:
             model.requires_grad_(False)
