@@ -1115,7 +1115,7 @@ def train(attn_implementation=None):
                     p.requires_grad = True
             
             if model_args.tune_embed_tokens:
-                for param in model.get_model().model.embed_tokens.parameters():
+                for param in model.get_model().embed_tokens.parameters():
                     param.requires_grad = True
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
