@@ -75,6 +75,7 @@ class ModelArguments:
     vision_tower: Optional[str] = field(default=None)
     mm_vision_select_layer: Optional[int] = field(default=-1)
     pretrain_mm_mlp_adapter: Optional[str] = field(default=None)
+    pretrain_embed_tokens: Optional[str] = field(default=None)
     mm_projector_type: Optional[str] = field(default='linear')
     share_moe: bool = field(default=False)
     cross_attention: bool = field(default=False)
@@ -1117,6 +1118,11 @@ def train(attn_implementation=None):
             if model_args.tune_embed_tokens:
                 for param in model.get_model().embed_tokens.parameters():
                     param.requires_grad = True
+        
+        if model_args.pretrain_embed_tokens is not None:
+            embed_tokens_weights = torch.load(model_args.pretrain_embed_tokens, map_location='cpu')
+            model.get_model().embed_tokens.load_state_dict(embed_tokens_weights)
+
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
 
