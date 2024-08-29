@@ -956,6 +956,8 @@ def train(attn_implementation=None):
     model.config.local_rank = local_rank
     model.config.training = True
 
+    print(model)
+
 
 
     # freezing the LLM
