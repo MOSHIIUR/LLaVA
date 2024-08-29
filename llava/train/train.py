@@ -1110,14 +1110,12 @@ def train(attn_implementation=None):
             for p in model.get_model().mm_projector.parameters():
                 p.requires_grad = True
 
-            co_attention = getattr(model_args, 'cross_attention', False)  
-            if co_attention: 
+            if model_args.cross_attention: 
                 for p in model.get_model().co_attention.parameters():
                     p.requires_grad = True
             
-            tune_embed_tokens = getattr(model_args, 'tune_embed_tokens', False)  
-            if tune_embed_tokens:
-                for param in model.embed_tokens.parameters():
+            if model_args.tune_embed_tokens:
+                for param in model.get_model().model.embed_tokens.parameters():
                     param.requires_grad = True
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
