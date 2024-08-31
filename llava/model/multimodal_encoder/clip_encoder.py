@@ -175,14 +175,21 @@ class CLIPVisionTower(nn.Module):
 
 
 class CLIPVisionTowerS2(CLIPVisionTower):
-    def __init__(self, vision_tower, sparseMoE, args, delay_load=False):
+    def __init__(self, vision_tower, args, sparseMoE=None, delay_load=False):
         super().__init__(vision_tower, args, delay_load)
 
         self.s2_scales = getattr(args, 's2_scales', '336,672,1008')
+        print(f'S2 scales: {self.s2_scales}')
         self.s2_scales = list(map(int, self.s2_scales.split(',')))
         self.s2_scales.sort()
         self.s2_split_size = self.s2_scales[0]
         self.s2_image_size = self.s2_scales[-1]
+
+        # setup moe
+        
+        # check if sparse_Moe is none
+        self.moe = sparseMoE is not None
+
 
         # optional
         self.cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
@@ -193,6 +200,7 @@ class CLIPVisionTowerS2(CLIPVisionTower):
             from s2wrapper import forward as multiscale_forward
         except ImportError:
             raise ImportError('Package s2wrapper not found! Please install by running: \npip install git+https://github.com/bfshi/scaling_on_scales.git')
+        
         self.multiscale_forward = multiscale_forward
 
         # change resize/crop size in preprocessing to the largest image size in s2_scale
