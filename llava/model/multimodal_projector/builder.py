@@ -176,9 +176,8 @@ def build_vision_projector(config, delay_load=False, **kwargs):
     
     mlp_gelu_match = re.match(r'^mlp(\d+)x_gelu$', projector_type)
     if mlp_gelu_match:
-        print('#' * 100)
-        print(f'{projector_type} Projection executed in BUILDER.PY')
-        print('#' * 100)
+        print(f'{projector_type} Projection executed')
+        print('-' * 100)
         
         mlp_depth = int(mlp_gelu_match.group(1))
         modules = [nn.Linear(config.mm_hidden_size, config.hidden_size)]
@@ -191,7 +190,7 @@ def build_vision_projector(config, delay_load=False, **kwargs):
         return IdentityMap()
     
     if projector_type == 'sparse_moe':
-        print('sparse_moe Projection executed in BUILDER.PY')
+        print('sparse_moe Projection executed')
         print('-' * 100)
         return SparseMoeBlock(config)
     

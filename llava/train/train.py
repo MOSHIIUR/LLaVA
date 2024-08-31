@@ -71,6 +71,8 @@ class ModelArguments:
     tune_mm_mlp_adapter: bool = field(default=False)
     tune_embed_tokens: bool = field(default=False)
     use_custom_embed_tokens: bool = field(default=False)
+    s2: bool = field(default=False)
+    s2_scales: List[int] = field(default_factory=lambda: [336, 672, 1008])
     text_encoder: Optional[str] = field(default=None)
     vision_tower: Optional[str] = field(default=None)
     mm_vision_select_layer: Optional[int] = field(default=-1)
@@ -776,9 +778,12 @@ class LazySupervisedDataset(Dataset):
 
     
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
+
         sources = self.list_data_dict[i]
+
         if isinstance(i, int):
             sources = [sources]
+
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
         
         if 'image' in sources[0]:
@@ -825,6 +830,7 @@ class LazySupervisedDataset(Dataset):
         # image exist in the data
         if 'image' in self.list_data_dict[i]:
             data_dict['image'] = image
+
         elif self.data_args.is_multimodal:
             # image does not exist in the data, but the model is multimodal
             crop_size = self.data_args.image_processor.crop_size
@@ -1095,6 +1101,7 @@ def train(attn_implementation=None):
         model.config.tokenizer_padding_side = tokenizer.padding_side
         model.config.tokenizer_model_max_length = tokenizer.model_max_length
 
+
         
         # mlp_adapter is mumtimodal projector
         # making it freez/tune based on the model 
@@ -1119,8 +1126,8 @@ def train(attn_implementation=None):
         
         if model_args.pretrain_embed_tokens is not None:
             embed_tokens_weights = torch.load(model_args.pretrain_embed_tokens, map_location='cpu')
-            adjusted_weight = {k.replace('model.embed_tokens.', ''): v for k, v in embed_tokens_weights.items()}
-            model.get_model().embed_tokens.load_state_dict(adjusted_weight)
+            embed_tokens_weights = {k.replace('model.embed_tokens.', ''): v for k, v in embed_tokens_weights.items()}
+            model.get_model().embed_tokens.load_state_dict(embed_tokens_weights)
             rank0_print('Pretrain embed tokens initialized')
 
 
@@ -1145,6 +1152,10 @@ def train(attn_implementation=None):
         model.config.mm_projector_lr = training_args.mm_projector_lr
         training_args.use_im_start_end = model_args.mm_use_im_start_end
         model.config.mm_use_im_patch_token = model_args.mm_use_im_patch_token
+
+        #s2
+        model.config.s2 = model_args.s2
+        model.config.s2_scales = model_args.s2_scales
         
         model.initialize_vision_tokenizer(model_args, tokenizer=tokenizer)
         
