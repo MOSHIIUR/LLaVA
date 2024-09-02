@@ -84,9 +84,8 @@ class LlavaMetaModel:
             # print('*'*40+'build viison projector'+'*'*40)
 
             self.mm_projector = build_vision_projector(self.config)
-            # self.mm_projector = sparseMoE
-            # print(self.mm_projector)
-            # print('-'*120)
+            print(self.mm_projector)
+            print('-'*120)
 
             if 'unpad' in mm_patch_merge_type:
                 embed_std = 1 / torch.sqrt(torch.tensor(self.config.hidden_size, dtype=self.dtype))
