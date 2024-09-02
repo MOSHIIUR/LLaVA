@@ -89,6 +89,7 @@ class ModelArguments:
     num_experts_per_tok: Optional[int] = field(default=1)
     aux_loss_coef: Optional[float] = field(default=0.01)
     clip_loss_coef: Optional[float] = field(default=0.01)
+    use_contrastive_loss: bool = field(default=False)
 
 
 @dataclass
@@ -1063,6 +1064,8 @@ def train(attn_implementation=None):
     model.config.use_cache = False
     model.config.local_rank = local_rank
     model.config.training = True
+    model.config.use_contrastive_loss = model_args.use_contrastive_loss
+
 
 
 

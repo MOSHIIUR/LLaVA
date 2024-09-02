@@ -70,6 +70,7 @@ class LlavaMetaModel:
         self.config.num_experts_per_tok = getattr(model_args, 'num_experts_per_tok', 1)
         self.config.aux_loss_coef = getattr(model_args, 'aux_loss_coef', 0.01)
         self.config.clip_loss_coef = getattr(model_args, 'clip_loss_coef', 0.01)
+
         # gettting the config for the vision tower
         vision_tower_config = CLIPConfig.from_pretrained(vision_tower)
         self.config.mm_hidden_size = vision_tower_config.vision_config.hidden_size
@@ -149,6 +150,13 @@ class LlavaMetaModel:
             return True
         else: return False
 
+    def use_constrastive_loss(self):
+        use_loss = getattr(self, 'use_contrastive_loss', None)
+
+        if use_loss is not None:
+            return True
+        else: return False
+
 
 def unpad_image(tensor, original_size):
     """
@@ -192,6 +200,9 @@ class LlavaMetaForCausalLM(ABC):
     
     def get_cross_attention(self):
         return self.get_model().get_cross_attention()
+    
+    def use_contrastive_loss(self):
+        return self.get_model().use_contrastive_loss()
     
     def cross_attention(self, text_features, image_features, text_mask):
         return self.get_model().co_attention(image_features, text_features, text_mask, visual_mask = None)
@@ -318,6 +329,11 @@ class LlavaMetaForCausalLM(ABC):
         
         vision_tower = self.get_vision_tower()
         cross_attention  = self.get_cross_attention()
+        use_contrastive_loss = self.use_contrastive_loss()
+        if use_contrastive_loss:
+            print('using contrastive_loss')
+        
+        else: print('Not using contrastive_loss')
 
         gate_logits = None
         align_loss = None
@@ -637,8 +653,8 @@ class LlavaMetaForCausalLM(ABC):
                 print("image_features_has_zero Contains Zero:", image_features_has_zero)
             
             
-            
-            align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
+            if use_contrastive_loss:
+                align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
 
             # print('unpad text features')
             # for i in text_features:
@@ -681,7 +697,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_input_embeds.append(cur_new_input_embeds)
                 new_labels.append(cur_new_labels)
 
-        else:
+        elif use_contrastive_loss:
             align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
 
 

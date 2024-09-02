@@ -130,8 +130,10 @@ class LlavaPhiForCausalLM(PhiForCausalLM, LlavaMetaForCausalLM):
         if self.config.training:
             projector_type = getattr(self.config, 'mm_projector_type', 'linear')
             encoder_moe_loss = None
-            alignment_loss = alignment_loss*self.config.clip_loss_coef
-            
+
+            if self.config.use_contrastive_loss:
+                alignment_loss = (alignment_loss*self.config.clip_loss_coef).to(llm_loss.device)
+
             if projector_type == 'sparse_moe':
                 load_balancing_loss = aux_loss(
                 gate_logits,
@@ -147,54 +149,97 @@ class LlavaPhiForCausalLM(PhiForCausalLM, LlavaMetaForCausalLM):
                         )* self.config.aux_loss_coef
 
 
-
                 if encoder_moe_loss is None:
-                    llm_loss = out['loss']
-                    out['loss'] = llm_loss + load_balancing_loss.to(llm_loss.device) + alignment_loss.to(llm_loss.device)
 
+                    if self.config.use_contrastive_loss:
+                        llm_loss = out['loss']
+                        out['loss'] = llm_loss + load_balancing_loss.to(llm_loss.device) + alignment_loss.to(llm_loss.device)
 
-                    if self.config.local_rank == 0:
-                        print(f'LLM Loss: {llm_loss}; LoadBalancingLoss: {load_balancing_loss}; AlignmentLoss: {alignment_loss}')
-                        print(f'Total Loss: {out["loss"]}')
+                        if self.config.local_rank == 0:
+                            print(f'LLM Loss: {llm_loss}; LoadBalancingLoss: {load_balancing_loss}; AlignmentLoss: {alignment_loss}')
+                            print(f'Total Loss: {out["loss"]}')
 
-                        wandb.log({
-                        "llm_loss": llm_loss,
-                        "load_balancing_loss": load_balancing_loss,
-                        "alignment_loss": alignment_loss,
-                        })
+                            wandb.log({
+                            "llm_loss": llm_loss,
+                            "load_balancing_loss": load_balancing_loss,
+                            "alignment_loss": alignment_loss,
+                            })
+
+                    else:
+                        llm_loss = out['loss']
+                        out['loss'] = llm_loss + load_balancing_loss.to(llm_loss.device)
+
+                        if self.config.local_rank == 0:
+                            print(f'LLM Loss: {llm_loss}; LoadBalancingLoss: {load_balancing_loss}')
+                            print(f'Total Loss: {out["loss"]}')
+
+                            wandb.log({
+                            "llm_loss": llm_loss,
+                            "load_balancing_loss": load_balancing_loss,
+                            })
 
                 else:
-                    llm_loss = out['loss']
-                    out['loss'] = llm_loss + load_balancing_loss.to(llm_loss.device) + encoder_moe_loss.to(llm_loss) + alignment_loss.to(llm_loss.device)
+                    if self.config.use_contrastive_loss:
+                        llm_loss = out['loss']
+                        out['loss'] = llm_loss + load_balancing_loss.to(llm_loss.device) + encoder_moe_loss.to(llm_loss) + alignment_loss.to(llm_loss.device)
 
 
-                    if self.config.local_rank == 0:
-                        print(f'LLM Loss: {llm_loss}; LoadBalancingLoss: {load_balancing_loss}; Encoder_moe_loss: {encoder_moe_loss}; AlignmentLoss: {alignment_loss}')
-                        print(f'Total Loss: {out["loss"]}')
+                        if self.config.local_rank == 0:
+                            print(f'LLM Loss: {llm_loss}; LoadBalancingLoss: {load_balancing_loss}; Encoder_moe_loss: {encoder_moe_loss}; AlignmentLoss: {alignment_loss}')
+                            print(f'Total Loss: {out["loss"]}')
 
-                        wandb.log({
-                        "llm_loss": llm_loss,
-                        "load_balancing_loss": load_balancing_loss,
-                        "alignment_loss": alignment_loss,
-                        "encoder_load_balancing_loss": encoder_moe_loss,
-                        })
+                            wandb.log({
+                            "llm_loss": llm_loss,
+                            "load_balancing_loss": load_balancing_loss,
+                            "alignment_loss": alignment_loss,
+                            "encoder_load_balancing_loss": encoder_moe_loss,
+                            })
+
+                    else:
+                        llm_loss = out['loss']
+                        out['loss'] = llm_loss + load_balancing_loss.to(llm_loss.device) + encoder_moe_loss.to(llm_loss)
+
+
+                        if self.config.local_rank == 0:
+                            print(f'LLM Loss: {llm_loss}; LoadBalancingLoss: {load_balancing_loss}; Encoder_moe_loss: {encoder_moe_loss}')
+                            print(f'Total Loss: {out["loss"]}')
+
+                            wandb.log({
+                            "llm_loss": llm_loss,
+                            "load_balancing_loss": load_balancing_loss,
+                            "encoder_load_balancing_loss": encoder_moe_loss,
+                            })
 
 
 
             else:
-                llm_loss = out['loss']
-                out['loss'] = llm_loss + alignment_loss.to(llm_loss.device)
+                if self.config.use_contrastive_loss: 
+                    llm_loss = out['loss']
+                    out['loss'] = llm_loss + alignment_loss.to(llm_loss.device)
 
 
-                if self.config.local_rank == 0:
-                    print(f'LLM Loss: {llm_loss}; AlignmentLoss: {alignment_loss}')
-                    print(f'Total Loss: {out["loss"]}')
+                    if self.config.local_rank == 0:
+                        print(f'LLM Loss: {llm_loss}; AlignmentLoss: {alignment_loss}')
+                        print(f'Total Loss: {out["loss"]}')
 
-                    wandb.log({
-                        "llm_loss": llm_loss,
-                        "alignment_loss": alignment_loss,
-                        # ... log any other metrics you want (e.g., accuracy) ... 
-                    })
+                        wandb.log({
+                            "llm_loss": llm_loss,
+                            "alignment_loss": alignment_loss,
+                            # ... log any other metrics you want (e.g., accuracy) ... 
+                        })
+            
+                else: 
+                    llm_loss = out['loss']
+
+
+                    if self.config.local_rank == 0:
+                        print(f'LLM Loss: {llm_loss};')
+                        print(f'Total Loss: {out["loss"]}')
+
+                        wandb.log({
+                            "llm_loss": llm_loss,
+                            # ... log any other metrics you want (e.g., accuracy) ... 
+                        })
             
 
         return out

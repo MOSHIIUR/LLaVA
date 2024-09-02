@@ -12,7 +12,8 @@ deepspeed llava/train/train_mem.py \
     --image_folder ./playground/data/images \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --tune_mm_mlp_adapter True \
-    --tune_embed_tokens True \
+    --tune_embed_tokens False \
+    --use_contrastive_loss False \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
@@ -24,6 +25,7 @@ deepspeed llava/train/train_mem.py \
     --num_layers 2 \
     --num_heads 2 \
     --aux_loss_coef 0.01 \
+    --clip_loss_coef 0.01 \
     --share_moe False \
     --cross_attention False \
     --mm_projector_type 'mlp2x_gelu'\
