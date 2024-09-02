@@ -2,10 +2,11 @@
 
 llama='meta-llama/Meta-Llama-3.1-8B'
 phi='microsoft/Phi-3.5-mini-instruct'
+phi2='microsoft/phi-2'
 
 deepspeed llava/train/train_mem.py \
     --deepspeed ./scripts/zero2.json \
-    --model_name_or_path  $phi\
+    --model_name_or_path $phi2 \
     --version plain \
     --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
     --image_folder ./playground/data/images \
