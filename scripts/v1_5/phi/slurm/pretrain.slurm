@@ -2,12 +2,13 @@
 
 #SBATCH -A collabrobogroup
 #SBATCH --array=0
-#SBATCH --ntasks=1 
+#SBATCH --ntasks-per-node=1
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a40:4
-#SBATCH -N 1 
-#SBATCH --cpus-per-task=64
+#SBATCH --gpus-per-node=1
+#SBATCH --nodes=4
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=256G
 #SBATCH --output=log/slurm/phi_pretrain/log-%A-%a.log 
 #SBATCH -J phi_pretrain
 
