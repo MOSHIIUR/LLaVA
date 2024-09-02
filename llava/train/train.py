@@ -73,7 +73,7 @@ class ModelArguments:
     tune_embed_tokens: bool = field(default=False)
     use_custom_embed_tokens: bool = field(default=False)
     s2: bool = field(default=False)
-    s2_scales: List[int] = field(default_factory=lambda: [336, 672, 1008])
+    s2_scales: Optional[str] = field(default="336,672,1008")
     text_encoder: Optional[str] = field(default=None)
     vision_tower: Optional[str] = field(default=None)
     mm_vision_select_layer: Optional[int] = field(default=-1)

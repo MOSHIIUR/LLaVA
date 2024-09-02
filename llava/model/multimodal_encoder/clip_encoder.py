@@ -180,7 +180,6 @@ class CLIPVisionTowerS2(CLIPVisionTower):
         self.moe = sparseMoE
         self.router_logits = None
         self.s2_scales = getattr(args, 's2_scales', '336,672,1008')
-        print(f'S2 scales: {self.s2_scales}')
         self.s2_scales = list(map(int, self.s2_scales.split(',')))
         self.s2_scales.sort()
         self.s2_split_size = self.s2_scales[0]
