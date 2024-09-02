@@ -229,12 +229,14 @@ class CLIPVisionTowerS2(CLIPVisionTower):
 
             for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
                 if isinstance(layer, ModifiedEncoderLayer):
-                    for param in layer.moe.parameters():
-                        param.requires_grad = True
-                    
+                    print(f"Layer type: {type(layer)}")
+                    print(f"Attributes: {dir(layer)}")
                     if hasattr(layer, 'linear_projection'):
                         print(f"linear_projection: {layer.linear_projection}")
 
+                    for param in layer.moe.parameters():
+                        param.requires_grad = True
+                    
                     for param in layer.linear_projection.parameters():
                         param.requires_grad = True        
                         
