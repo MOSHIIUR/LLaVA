@@ -88,6 +88,7 @@ class ModelArguments:
     num_heads: Optional[int] = field(default=2)
     num_experts_per_tok: Optional[int] = field(default=1)
     aux_loss_coef: Optional[float] = field(default=0.01)
+    clip_loss_coef: Optional[float] = field(default=0.01)
 
 
 @dataclass

@@ -69,6 +69,7 @@ class LlavaMetaModel:
         self.config.num_experts = getattr(model_args, 'num_experts', 1)
         self.config.num_experts_per_tok = getattr(model_args, 'num_experts_per_tok', 1)
         self.config.aux_loss_coef = getattr(model_args, 'aux_loss_coef', 0.01)
+        self.config.clip_loss_coef = getattr(model_args, 'clip_loss_coef', 0.01)
         # gettting the config for the vision tower
         vision_tower_config = CLIPConfig.from_pretrained(vision_tower)
         self.config.mm_hidden_size = vision_tower_config.vision_config.hidden_size
