@@ -130,7 +130,8 @@ class LlavaPhiForCausalLM(PhiForCausalLM, LlavaMetaForCausalLM):
         if self.config.training:
             projector_type = getattr(self.config, 'mm_projector_type', 'linear')
             encoder_moe_loss = None
-
+            alignment_loss = alignment_loss*self.config.clip_loss_coef
+            
             if projector_type == 'sparse_moe':
                 load_balancing_loss = aux_loss(
                 gate_logits,
