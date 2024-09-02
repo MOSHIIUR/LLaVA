@@ -176,10 +176,6 @@ class CLIPVisionTowerS2(CLIPVisionTower):
     def __init__(self, vision_tower, args, sparseMoE=None, delay_load=False):
 
         # check if sparse_Moe is none
-        if sparseMoE is not None:
-            super().__init__(vision_tower, args, sparseMoE, delay_load)
-
-        else: super().__init__(vision_tower, args, sparseMoE=None, delay_load=delay_load)
 
         self.moe = sparseMoE
         self.router_logits = None
@@ -191,7 +187,10 @@ class CLIPVisionTowerS2(CLIPVisionTower):
         self.s2_image_size = self.s2_scales[-1]
 
         # optional
-        self.cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
+        if sparseMoE is not None:
+            super().__init__(vision_tower, args, sparseMoE, delay_load)
+
+        else: super().__init__(vision_tower, args, sparseMoE=None, delay_load=delay_load)
 
         try:
             from s2wrapper import forward as multiscale_forward
