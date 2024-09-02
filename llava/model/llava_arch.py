@@ -46,6 +46,9 @@ class LlavaMetaModel:
                 self.image_newline = nn.Parameter(
                     torch.empty(config.hidden_size, dtype=self.dtype)
                 )
+        
+        self.model_config=config
+
 
     def get_vision_tower(self):
         vision_tower = getattr(self, 'vision_tower', None)
@@ -151,9 +154,9 @@ class LlavaMetaModel:
         else: return False
 
     def use_contrastive_loss(self):
-        use_loss = getattr(self, 'use_contrastive_loss', None)
+        use_loss = self.model_config.use_contrastive_loss
 
-        if use_loss is not None:
+        if use_loss:
             return True
         else: return False
 
