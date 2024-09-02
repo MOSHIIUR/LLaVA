@@ -51,33 +51,31 @@ class CLIPVisionTower(nn.Module):
                 self.vision_tower.vision_model.encoder.layers[i] = ModifiedEncoderLayer(encoder_layer, hidden_size, sparseMoE)
 
             print('shared moe encoder initialized')
-            for i, layer in enumerate(self.vision_tower.vision_model.encoder.layers):
-                print(f"Layer {i} type: {type(layer)}")
-                if hasattr(layer, 'moe'):
-                    print(f"Layer {i} moe: {layer.moe}")
-                if hasattr(layer, 'linear_projection'):
-                    print(f"Layer {i} linear_projection: {layer.linear_projection}")
-
             # Wrap the model with the LogitCollectorWrapper
             self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
 
             # backnone freezing
             self.vision_tower.requires_grad_(False)
 
-            for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
+            # Verify and unfreeze parameters in the new layers
+            for i, layer in enumerate(self.vision_tower.vision_model.encoder.layers):
                 if isinstance(layer, ModifiedEncoderLayer):
+                    # Unfreeze 'moe' parameters where present
+                    if hasattr(layer, 'moe'):
+                        for param in layer.moe.parameters():
+                            param.requires_grad = True
+                            print(f"Layer {i} - Unfreezing moe parameter: {param} - requires_grad: {param.requires_grad}")
 
-                    for param in layer.moe.parameters():
-                        param.requires_grad = True
-
-                    for param in layer.linear_projection.parameters():
-                        param.requires_grad = True
-        
-        # vanilla vision encoder
-        else:
-            self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
-            self.vision_tower.requires_grad_(False)
-            print('pretrained vision model initialized')
+                    # Unfreeze 'linear_projection' parameters where present
+                    if hasattr(layer, 'linear_projection'):
+                        for param in layer.linear_projection.parameters():
+                            param.requires_grad = True
+                            print(f"Layer {i} - Unfreezing linear_projection parameter: {param} - requires_grad: {param.requires_grad}")        
+                    # vanilla vision encoder
+                    else:
+                        self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
+                        self.vision_tower.requires_grad_(False)
+                        print('pretrained vision model initialized')
 
 
     
