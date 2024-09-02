@@ -658,6 +658,100 @@ def preprocess_mpt(
         labels=targets,
     )
 
+def preprocess_phi(
+    sources,
+    tokenizer: transformers.PreTrainedTokenizer,
+    has_image: bool = False
+) -> Dict:
+    conv = conversation_lib.default_conversation.copy()
+    roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
+
+    # print('00000000000', sources)
+    # Apply prompt templates
+    conversations = []
+    # sys.exit()
+
+    # import ipdb
+    # ipdb.set_trace()
+    for i, source in enumerate(sources):
+        if roles[source[0]["from"]] != conv.roles[0]:
+            # Skip the first one if it is not from human
+            source = source[1:]
+
+        conv.messages = []
+        for j, sentence in enumerate(source):
+            role = roles[sentence["from"]]
+            assert role == conv.roles[j % 2], f"{i}"
+            conv.append_message(role, sentence["value"])
+        conversations.append(conv.get_prompt())
+    # print(11111111, conversations)
+    # Tokenize conversations
+    # print('before tokenizer_image_token', conversations)
+    if has_image:
+        input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
+        # print(2222222222222, input_ids.shape)
+    else:
+        input_ids = tokenizer(
+            conversations,
+            return_tensors="pt",
+            padding="longest",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+        ).input_ids
+
+    # print('after tokenizer_image_token input_ids targets', input_ids)
+    targets = input_ids.clone()
+
+    assert conv.sep_style == conversation_lib.SeparatorStyle.TWO
+    # print(tokenizer)
+    # Mask targets
+    sep = conv.sep + conv.roles[1] + ": "
+    # print('sep', sep)
+    for conversation, target in zip(conversations, targets):
+        total_len = int(target.ne(tokenizer.pad_token_id).sum())
+        # print('total_len', total_len)
+        rounds = conversation.split(conv.sep2)
+        # print('len(rounds)', len(rounds))
+        cur_len = 0
+        target[:cur_len] = IGNORE_INDEX
+        for i, rou in enumerate(rounds):
+            if rou == "":
+                break
+
+            parts = rou.split(sep)
+            # print('i rou, parts', i, rou, parts)
+            if len(parts) != 2:
+                break
+            parts[0] += sep
+            # print('after add sep, parts', parts)
+
+            if has_image:
+                round_len = len(tokenizer_image_token(rou, tokenizer)) + 1  # for eos_token
+                instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 1
+            else:
+                round_len = len(tokenizer(rou).input_ids) + 1  # for eos_token
+                instruction_len = len(tokenizer(parts[0]).input_ids) - 1
+            # print('round_len, instruction_len, target[cur_len : cur_len + instruction_len]',
+            #       round_len, instruction_len, target[cur_len : cur_len + instruction_len], target[cur_len : cur_len + round_len])
+            target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
+
+            cur_len += round_len
+        target[cur_len:] = IGNORE_INDEX
+
+        if cur_len < tokenizer.model_max_length:
+            # import ipdb
+            # ipdb.set_trace()
+            if cur_len != total_len:
+                target[:] = IGNORE_INDEX
+                print(
+                    f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
+                    f" (ignored)"
+                )
+    # print(input_ids, target)
+    return dict(
+        input_ids=input_ids,
+        labels=targets,
+    )
 
 def preprocess_plain( sources: Sequence[str], tokenizer: transformers.PreTrainedTokenizer,) -> Dict:
     
@@ -694,6 +788,8 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
         return preprocess_llama_2(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version.startswith("v1"):
         return preprocess_v1(sources, tokenizer, has_image=has_image)
+    if conversation_lib.default_conversation.version.startswith("phi"):  # for phi and qwen
+        return preprocess_phi(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version == "mpt":
         return preprocess_mpt(sources, tokenizer, has_image=has_image)
     
@@ -928,6 +1024,16 @@ def train(attn_implementation=None):
                 cache_dir=training_args.cache_dir,
                 **bnb_model_from_pretrained_args
             )
+
+
+        elif 'phi' in model_args.model_name_or_path.lower():
+            model = LlavaPhiForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                attn_implementation=attn_implementation,
+                # torch_dtype=torch.bfloat16,
+                **bnb_model_from_pretrained_args
+            )
         
         else:
             # print('Calling the llama model > refered to LlavaLlamaForCausalLM class ')
@@ -1025,6 +1131,17 @@ def train(attn_implementation=None):
             model_max_length=training_args.model_max_length,
             padding_side="right"
         )
+
+    elif 'phi' in model_args.model_name_or_path.lower():
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            cache_dir=training_args.cache_dir,
+            model_max_length=training_args.model_max_length,
+            padding_side="right",
+            use_fast=False,
+        )
+        tokenizer.add_special_tokens({'unk_token': '<|extra_0|>'})
+
 
     elif model_args.text_encoder:
         rank0_print('custom Text Tokenizer initialized')
