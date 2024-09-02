@@ -48,10 +48,15 @@ class CLIPVisionTower(nn.Module):
             self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
             
             for i, encoder_layer in enumerate(self.vision_tower.vision_model.encoder.layers):
-                print(i)
                 self.vision_tower.vision_model.encoder.layers[i] = ModifiedEncoderLayer(encoder_layer, hidden_size, sparseMoE)
 
             print('shared moe encoder initialized')
+            for i, layer in enumerate(self.vision_tower.vision_model.encoder.layers):
+                print(f"Layer {i} type: {type(layer)}")
+                if hasattr(layer, 'moe'):
+                    print(f"Layer {i} moe: {layer.moe}")
+                if hasattr(layer, 'linear_projection'):
+                    print(f"Layer {i} linear_projection: {layer.linear_projection}")
 
             # Wrap the model with the LogitCollectorWrapper
             self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
