@@ -333,10 +333,6 @@ class LlavaMetaForCausalLM(ABC):
         vision_tower = self.get_vision_tower()
         cross_attention  = self.get_cross_attention()
         use_contrastive_loss = self.use_contrastive_loss()
-        if use_contrastive_loss:
-            print('using contrastive_loss')
-        
-        else: print('Not using contrastive_loss')
 
         gate_logits = None
         align_loss = None
