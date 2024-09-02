@@ -44,7 +44,6 @@ class CLIPVisionTower(nn.Module):
         # vision encoder with moe
         if sparseMoE is not None:
             vision_tower_config = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
-            # self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
             hidden_size = vision_tower_config.hidden_size
             self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
             
@@ -213,7 +212,6 @@ class CLIPVisionTowerS2(CLIPVisionTower):
         # vision encoder with moe
         if sparseMoE is not None:
             vision_tower_config = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
-            # self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
             hidden_size = vision_tower_config.hidden_size
             self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
             
@@ -249,6 +247,8 @@ class CLIPVisionTowerS2(CLIPVisionTower):
 
     @torch.no_grad()
     def forward_feature(self, images):
+        print(f's2 forward featuredmethod called')
+        print('Raw image shape:', images.shape)
         
         if self.moe:
             image_forward_outs = self.wrapped_vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
@@ -260,10 +260,14 @@ class CLIPVisionTowerS2(CLIPVisionTower):
         else:
             image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
             image_features = self.feature_select(image_forward_outs).to(images.dtype)
+            print('shape of image:', image_features.shape)
             return image_features
 
     @torch.no_grad()
     def forward(self, images):
+        
+        print(f's2 forward method called')
+
         if type(images) is list:
             image_features = []
             for image in images:
@@ -271,6 +275,7 @@ class CLIPVisionTowerS2(CLIPVisionTower):
                 image_features.append(image_feature)
         else:
             image_features = self.multiscale_forward(self.forward_feature, images, img_sizes=self.s2_scales, max_split_size=self.s2_split_size)
+            print('multiscale image features shape: ', image_features.shape)
 
         # Prepare the return tuple
         if self.router_logits is not None:
