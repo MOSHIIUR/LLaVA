@@ -18,60 +18,44 @@ from typing import List, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 import wandb
+from ..load_balancing_loss import *
 
-from transformers import AutoConfig, AutoModelForCausalLM, \
-                         LlamaConfig, LlamaModel, LlamaForCausalLM
+
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, \
+                            PhiConfig, PhiForCausalLM, PhiModel
+# from .phi.configuration_phi import PhiConfig
+# from .phi.modeling_phi import PhiModel, PhiForCausalLM
 
 from transformers.modeling_outputs import CausalLMOutputWithPast
-from transformers.generation.utils import GenerateOutput
 
 from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
-from ..load_balancing_loss import *
-from ..multimodal_encoder.clip_text_encoder import CustomTextEncoder
-
-# this is inherating all the attributes of LlamaConfig
-# and adding new attribute called model_type attribute to it
-class LlavaConfig(LlamaConfig):
-    # add new attributes to the config
-    model_type = "llava_llama"
+import torch.distributed as dist
 
 
-# this was called by LlavaLlamaForCausalLM
-class LlavaLlamaModel(LlavaMetaModel, LlamaModel):
-    config_class = LlavaConfig
+class LlavaPhiConfig(PhiConfig):
+    model_type = "llava_phi"
 
-    # config: LlamaConfig -> specifying the type of the config argument
-    def __init__(self, config: LlamaConfig):
-        # calling the constructor of the parent class LlavaMetaModel and LlamaModel and passing the config argument to it.
-        super(LlavaLlamaModel, self).__init__(config)
 
-# we have created this LlavaLlamaForCausalLM (child class) is a subclass of both LlamaForCausalLM (parent class) and LlavaMetaForCausalLM.
-# LlamaForCausalLM is the main class which is inharited by LlavaLlamaForCausalLM
-# now we can access all the functions of the parent class
-class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
-    # print('inside LlavaLlamaForCausalLM')
-    config_class = LlavaConfig
+class LlavaPhiModel(LlavaMetaModel, PhiModel):
+    config_class = LlavaPhiConfig
+
+    def __init__(self, config: PhiConfig):
+        super(LlavaPhiModel, self).__init__(config)
+
+
+class LlavaPhiForCausalLM(PhiForCausalLM, LlavaMetaForCausalLM):
+    config_class = LlavaPhiConfig
 
     def __init__(self, config):
-
-        # overriding default MRO as LlavaMetaForCausalLM does not have any _init_ function
-        super(LlamaForCausalLM, self).__init__(config)
-        self.model = LlavaLlamaModel(config)
-        self.config = config
-        self.pretraining_tp = config.pretraining_tp
+        super(PhiForCausalLM, self).__init__(config)
+        self.model = LlavaPhiModel(config)
         self.vocab_size = config.vocab_size
-        self.use_custom_embed_tokens = False
-        
-        # Conditional replacement of the embedding layer
-        if self.use_custom_embed_tokens:
-            self.text_encoder = "openai/clip-vit-large-patch14"
-            self.model.embed_tokens = CustomTextEncoder(self.text_encoder, config.hidden_size)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
         # self.gate_logits = None
         self.gate_logits = [] # tuple of gate logits for each steps
         self.gate_logits_encoder = [] # tuple of gate logits for each steps
-        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
-
+        
         # Initialize weights and apply final processing
         self.post_init()
 
@@ -94,6 +78,9 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
 
+        # import ipdb
+        # ipdb.set_trace()
+        # print(f'rank {dist.get_rank()}', 'before prepare_inputs_labels_for_multimodal')
         if inputs_embeds is None:
             (
                 input_ids,
@@ -187,62 +174,32 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
 
         return out
 
-    @torch.no_grad()
-    def generate(
-        self,
-        inputs: Optional[torch.Tensor] = None,
-        images: Optional[torch.Tensor] = None,
-        image_sizes: Optional[torch.Tensor] = None,
-        **kwargs,
-    ) -> Union[GenerateOutput, torch.LongTensor]:
-        position_ids = kwargs.pop("position_ids", None)
-        attention_mask = kwargs.pop("attention_mask", None)
-        if "inputs_embeds" in kwargs:
-            raise NotImplementedError("`inputs_embeds` is not supported")
 
-        if images is not None:
-            (
-                inputs,
-                position_ids,
-                attention_mask,
-                _,
-                inputs_embeds,
-                _,
-                _,
-                _,
-                _
-                
-            ) = self.prepare_inputs_labels_for_multimodal(
-                inputs,
-                position_ids,
-                attention_mask,
-                None,
-                None,
-                images,
-                image_sizes=image_sizes
-            )
+
+    def prepare_inputs_for_generation(
+            self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None, **kwargs
+    ):
+        if past_key_values:
+            input_ids = input_ids[:, -1:]
+
+        # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
+        if inputs_embeds is not None and past_key_values is None:
+            model_inputs = {"inputs_embeds": inputs_embeds}
         else:
-            inputs_embeds = self.get_model().embed_tokens(inputs)
+            model_inputs = {"input_ids": input_ids}
 
-        return super().generate(
-            position_ids=position_ids,
-            attention_mask=attention_mask,
-            inputs_embeds=inputs_embeds,
-            **kwargs
+        model_inputs.update(
+            {
+                "past_key_values": past_key_values,
+                "use_cache": kwargs.get("use_cache"),
+                "attention_mask": attention_mask,
+                "images": kwargs.get("images", None),
+            }
         )
+        return model_inputs
+    
+    
 
-    def prepare_inputs_for_generation(self, input_ids, past_key_values=None,
-                                      inputs_embeds=None, **kwargs):
-        images = kwargs.pop("images", None)
-        image_sizes = kwargs.pop("image_sizes", None)
-        inputs = super().prepare_inputs_for_generation(
-            input_ids, past_key_values=past_key_values, inputs_embeds=inputs_embeds, **kwargs
-        )
-        if images is not None:
-            inputs['images'] = images
-        if image_sizes is not None:
-            inputs['image_sizes'] = image_sizes
-        return inputs
-
-AutoConfig.register("llava_llama", LlavaConfig)
-AutoModelForCausalLM.register(LlavaConfig, LlavaLlamaForCausalLM)
+AutoConfig.register("llava_phi", LlavaPhiConfig)
+# AutoTokenizer.register(LlavaPhiConfig, PhiTokenizer)
+AutoModelForCausalLM.register(LlavaPhiConfig, LlavaPhiForCausalLM)
