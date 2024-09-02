@@ -48,6 +48,7 @@ class CLIPVisionTower(nn.Module):
             self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
             
             for i, encoder_layer in enumerate(self.vision_tower.vision_model.encoder.layers):
+                print(i)
                 self.vision_tower.vision_model.encoder.layers[i] = ModifiedEncoderLayer(encoder_layer, hidden_size, sparseMoE)
 
             print('shared moe encoder initialized')
@@ -60,7 +61,7 @@ class CLIPVisionTower(nn.Module):
 
             for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
                 if isinstance(layer, ModifiedEncoderLayer):
-                         
+
                     for param in layer.moe.parameters():
                         param.requires_grad = True
 
