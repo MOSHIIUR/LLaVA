@@ -24,7 +24,6 @@ deepspeed llava/train/train_mem.py \
     --num_experts 4 \
     --num_layers 2 \
     --num_heads 2 \
-    --aux_loss_coef 0.01 \
     --clip_loss_coef 0.01 \
     --share_moe False \
     --cross_attention False \
