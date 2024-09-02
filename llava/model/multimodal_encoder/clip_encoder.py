@@ -175,9 +175,6 @@ class CLIPVisionTowerS2(CLIPVisionTower):
     def __init__(self, vision_tower, args, sparseMoE=None, delay_load=False):
 
         # check if sparse_Moe is none
-
-        self.moe = sparseMoE
-        self.router_logits = None
         self.s2_scales = getattr(args, 's2_scales', '336,672,1008')
         self.s2_scales = list(map(int, self.s2_scales.split(',')))
         self.s2_scales.sort()
@@ -189,6 +186,10 @@ class CLIPVisionTowerS2(CLIPVisionTower):
             super().__init__(vision_tower, args, sparseMoE, delay_load)
 
         else: super().__init__(vision_tower, args, sparseMoE=None, delay_load=delay_load)
+
+        # initialize moe
+        self.moe = sparseMoE
+        self.router_logits = None
 
         try:
             from s2wrapper import forward as multiscale_forward

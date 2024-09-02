@@ -215,28 +215,20 @@ class LlavaMetaForCausalLM(ABC):
         output_features = self.get_model().get_vision_tower()(images)
 
         try:
-            # Try to unpack image_features, assuming it contains two values
             image_features, gate_logits_encoder = output_features
-            # Process image_features if unpacking was successful
             image_features = self.get_model().mm_projector(image_features)
-            
 
         except ValueError:
-            # If unpacking fails, only image_features is returned and gate_logits_encoder should be None
             gate_logits_encoder = None
             image_features = output_features
             image_features = self.get_model().mm_projector(image_features)
 
-
         try:
-            # Attempt to unpack the processed image_features again, assuming it could yield two values
             image_features, gate_logits = image_features
 
         except ValueError:
-            # If unpacking fails, gate_logits should be None
             gate_logits = None
 
-        # Return the appropriate output based on whether gate_logits_encoder is None
         if gate_logits_encoder is None:
             return image_features, gate_logits
         else:
