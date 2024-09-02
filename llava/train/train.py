@@ -40,6 +40,7 @@ from llava.train.llava_trainer import LLaVATrainer
 
 from llava import conversation as conversation_lib
 from llava.model import *
+from llava.model.language_model.llava_phi import LlavaPhiForCausalLM
 from llava.model.multimodal_projector.builder import build_vision_projector
 from llava.mm_utils import tokenizer_image_token
 
