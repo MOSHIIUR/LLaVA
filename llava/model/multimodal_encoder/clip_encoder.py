@@ -231,6 +231,9 @@ class CLIPVisionTowerS2(CLIPVisionTower):
                 if isinstance(layer, ModifiedEncoderLayer):
                     for param in layer.moe.parameters():
                         param.requires_grad = True
+                    
+                    if hasattr(layer, 'linear_projection'):
+                        print(f"linear_projection: {layer.linear_projection}")
 
                     for param in layer.linear_projection.parameters():
                         param.requires_grad = True        
