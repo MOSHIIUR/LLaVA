@@ -17,9 +17,6 @@ class CLIPVisionTower(nn.Module):
         self.vision_tower_name = vision_tower
         self.select_layer = args.mm_vision_select_layer
         self.select_feature = getattr(args, 'mm_vision_select_feature', 'patch')
-        self.mlp_type = getattr(args, 'mm_projector_type', 'linear')
-        self.num_experts = getattr(args, 'num_experts', 'linear')
-        self.num_selected = getattr(args, 'num_experts_per_tok', 'linear')
 
         # check if sparse_Moe is none
         self.moe = sparseMoE is not None
@@ -45,9 +42,9 @@ class CLIPVisionTower(nn.Module):
 
         # vision encoder with moe
         if sparseMoE is not None:
-            cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
-            self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
-            hidden_size = self.vision_tower.config.hidden_size
+            vision_tower_config = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
+            # self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
+            hidden_size = vision_tower_config.hidden_size
             self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
             
             for i, encoder_layer in enumerate(self.vision_tower.vision_model.encoder.layers):
@@ -113,9 +110,9 @@ class CLIPVisionTower(nn.Module):
                 for image in images:
                     image_forward_out = self.wrapped_vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
                     image_features = self.feature_select(image_forward_outs).to(images.dtype)
-                    # print(f'image_features shape : {image_features.shape}')
                     image_features.append(image_feature)
-                    # router_logits.append(router_logits)
+                    router_logits = self.wrapped_vision_tower.get_collected_logits()
+                    self.wrapped_vision_tower.clear_logits()
 
         
         # image is not a list but tensor
@@ -176,20 +173,21 @@ class CLIPVisionTower(nn.Module):
 
 class CLIPVisionTowerS2(CLIPVisionTower):
     def __init__(self, vision_tower, args, sparseMoE=None, delay_load=False):
-        super().__init__(vision_tower, args, delay_load)
 
+        # check if sparse_Moe is none
+        if sparseMoE is not None:
+            super().__init__(vision_tower, args, sparseMoE, delay_load)
+
+        else: super().__init__(vision_tower, args, sparseMoE=None, delay_load=delay_load)
+
+        self.moe = sparseMoE
+        self.router_logits = None
         self.s2_scales = getattr(args, 's2_scales', '336,672,1008')
         print(f'S2 scales: {self.s2_scales}')
         self.s2_scales = list(map(int, self.s2_scales.split(',')))
         self.s2_scales.sort()
         self.s2_split_size = self.s2_scales[0]
         self.s2_image_size = self.s2_scales[-1]
-
-        # setup moe
-        
-        # check if sparse_Moe is none
-        self.moe = sparseMoE is not None
-
 
         # optional
         self.cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
@@ -203,19 +201,49 @@ class CLIPVisionTowerS2(CLIPVisionTower):
         
         self.multiscale_forward = multiscale_forward
 
-        # change resize/crop size in preprocessing to the largest image size in s2_scale
-        if not delay_load or getattr(args, 'unfreeze_mm_vision_tower', False):
-            self.image_processor.size['shortest_edge'] = self.s2_image_size
-            self.image_processor.crop_size['height'] = self.image_processor.crop_size['width'] = self.s2_image_size
+        # # change resize/crop size in preprocessing to the largest image size in s2_scale
+        # if not delay_load or getattr(args, 'unfreeze_mm_vision_tower', False):
+        #     self.image_processor.size['shortest_edge'] = self.s2_image_size
+        #     self.image_processor.crop_size['height'] = self.image_processor.crop_size['width'] = self.s2_image_size
 
-    def load_model(self, device_map=None):
+    def load_model(self, sparseMoE=None, device_map=None):
         if self.is_loaded:
             print('{} is already loaded, `load_model` called again, skipping.'.format(self.vision_tower_name))
             return
 
         self.image_processor = CLIPImageProcessor.from_pretrained(self.vision_tower_name)
-        self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
-        self.vision_tower.requires_grad_(False)
+        
+        # vision encoder with moe
+        if sparseMoE is not None:
+            vision_tower_config = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
+            # self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
+            hidden_size = vision_tower_config.hidden_size
+            self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
+            
+            for i, encoder_layer in enumerate(self.vision_tower.vision_model.encoder.layers):
+                self.vision_tower.vision_model.encoder.layers[i] = ModifiedEncoderLayer(encoder_layer, hidden_size, sparseMoE)
+
+            print('shared moe initialized in s^2')
+
+            # Wrap the model with the LogitCollectorWrapper
+            self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
+
+            # backnone freezing
+            self.vision_tower.requires_grad_(False)
+
+            for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
+                if isinstance(layer, ModifiedEncoderLayer):
+                    for param in layer.moe.parameters():
+                        param.requires_grad = True
+
+                    for param in layer.linear_projection.parameters():
+                        param.requires_grad = True        
+                        
+        else:
+            self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
+            self.vision_tower.requires_grad_(False)
+            print('pretrained vision model initialized in s^2')
+
 
         self.image_processor.size['shortest_edge'] = self.s2_image_size
         self.image_processor.crop_size['height'] = self.image_processor.crop_size['width'] = self.s2_image_size
@@ -224,9 +252,18 @@ class CLIPVisionTowerS2(CLIPVisionTower):
 
     @torch.no_grad()
     def forward_feature(self, images):
-        image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
-        image_features = self.feature_select(image_forward_outs).to(images.dtype)
-        return image_features
+        
+        if self.moe:
+            image_forward_outs = self.wrapped_vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+            image_features = self.feature_select(image_forward_outs).to(images.dtype)
+            self.router_logits = self.wrapped_vision_tower.get_collected_logits()
+            self.wrapped_vision_tower.clear_logits()
+            return image_features
+        
+        else:
+            image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+            image_features = self.feature_select(image_forward_outs).to(images.dtype)
+            return image_features
 
     @torch.no_grad()
     def forward(self, images):
@@ -238,7 +275,11 @@ class CLIPVisionTowerS2(CLIPVisionTower):
         else:
             image_features = self.multiscale_forward(self.forward_feature, images, img_sizes=self.s2_scales, max_split_size=self.s2_split_size)
 
-        return image_features
+        # Prepare the return tuple
+        if self.router_logits is not None:
+            return image_features, self.router_logits
+        else:
+            return image_features      
 
     @property
     def hidden_size(self):

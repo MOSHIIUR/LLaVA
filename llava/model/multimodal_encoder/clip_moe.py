@@ -258,7 +258,7 @@ class CLIPVisionEmbeddings(nn.Module):
         return embeddings
 
 class CLIPSMoEVisionTransformer(nn.Module):
-    def __init__(self, config, sparseMoE, num_experts=4, num_selected=2):
+    def __init__(self, config, sparseMoE, num_experts, num_selected):
         super().__init__()
         self.config = config
         embed_dim = config.hidden_size
