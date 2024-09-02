@@ -269,8 +269,7 @@ class LlavaMetaForCausalLM(ABC):
     
     def clip_contrastive_loss(self, text_embeddings, image_embeddings, attention_mask, temperature=0.07):
 
-        # print(f'Text embeding shape: {text_embeddings.shape}')
-        # print(f'Image embeding shape: {image_embeddings.shape}')
+
         # # convert this to fp32 to mitigate `nan` during normalization
         text_embeds = text_embeddings.float()
         vision_embeds = image_embeddings.float()
