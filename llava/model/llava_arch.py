@@ -83,9 +83,13 @@ class LlavaMetaModel:
             # print('-' * 100)
             # print('*'*40+'build viison projector'+'*'*40)
 
-            # self.mm_projector = build_vision_projector(self.config)
+            self.mm_projector = build_vision_projector(self.config)
             # print(self.mm_projector)
             # print('-'*120)
+            for name, param in self.mm_projector.named_parameters():
+                if param.requires_grad:
+                    print(f'{name} : Trainable')
+
 
             if 'unpad' in mm_patch_merge_type:
                 embed_std = 1 / torch.sqrt(torch.tensor(self.config.hidden_size, dtype=self.dtype))
