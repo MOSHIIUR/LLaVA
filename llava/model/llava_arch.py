@@ -103,7 +103,7 @@ class LlavaMetaModel:
             
             if share_moe:
                 vision_tower = build_vision_tower(model_args, self.mm_projector)
-                for name, param in self.mm_projector.vision_tower():
+                for name, param in self.vision_tower.named_parameters():
                     if param.requires_grad:
                         print(f'{name} : Trainable')
 
