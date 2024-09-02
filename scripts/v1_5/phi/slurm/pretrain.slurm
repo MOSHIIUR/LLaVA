@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-10
+#SBATCH --array=0
 #SBATCH --ntasks=1 
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
@@ -64,7 +64,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $P
 --save_strategy "steps" \
 --save_steps 2500 \
 --save_total_limit 1 \
---learning_rate ${lr[${SLURM_ARRAY_TASK_ID}]} \
+--learning_rate 2e-3 \
 --weight_decay 0. \
 --warmup_ratio 0.03 \
 --lr_scheduler_type "cosine" \
