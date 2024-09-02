@@ -59,11 +59,7 @@ class CLIPVisionTower(nn.Module):
             self.vision_tower.requires_grad_(False)
 
             for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
-                if isinstance(layer, ModifiedEncoderLayer):
-  
-                    if hasattr(layer, 'linear_projection'):
-                        print(f"linear_projection: {layer.linear_projection}")
-     
+                if isinstance(layer, ModifiedEncoderLayer):     
                     for param in layer.moe.parameters() and layer.linear_projection.parameters():
                         param.requires_grad = True
         

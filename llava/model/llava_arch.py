@@ -86,9 +86,6 @@ class LlavaMetaModel:
             self.mm_projector = build_vision_projector(self.config)
             # print(self.mm_projector)
             # print('-'*120)
-            for name, param in self.mm_projector.named_parameters():
-                if param.requires_grad:
-                    print(f'{name} : Trainable')
 
 
             if 'unpad' in mm_patch_merge_type:
@@ -106,6 +103,10 @@ class LlavaMetaModel:
             
             if share_moe:
                 vision_tower = build_vision_tower(model_args, self.mm_projector)
+                for name, param in self.mm_projector.vision_tower():
+                    if param.requires_grad:
+                        print(f'{name} : Trainable')
+
 
             else: vision_tower = build_vision_tower(model_args)
 
@@ -113,6 +114,8 @@ class LlavaMetaModel:
                 self.vision_tower = [vision_tower]
             else:
                 self.vision_tower = vision_tower
+
+
 
         else:
             if fsdp is not None and len(fsdp) > 0:
