@@ -150,7 +150,7 @@ class LlavaMetaModel:
             return True
         else: return False
 
-    def use_constrastive_loss(self):
+    def use_contrastive_loss(self):
         use_loss = getattr(self, 'use_contrastive_loss', None)
 
         if use_loss is not None:
