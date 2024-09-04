@@ -57,20 +57,17 @@ class CLIPVisionTower(nn.Module):
             # backnone freezing
             self.vision_tower.requires_grad_(False)
 
-            # Verify and unfreeze parameters in the new layers
+            # unfreez the custom components
             for i, layer in enumerate(self.vision_tower.vision_model.encoder.layers):
                 if isinstance(layer, ModifiedEncoderLayer):
-                    # Unfreeze 'moe' parameters where present
                     if hasattr(layer, 'moe'):
                         for param in layer.moe.parameters():
                             param.requires_grad = True
-                            print(f"Layer {i} - Unfreezing moe parameter: {param} - requires_grad: {param.requires_grad}")
 
-                    # Unfreeze 'linear_projection' parameters where present
                     if hasattr(layer, 'linear_projection'):
                         for param in layer.linear_projection.parameters():
                             param.requires_grad = True
-                            print(f"Layer {i} - Unfreezing linear_projection parameter: {param} - requires_grad: {param.requires_grad}")        
+
                     # vanilla vision encoder
                     else:
                         self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)

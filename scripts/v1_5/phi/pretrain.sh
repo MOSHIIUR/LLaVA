@@ -3,22 +3,24 @@
 llama='meta-llama/Meta-Llama-3.1-8B'
 phi='microsoft/Phi-3.5-mini-instruct'
 phi2='microsoft/phi-2'
+vicuna='lmsys/vicuna-7b-v1.5'
 
 deepspeed llava/train/train_mem.py \
     --deepspeed ./scripts/zero2.json \
-    --model_name_or_path $phi2 \
+    --model_name_or_path $vicuna \
     --version plain \
     --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
     --image_folder ./playground/data/images \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --tune_mm_mlp_adapter True \
+    --s2 True \
     --tune_embed_tokens False \
     --use_contrastive_loss False \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
     --bf16 True \
-    --output_dir ./ckpts/llava-llama-8b \
+    --output_dir ./ckpts/llava-llama-8b-s2-test \
     --num_train_epochs 1 \
     --num_experts_per_tok 2 \
     --num_experts 4 \
