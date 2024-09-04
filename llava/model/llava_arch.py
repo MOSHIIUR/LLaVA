@@ -79,6 +79,11 @@ class LlavaMetaModel:
         self.config.mm_hidden_size = vision_tower_config.vision_config.hidden_size
         self.config.mm_vision_tower = vision_tower
 
+        if not model_args.s2:
+            self.config.mm_hidden_size = vision_tower.config.hidden_size
+        else:
+            self.config.mm_hidden_size = vision_tower.hidden_size
+
         if getattr(self, 'mm_projector', None) is None:
             # print('-' * 100)
             # print('*'*40+'build viison projector'+'*'*40)
@@ -114,8 +119,6 @@ class LlavaMetaModel:
                 self.vision_tower = [vision_tower]
             else:
                 self.vision_tower = vision_tower
-
-
 
         else:
             if fsdp is not None and len(fsdp) > 0:

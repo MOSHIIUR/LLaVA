@@ -250,7 +250,7 @@ class CLIPVisionTowerS2(CLIPVisionTower):
 
     @torch.no_grad()
     def forward_feature(self, images):
-        print(f's2 forward featuredmethod called')
+        print(f's2 forward_feature method called')
         print('Raw image shape:', images.shape)
         
         if self.moe:
