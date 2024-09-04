@@ -5,10 +5,10 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a40:1
+#SBATCH --gres=gpu:a100:1
 #SBATCH --nodes=4
 #SBATCH --gpus-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
 #SBATCH --output=log/slurm/phi_pretrain/log-%A-%a.log 
 #SBATCH -J phi_pretrain
 
