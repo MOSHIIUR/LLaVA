@@ -13,7 +13,7 @@ deepspeed llava/train/train_mem.py \
     --image_folder ./playground/data/images \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --tune_mm_mlp_adapter True \
-    --s2 True \
+    --s2 False \
     --tune_embed_tokens False \
     --use_contrastive_loss False \
     --mm_vision_select_layer -2 \
