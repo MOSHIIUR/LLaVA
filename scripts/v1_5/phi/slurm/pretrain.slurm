@@ -1,16 +1,16 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-10
-#SBATCH --ntasks=1 
-#SBATCH -t 09:00:00 
+#SBATCH --array=0
+#SBATCH --ntasks-per-node=1
+#SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a40:4
-#SBATCH -N 1 
-#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:a40:1
+#SBATCH --nodes=4
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
 #SBATCH --output=log/slurm/phi_pretrain/log-%A-%a.log 
 #SBATCH -J phi_pretrain
-
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
@@ -24,7 +24,7 @@ batch_size=(32 32 32 32 32 32 32 32 32 32 32)
 
 # base output dir - BOD
 BOD='./ckpts/phi2/pretrain'
-output_dir=('$BOD/llava-phi-TT-0.01' '$BOD/llava-phi-TF-0.01' '$BOD/llava-phi-TT-1' '$BOD/llava-phi-TF-1' '$BOD/llava-phi-TT-0.05' '$BOD/llava-phi-TF-0.05' '$BOD/llava-phi-TT-0.1' '$BOD/llava-phi-TF-0.1' '$BOD/llava-phi-TT-0.5' '$BOD/llava-phi-TF-0.5' '$BOD/llava-phi-FF')
+output_dir=('$BOD/llava-phi-TT-0.01-test' '$BOD/llava-phi-TF-0.01' '$BOD/llava-phi-TT-1' '$BOD/llava-phi-TF-1' '$BOD/llava-phi-TT-0.05' '$BOD/llava-phi-TF-0.05' '$BOD/llava-phi-TT-0.1' '$BOD/llava-phi-TF-0.1' '$BOD/llava-phi-TT-0.5' '$BOD/llava-phi-TF-0.5' '$BOD/llava-phi-FF')
 
 
 use_clip_loss=(True True True True True True True True True True False)
