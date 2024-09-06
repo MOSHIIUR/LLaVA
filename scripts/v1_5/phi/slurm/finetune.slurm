@@ -1,15 +1,15 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
+#SBATCH --array=0-2
 #SBATCH --ntasks=1 
-#SBATCH -t 30:00:00 
+#SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a100:8
+#SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
 #SBATCH --cpus-per-task=64
-#SBATCH --output=log/slurm/it_test/log-%A-%a.log 
-#SBATCH -J instruct_tune
+#SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
+#SBATCH -J phi_finetune
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
@@ -17,29 +17,27 @@ export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 module purge
 module load apptainer
 
-model_name=('lmsys/vicuna-13b-v1.5' 'lmsys/vicuna-13b-v1.5' 'lmsys/vicuna-13b-v1.5' 'lmsys/vicuna-13b-v1.5' 'lmsys/vicuna-13b-v1.5')
-vision_tower=('openai/clip-vit-large-patch14-336' 'openai/clip-vit-large-patch14-336' 'openai/clip-vit-large-patch14-336' 'openai/clip-vit-large-patch14-336' 'openai/clip-vit-large-patch14-336')
-num_experts=(3 4 4 5 6)
-num_experts_per_tok=(2 2 3 2 3)
+num_experts=(4 4 4 5 6)
+num_experts_per_tok=(2 2 2 2 3)
 num_layers=(2 2 2 2 2)
 num_heads=(2 2 2 2 2)
 batch_size=(16 16 16 16 16)
-lr=(2e-5 2e-5 1e-3 1e-3)
 tune_embed_tokens=(False False False False)
+share_moe=(False True False False)
 mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe')
-output_dir=('./ckpts_it/deafult/llava-v1.5-13b-finetune' './ckpts/moe/llava-v1.5-13b-pretrain-v3' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v3' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v4' './ckpts/embed/llava-v1.5-13b-pretrain-v5')
+output_dir=('./ckpts_it/phi/llava-phi2-3b' './ckpts_it/phi/llava-phi2-3b-moe' './ckpts_it/phi/llava-phi2-3b-share-moe' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v4' './ckpts/embed/llava-v1.5-13b-pretrain-v5')
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
+phi2='microsoft/phi-2'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
---model_name_or_path ${model_name[${SLURM_ARRAY_TASK_ID}]} \
+--model_name_or_path $phi2 \
 --version v1 \
 --data_path ./playground/data/llava_v1_5_mix665k.json \
 --image_folder ./playground/data \
 --vision_tower openai/clip-vit-large-patch14-336 \
---pretrain_mm_mlp_adapter ./ckpts/ref_embed/llava-v1.5-13b-pretrain-v1/mm_projector.bin \
---tune_embed_tokens ${tune_embed_tokens[${SLURM_ARRAY_TASK_ID}]} \
+--pretrain_mm_mlp_adapter './$BOD/llava-phi-TT-0.5/mm_projector.bin' \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
 --mm_use_im_patch_token False \
@@ -63,7 +61,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $P
 --save_strategy "steps" \
 --save_steps 50000 \
 --save_total_limit 1 \
---learning_rate ${lr[${SLURM_ARRAY_TASK_ID}]} \
+--learning_rate 2e-5 \
 --weight_decay 0. \
 --warmup_ratio 0.03 \
 --lr_scheduler_type "cosine" \

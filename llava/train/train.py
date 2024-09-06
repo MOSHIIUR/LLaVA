@@ -40,6 +40,7 @@ from llava.train.llava_trainer import LLaVATrainer
 
 from llava import conversation as conversation_lib
 from llava.model import *
+from llava.model.language_model.llava_phi import LlavaPhiForCausalLM
 from llava.model.multimodal_projector.builder import build_vision_projector
 from llava.mm_utils import tokenizer_image_token
 
@@ -88,6 +89,8 @@ class ModelArguments:
     num_heads: Optional[int] = field(default=2)
     num_experts_per_tok: Optional[int] = field(default=1)
     aux_loss_coef: Optional[float] = field(default=0.01)
+    clip_loss_coef: Optional[float] = field(default=0.01)
+    use_contrastive_loss: bool = field(default=False)
 
 
 @dataclass
@@ -138,6 +141,7 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
     group_by_modality_length: bool = field(default=False)
+    llm_backbone: str = field(default=None)
 
 
 def maybe_zero_3(param, ignore_status=False, name=None):
@@ -223,41 +227,27 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
         # Save Adapter and Cross Attention
         keys_to_match = ['mm_projector']
         
-        if getattr(trainer.args, "use_im_start_end", False):
+        if getattr(trainer.args, "use_im_start_end", False) or  getattr(trainer.args, "tune_embed_tokens", False):
             keys_to_match.extend(['embed_tokens', 'embed_in'])
-
-        if getattr(trainer.args, "tune_embed_tokens", False):
-            keys_to_match.extend(['embed_tokens'])
 
         if getattr(trainer.args, "cross_attention", False):
             keys_to_match.extend(['co_attention'])
 
 
-        # Extract the relevant parameters
         weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer.model.named_parameters(), keys_to_match)
-        
-        # Save model configuration
         trainer.model.config.save_pretrained(output_dir)
 
-        # Determine where to save the weights
         current_folder = output_dir.split('/')[-1]
         parent_folder = os.path.dirname(output_dir)
-        
         if trainer.args.local_rank == 0 or trainer.args.local_rank == -1:
             if current_folder.startswith('checkpoint-'):
-                print('saving checkpoint')
-                component_folder = os.path.join(parent_folder, "components")
-                os.makedirs(component_folder, exist_ok=True)
-                for key in keys_to_match:
-                    component_weights = {k: v for k, v in weight_to_save.items() if key in k}
-                    torch.save(component_weights, os.path.join(component_folder, f'{key}_{current_folder}.bin'))
+                mm_projector_folder = os.path.join(parent_folder, "mm_projector")
+                os.makedirs(mm_projector_folder, exist_ok=True)
+                torch.save(weight_to_save, os.path.join(mm_projector_folder, f'{current_folder}.bin'))
             else:
-                for key in keys_to_match:
-                    component_weights = {k: v for k, v in weight_to_save.items() if key in k}
-                    torch.save(component_weights, os.path.join(output_dir, f'{key}.bin'))
-
+                torch.save(weight_to_save, os.path.join(output_dir, f'mm_projector.bin'))
         return
-
+    
     if trainer.deepspeed:
         torch.cuda.synchronize()
         trainer.save_model(output_dir)
@@ -391,6 +381,7 @@ def preprocess_multimodal( sources: Sequence[str], data_args: DataArguments) -> 
                     sentence['value'] = sentence['value'].replace(DEFAULT_IMAGE_TOKEN, '<Image>' + DEFAULT_IMAGE_TOKEN + '</Image>')
             
             replace_token = DEFAULT_IMAGE_TOKEN
+            
             if data_args.mm_use_im_start_end:
                 
                 # DEFAULT_IM_END_TOKEN = "<im_end>"
@@ -659,6 +650,100 @@ def preprocess_mpt(
         labels=targets,
     )
 
+def preprocess_phi(
+    sources,
+    tokenizer: transformers.PreTrainedTokenizer,
+    has_image: bool = False
+) -> Dict:
+    conv = conversation_lib.default_conversation.copy()
+    roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
+
+    # print('00000000000', sources)
+    # Apply prompt templates
+    conversations = []
+    # sys.exit()
+
+    # import ipdb
+    # ipdb.set_trace()
+    for i, source in enumerate(sources):
+        if roles[source[0]["from"]] != conv.roles[0]:
+            # Skip the first one if it is not from human
+            source = source[1:]
+
+        conv.messages = []
+        for j, sentence in enumerate(source):
+            role = roles[sentence["from"]]
+            assert role == conv.roles[j % 2], f"{i}"
+            conv.append_message(role, sentence["value"])
+        conversations.append(conv.get_prompt())
+    # print(11111111, conversations)
+    # Tokenize conversations
+    # print('before tokenizer_image_token', conversations)
+    if has_image:
+        input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
+        # print(2222222222222, input_ids.shape)
+    else:
+        input_ids = tokenizer(
+            conversations,
+            return_tensors="pt",
+            padding="longest",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+        ).input_ids
+
+    # print('after tokenizer_image_token input_ids targets', input_ids)
+    targets = input_ids.clone()
+
+    assert conv.sep_style == conversation_lib.SeparatorStyle.TWO
+    # print(tokenizer)
+    # Mask targets
+    sep = conv.sep + conv.roles[1] + ": "
+    # print('sep', sep)
+    for conversation, target in zip(conversations, targets):
+        total_len = int(target.ne(tokenizer.pad_token_id).sum())
+        # print('total_len', total_len)
+        rounds = conversation.split(conv.sep2)
+        # print('len(rounds)', len(rounds))
+        cur_len = 0
+        target[:cur_len] = IGNORE_INDEX
+        for i, rou in enumerate(rounds):
+            if rou == "":
+                break
+
+            parts = rou.split(sep)
+            # print('i rou, parts', i, rou, parts)
+            if len(parts) != 2:
+                break
+            parts[0] += sep
+            # print('after add sep, parts', parts)
+
+            if has_image:
+                round_len = len(tokenizer_image_token(rou, tokenizer)) + 1  # for eos_token
+                instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 1
+            else:
+                round_len = len(tokenizer(rou).input_ids) + 1  # for eos_token
+                instruction_len = len(tokenizer(parts[0]).input_ids) - 1
+            # print('round_len, instruction_len, target[cur_len : cur_len + instruction_len]',
+            #       round_len, instruction_len, target[cur_len : cur_len + instruction_len], target[cur_len : cur_len + round_len])
+            target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
+
+            cur_len += round_len
+        target[cur_len:] = IGNORE_INDEX
+
+        if cur_len < tokenizer.model_max_length:
+            # import ipdb
+            # ipdb.set_trace()
+            if cur_len != total_len:
+                target[:] = IGNORE_INDEX
+                print(
+                    f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
+                    f" (ignored)"
+                )
+    # print(input_ids, target)
+    return dict(
+        input_ids=input_ids,
+        labels=targets,
+    )
 
 def preprocess_plain( sources: Sequence[str], tokenizer: transformers.PreTrainedTokenizer,) -> Dict:
     
@@ -695,6 +780,8 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
         return preprocess_llama_2(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version.startswith("v1"):
         return preprocess_v1(sources, tokenizer, has_image=has_image)
+    if conversation_lib.default_conversation.version.startswith("phi"):  # for phi and qwen
+        return preprocess_phi(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version == "mpt":
         return preprocess_mpt(sources, tokenizer, has_image=has_image)
     
@@ -929,6 +1016,16 @@ def train(attn_implementation=None):
                 cache_dir=training_args.cache_dir,
                 **bnb_model_from_pretrained_args
             )
+
+
+        elif 'phi' in model_args.model_name_or_path.lower():
+            model = LlavaPhiForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                attn_implementation=attn_implementation,
+                # torch_dtype=torch.bfloat16,
+                **bnb_model_from_pretrained_args
+            )
         
         else:
             # print('Calling the llama model > refered to LlavaLlamaForCausalLM class ')
@@ -956,6 +1053,8 @@ def train(attn_implementation=None):
     model.config.use_cache = False
     model.config.local_rank = local_rank
     model.config.training = True
+    model.config.use_contrastive_loss = model_args.use_contrastive_loss
+
 
 
 
@@ -1026,6 +1125,17 @@ def train(attn_implementation=None):
             model_max_length=training_args.model_max_length,
             padding_side="right"
         )
+
+    elif 'phi' in model_args.model_name_or_path.lower():
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            cache_dir=training_args.cache_dir,
+            model_max_length=training_args.model_max_length,
+            padding_side="right",
+            use_fast=False,
+        )
+        tokenizer.add_special_tokens({'unk_token': '<|extra_0|>'})
+
 
     elif model_args.text_encoder:
         rank0_print('custom Text Tokenizer initialized')
@@ -1112,17 +1222,6 @@ def train(attn_implementation=None):
             if model_args.cross_attention: 
                 for p in model.get_model().co_attention.parameters():
                     p.requires_grad = True
-            
-            if model_args.tune_embed_tokens:
-                for param in model.get_model().embed_tokens.parameters():
-                    param.requires_grad = True
-        
-        if model_args.pretrain_embed_tokens is not None:
-            embed_tokens_weights = torch.load(model_args.pretrain_embed_tokens, map_location='cpu')
-            adjusted_weight = {k.replace('model.embed_tokens.', ''): v for k, v in embed_tokens_weights.items()}
-            model.get_model().embed_tokens.load_state_dict(adjusted_weight)
-            rank0_print('Pretrain embed tokens initialized')
-
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
 
@@ -1163,10 +1262,6 @@ def train(attn_implementation=None):
                     if training_args.bf16 and module.weight.dtype == torch.float32:
                         module = module.to(torch.bfloat16)
 
-    # # *** Place the casting code here ***
-    # model.base_model.model.model.embed_tokens.weight.data = model.base_model.model.model.embed_tokens.weight.data.float()
-    # model.base_model.model.lm_head.weight.data = model.base_model.model.lm_head.weight.data.float()
-
 
     # data module contain train_datset and data_collector instance
     data_module = make_supervised_data_module(tokenizer=tokenizer,
@@ -1188,9 +1283,7 @@ def train(attn_implementation=None):
                     args=training_args,
                     **data_module)
     
-    # for name, _ in trainer.model.named_parameters():
-    #     print(name)
-    # Initialize a W&B run
+
     rank0status = rank0_condition()
     
     if rank0status:

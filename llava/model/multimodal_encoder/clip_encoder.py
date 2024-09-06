@@ -37,6 +37,7 @@ class CLIPVisionTower(nn.Module):
 
 
     def load_model(self, sparseMoE=None, device_map=None):
+        
         if self.is_loaded:
             print('{} is already loaded, `load_model` called again, skipping.'.format(self.vision_tower_name))
             return
@@ -186,13 +187,12 @@ class CLIPVisionTowerS2(CLIPVisionTower):
 
         # optional
         self.cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
-        print('*'*40+'vision config'+'*'*40)
-        print(self.cfg_only)
 
         try:
             from s2wrapper import forward as multiscale_forward
         except ImportError:
             raise ImportError('Package s2wrapper not found! Please install by running: \npip install git+https://github.com/bfshi/scaling_on_scales.git')
+        
         self.multiscale_forward = multiscale_forward
 
         # change resize/crop size in preprocessing to the largest image size in s2_scale
