@@ -1,13 +1,16 @@
 #!/bin/bash
 
 deepspeed llava/train/train_mem.py \
-    --deepspeed ./scripts/zero2.json \
-    --model_name_or_path meta-llama/Meta-Llama-3.1-8B \
+    --deepspeed ./scripts/zero3.json \
+    --model_name_or_path lmsys/vicuna-13b-v1.5 \
     --version plain \
     --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
     --image_folder ./playground/data/images \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --tune_mm_mlp_adapter True \
+    --tune_embed_tokens True \
+    --pretrain_mm_mlp_adapter ./ckpts/ref_embed/llava-v1.5-13b-pretrain-v1/mm_projector.bin \
+    --pretrain_embed_tokens ./ckpts/ref_embed/llava-tune_embeds/embed_tokens.bin \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
@@ -21,7 +24,7 @@ deepspeed llava/train/train_mem.py \
     --aux_loss_coef 0.01 \
     --share_moe False \
     --cross_attention False \
-    --mm_projector_type 'mlp2x_gelu'\
+    --mm_projector_type 'sparse_moe'\
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 1 \

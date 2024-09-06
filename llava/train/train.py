@@ -76,6 +76,7 @@ class ModelArguments:
     vision_tower: Optional[str] = field(default=None)
     mm_vision_select_layer: Optional[int] = field(default=-1)
     pretrain_mm_mlp_adapter: Optional[str] = field(default=None)
+    pretrain_embed_tokens: Optional[str] = field(default=None)
     mm_projector_type: Optional[str] = field(default='linear')
     share_moe: bool = field(default=False)
     cross_attention: bool = field(default=False)
@@ -1171,11 +1172,16 @@ def train(attn_implementation=None):
         tokenizer.pad_token = tokenizer.unk_token
     
     else:
+        # if tokenizer do not have "unk_token" add this when you initialize the tokenizer
         tokenizer.pad_token = tokenizer.unk_token
+
         if model_args.version in conversation_lib.conv_templates:
             conversation_lib.default_conversation = conversation_lib.conv_templates[model_args.version]
+        
         else:
             conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1"]
+
+
 
 
     if model_args.vision_tower is not None:
@@ -1187,11 +1193,6 @@ def train(attn_implementation=None):
             fsdp=training_args.fsdp
         )
         
-        # print('-'*100)
-        # print('-'*40+'Model After Initializing vision Module'+'-'*40)
-        # print(model)
-        # print('-'*100)
-
         vision_tower = model.get_vision_tower()
 
 
@@ -1212,15 +1213,15 @@ def train(attn_implementation=None):
         model.config.cross_attention = training_args.cross_attention = model_args.cross_attention
 
         if model_args.tune_mm_mlp_adapter:
+            
             model.requires_grad_(False)
+
             for p in model.get_model().mm_projector.parameters():
                 p.requires_grad = True
 
-            co_attention = getattr(model_args, 'cross_attention', False)  
-            if co_attention: 
+            if model_args.cross_attention: 
                 for p in model.get_model().co_attention.parameters():
                     p.requires_grad = True
-            
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
 
@@ -1294,6 +1295,7 @@ def train(attn_implementation=None):
         trainer.train(resume_from_checkpoint=True)
     else:
         trainer.train()
+    
     trainer.save_state()
 
     model.config.use_cache = True
