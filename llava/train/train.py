@@ -1222,7 +1222,7 @@ def train(attn_implementation=None):
             if model_args.cross_attention: 
                 for p in model.get_model().co_attention.parameters():
                     p.requires_grad = True
-            
+
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
 
