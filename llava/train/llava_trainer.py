@@ -243,6 +243,7 @@ class LLaVATrainer(Trainer):
             # Save Adapter, Vision Resampler, and Cross Attention
             keys_to_match = ['mm_projector', 'vision_resampler']
             if getattr(self.args, "use_im_start_end", False) or getattr(self.args, "tune_embed_tokens", False):
+                print('adding the embed tokens to the ckpts')
                 keys_to_match.extend(['embed_tokens', 'embed_in'])
             if getattr(self.args, "cross_attention", False):
                 keys_to_match.extend(['cross_attention'])
