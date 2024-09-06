@@ -3,9 +3,9 @@
 #SBATCH -A collabrobogroup
 #SBATCH --array=0
 #SBATCH --ntasks=1 
-#SBATCH -t 20:00:00 
+#SBATCH -t 12:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a40:8
+#SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
 #SBATCH --cpus-per-task=64
 #SBATCH --output=log/slurm/tune_embed/log-%A-%a.log 
@@ -27,12 +27,12 @@ batch_size=(32 32 32 32 32)
 lr=(1e-3 2e-5 1e-3 1e-3)
 tune_embed_tokens=(True True False True)
 mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe')
-output_dir=('./ckpts/ref_embed/llava-tune_embeds' './ckpts/moe/llava-v1.5-13b-pretrain-v3' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v3' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v4' './ckpts/embed/llava-v1.5-13b-pretrain-v5')
+output_dir=('./ckpts/ref_embed/llava-tune_embed-v2' './ckpts/moe/llava-v1.5-13b-pretrain-v3' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v3' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v4' './ckpts/embed/llava-v1.5-13b-pretrain-v5')
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
---deepspeed ./scripts/zero3.json \
+--deepspeed ./scripts/zero2.json \
 --model_name_or_path ${model_name[${SLURM_ARRAY_TASK_ID}]} \
 --version plain \
 --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
