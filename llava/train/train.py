@@ -394,6 +394,7 @@ def preprocess_multimodal( sources: Sequence[str], data_args: DataArguments) -> 
                     sentence['value'] = sentence['value'].replace(DEFAULT_IMAGE_TOKEN, '<Image>' + DEFAULT_IMAGE_TOKEN + '</Image>')
             
             replace_token = DEFAULT_IMAGE_TOKEN
+            
             if data_args.mm_use_im_start_end:
                 
                 # DEFAULT_IM_END_TOKEN = "<im_end>"
@@ -1234,10 +1235,6 @@ def train(attn_implementation=None):
                 for p in model.get_model().co_attention.parameters():
                     p.requires_grad = True
             
-            tune_embed_tokens = getattr(model_args, 'tune_embed_tokens', False)  
-            if tune_embed_tokens:
-                for param in model.model.embed_tokens.parameters():
-                    param.requires_grad = True
 
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
 
