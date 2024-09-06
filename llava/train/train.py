@@ -140,6 +140,7 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
     group_by_modality_length: bool = field(default=False)
+    llm_backbone: str = field(default=None)
 
 
 def maybe_zero_3(param, ignore_status=False, name=None):
@@ -1277,10 +1278,6 @@ def train(attn_implementation=None):
                     if training_args.bf16 and module.weight.dtype == torch.float32:
                         module = module.to(torch.bfloat16)
 
-    # # *** Place the casting code here ***
-    # model.base_model.model.model.embed_tokens.weight.data = model.base_model.model.model.embed_tokens.weight.data.float()
-    # model.base_model.model.lm_head.weight.data = model.base_model.model.lm_head.weight.data.float()
-
 
     # data module contain train_datset and data_collector instance
     data_module = make_supervised_data_module(tokenizer=tokenizer,
@@ -1302,9 +1299,7 @@ def train(attn_implementation=None):
                     args=training_args,
                     **data_module)
     
-    # for name, _ in trainer.model.named_parameters():
-    #     print(name)
-    # Initialize a W&B run
+
     rank0status = rank0_condition()
     
     if rank0status:
