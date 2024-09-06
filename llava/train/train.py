@@ -226,41 +226,27 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
         # Save Adapter and Cross Attention
         keys_to_match = ['mm_projector']
         
-        if getattr(trainer.args, "use_im_start_end", False):
+        if getattr(trainer.args, "use_im_start_end", False) or  getattr(trainer.args, "tune_embed_tokens", False):
             keys_to_match.extend(['embed_tokens', 'embed_in'])
-
-        if getattr(trainer.args, "tune_embed_tokens", False):
-            keys_to_match.extend(['embed_tokens'])
 
         if getattr(trainer.args, "cross_attention", False):
             keys_to_match.extend(['co_attention'])
 
 
-        # Extract the relevant parameters
         weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer.model.named_parameters(), keys_to_match)
-        
-        # Save model configuration
         trainer.model.config.save_pretrained(output_dir)
 
-        # Determine where to save the weights
         current_folder = output_dir.split('/')[-1]
         parent_folder = os.path.dirname(output_dir)
-        
         if trainer.args.local_rank == 0 or trainer.args.local_rank == -1:
             if current_folder.startswith('checkpoint-'):
-                print('saving checkpoint')
-                component_folder = os.path.join(parent_folder, "components")
-                os.makedirs(component_folder, exist_ok=True)
-                for key in keys_to_match:
-                    component_weights = {k: v for k, v in weight_to_save.items() if key in k}
-                    torch.save(component_weights, os.path.join(component_folder, f'{key}_{current_folder}.bin'))
+                mm_projector_folder = os.path.join(parent_folder, "mm_projector")
+                os.makedirs(mm_projector_folder, exist_ok=True)
+                torch.save(weight_to_save, os.path.join(mm_projector_folder, f'{current_folder}.bin'))
             else:
-                for key in keys_to_match:
-                    component_weights = {k: v for k, v in weight_to_save.items() if key in k}
-                    torch.save(component_weights, os.path.join(output_dir, f'{key}.bin'))
-
+                torch.save(weight_to_save, os.path.join(output_dir, f'mm_projector.bin'))
         return
-
+    
     if trainer.deepspeed:
         torch.cuda.synchronize()
         trainer.save_model(output_dir)

@@ -242,33 +242,25 @@ class LLaVATrainer(Trainer):
 
             # Save Adapter, Vision Resampler, and Cross Attention
             keys_to_match = ['mm_projector', 'vision_resampler']
-            if getattr(self.args, "use_im_start_end", False):
+            if getattr(self.args, "use_im_start_end", False) or getattr(self.args, "tune_embed_tokens", False):
                 keys_to_match.extend(['embed_tokens', 'embed_in'])
-            if getattr(self.args, "tune_embed_tokens", False):
-                keys_to_match.extend(['embed_tokens'])  
             if getattr(self.args, "cross_attention", False):
                 keys_to_match.extend(['cross_attention'])
             
 
-            # Extract the relevant parameters
             weight_to_save = get_mm_adapter_state_maybe_zero_3(self.model.named_parameters(), keys_to_match)
 
-            # Save the weights only if this is the correct process in distributed training
             if self.args.local_rank == 0 or self.args.local_rank == -1:
                 self.model.config.save_pretrained(output_dir)
-                
-                # Save each component separately
-                for key in keys_to_match:
-                    component_weights = {k: v for k, v in weight_to_save.items() if key in k}
-                    torch.save(component_weights, os.path.join(output_dir, f'{key}.bin'))
+                torch.save(weight_to_save, os.path.join(output_dir, f'mm_projector.bin'))
 
             # Save gate logits after training ends
-            if hasattr(self.model, 'gate_logits'):
+            if hasattr(self.model, 'gate_logits') and len(self.model.gate_logits) > 0:
                 gate_logits_path = os.path.join(output_dir, 'gate_logits.pt')
                 torch.save(self.model.gate_logits, gate_logits_path)
                 print(f'Gate logits saved to {gate_logits_path}')
 
-            if hasattr(self.model, 'gate_logits_encoder') and self.model.gate_logits_encoder is not None:
+            if hasattr(self.model, 'gate_logits_encoder') and len(self.model.gate_logits_encoder) > 0:
                 gate_logits_path = os.path.join(output_dir, 'encoder_gate_logits.pt')
                 torch.save(self.model.gate_logits_encoder, gate_logits_path)
                 print(f'encoder Gate logits saved to {gate_logits_path}')

@@ -804,6 +804,15 @@ class LlavaMetaForCausalLM(ABC):
             tokenizer.add_tokens([DEFAULT_IMAGE_PATCH_TOKEN], special_tokens=True)
             self.resize_token_embeddings(len(tokenizer))
 
+        if model_args.tune_embed_tokens:
+            print('-'*100)
+            print(f'inside the desired if blocl')
+            print('-'*100)
+            for p in self.get_input_embeddings().parameters():
+                p.requires_grad = True
+            for p in self.get_output_embeddings().parameters():
+                p.requires_grad = False        
+        
         if model_args.mm_use_im_start_end:
             print(f'inside the second if blocl')
             num_new_tokens = tokenizer.add_tokens([DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN], special_tokens=True)
@@ -846,10 +855,5 @@ class LlavaMetaForCausalLM(ABC):
                 for p in self.get_output_embeddings().parameters():
                     p.requires_grad = False
 
-        elif model_args.tune_embed_tokens:
-            print(f'inside the desired if blocl')
-            for p in self.get_input_embeddings().parameters():
-                p.requires_grad = True
-            for p in self.get_output_embeddings().parameters():
-                p.requires_grad = False
+
 
