@@ -157,7 +157,7 @@ class LlavaPhiForCausalLM(PhiForCausalLM, LlavaMetaForCausalLM):
                 
                 if self.config.local_rank == 0:
                     loss_log = "; ".join(f"{k}: {v}" for k, v in loss_dict.items())
-                    print(f"Losses -> {loss_log}; Total Loss: {out['loss']}")
+                    print(f"{loss_log}; Total Loss: {out['loss']}")
                     wandb.log(loss_dict)
 
             # Determine which losses to include

@@ -1,12 +1,12 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
-#SBATCH -t 01:00:00 
+#SBATCH --array=0-10
+#SBATCH -t 10:00:00 
 #SBATCH -p gpu
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1
-#SBATCH --gpus-per-node=a100:1
+#SBATCH --gpus-per-node=a40:4
 #SBATCH --cpus-per-task=32
 #SBATCH --output=log/slurm/phi_pretrain/log-%A-%a.log 
 #SBATCH -J phi_pretrain
@@ -23,7 +23,7 @@ batch_size=(32 32 32 32 32 32 32 32 32 32 32)
 
 # base output dir - BOD
 BOD='./ckpts/phi2/pretrain'
-output_dir=('$BOD/llava-phi-TT-0.01-test' '$BOD/llava-phi-TF-0.01' '$BOD/llava-phi-TT-1' '$BOD/llava-phi-TF-1' '$BOD/llava-phi-TT-0.05' '$BOD/llava-phi-TF-0.05' '$BOD/llava-phi-TT-0.1' '$BOD/llava-phi-TF-0.1' '$BOD/llava-phi-TT-0.5' '$BOD/llava-phi-TF-0.5' '$BOD/llava-phi-FF')
+output_dir=( $BOD/llava-phi-TT-0.01 $BOD/llava-phi-TF-0.01 $BOD/llava-phi-TT-1 $BOD/llava-phi-TF-1 $BOD/llava-phi-TT-0.05 $BOD/llava-phi-TF-0.05 $BOD/llava-phi-TT-0.1 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 use_clip_loss=(True True True True True True True True True True False)
@@ -61,7 +61,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $P
 --gradient_accumulation_steps 1 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
---save_steps 2500 \
+--save_steps 25000 \
 --save_total_limit 1 \
 --learning_rate 2e-3 \
 --weight_decay 0. \

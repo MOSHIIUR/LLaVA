@@ -243,7 +243,6 @@ class LLaVATrainer(Trainer):
             # Save Adapter, Vision Resampler, and Cross Attention
             keys_to_match = ['mm_projector', 'vision_resampler']
             if getattr(self.args, "use_im_start_end", False) or getattr(self.args, "tune_embed_tokens", False):
-                print('adding the embed tokens to the ckpts')
                 keys_to_match.extend(['embed_tokens', 'embed_in'])
             if getattr(self.args, "cross_attention", False):
                 keys_to_match.extend(['cross_attention'])
@@ -271,20 +270,6 @@ class LLaVATrainer(Trainer):
             model.generation_config.do_sample = True
             super(LLaVATrainer, self)._save_checkpoint(model, trial, metrics)
             
-            # from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
-            # checkpoint_folder = f"{PREFIX_CHECKPOINT_DIR}-{self.state.global_step}"
-
-            # # Save gate logits after training ends
-            # if hasattr(self.model, 'gate_logits'):
-            #     gate_logits_path = os.path.join(checkpoint_folder, 'gate_logits.pt')
-            #     torch.save(self.model.gate_logits, gate_logits_path)
-            #     print(f'Gate logits saved to {gate_logits_path}')
-
-            # if hasattr(self.model, 'gate_logits_encoder') and self.model.gate_logits_encoder is not None:
-            #     gate_logits_path = os.path.join(checkpoint_folder, 'encoder_gate_logits.pt')
-            #     torch.save(self.model.gate_logits_encoder, gate_logits_path)
-            #     print(f'encoder Gate logits saved to {gate_logits_path}')
-
     def _save(self, output_dir: Optional[str] = None, state_dict=None):
         print('*'*100)
         print('we are in the llava trainer _save')
