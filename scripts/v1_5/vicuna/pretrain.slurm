@@ -1,15 +1,15 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-10
+#SBATCH --array=0
 #SBATCH --ntasks=1 
-#SBATCH -t 10:00:00 
+#SBATCH -t 01:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a40:4
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=32
-#SBATCH --output=log/slurm/phi_pretrain/log-%A-%a.log 
-#SBATCH -J phi_pretrain
+#SBATCH --cpus-per-task=40
+#SBATCH --output=log/slurm/vicuna_pretrain/log-%A-%a.log 
+#SBATCH -J vicuna_pretrain
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
@@ -22,8 +22,8 @@ num_heads=(2 2 2 2 2 2 2 2 2 2 2)
 batch_size=(32 32 32 32 32 32 32 32 32 32 32)
 
 # base output dir - BOD
-BOD='./ckpts/phi2/pretrain'
-output_dir=( $BOD/llava-phi-TT-0.01 $BOD/llava-phi-TF-0.01 $BOD/llava-phi-TT-1 $BOD/llava-phi-TF-1 $BOD/llava-phi-TT-0.05 $BOD/llava-phi-TF-0.05 $BOD/llava-phi-TT-0.1 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+BOD='./ckpts/vicuna/pretrain'
+output_dir=( $BOD/llava-vicuna-TT-0.01 $BOD/llava-phi-TF-0.01 $BOD/llava-phi-TT-1 $BOD/llava-phi-TF-1 $BOD/llava-phi-TT-0.05 $BOD/llava-phi-TF-0.05 $BOD/llava-phi-TT-0.1 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 use_clip_loss=(True True True True True True True True True True False)
@@ -34,10 +34,11 @@ PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 phi3='microsoft/Phi-3.5-mini-instruct'
 phi2='microsoft/phi-2'
+vicuna='lmsys/vicuna-13b-v1.5'
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
 --deepspeed ./scripts/zero2.json \
---model_name_or_path $phi2 \
+--model_name_or_path $vicuna \
 --version plain \
 --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
 --image_folder ./playground/data/images \
