@@ -807,7 +807,12 @@ class LlavaMetaForCausalLM(ABC):
             for p in self.get_input_embeddings().parameters():
                 p.requires_grad = True
             for p in self.get_output_embeddings().parameters():
-                p.requires_grad = False        
+                p.requires_grad = False 
+        
+        if model_args.pretrain_embed_tokens:
+            mm_projector_weights = torch.load(model_args.pretrain_mm_mlp_adapter, map_location='cpu')
+            embed_tokens_weight = mm_projector_weights['base_model.model.model.embed_tokens.weight']
+            print('pretrain embed tokens initialize')
         
         if model_args.mm_use_im_start_end:
             num_new_tokens = tokenizer.add_tokens([DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN], special_tokens=True)

@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-2
+#SBATCH --array=0
 #SBATCH --ntasks=1 
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
@@ -25,19 +25,25 @@ batch_size=(16 16 16 16 16)
 tune_embed_tokens=(False False False False)
 share_moe=(False True False False)
 mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe')
-output_dir=('./ckpts_it/phi/llava-phi2-3b' './ckpts_it/phi/llava-phi2-3b-moe' './ckpts_it/phi/llava-phi2-3b-share-moe' './ckpts/embed_v2/llava-v1.5-13b-pretrain-v4' './ckpts/embed/llava-v1.5-13b-pretrain-v5')
+use_clip_loss=(True True True True True True True True True True False)
 PORT=$((29500 + SLURM_JOB_ID % 1000))
+
+BOD='./ckpts/phi2/finetune'
+output_dir=( $BOD/llava-phi-TT-0.01 $BOD/llava-phi-TF-0.01 $BOD/llava-phi-TT-1 $BOD/llava-phi-TF-1 $BOD/llava-phi-TT-0.05 $BOD/llava-phi-TF-0.05 $BOD/llava-phi-TT-0.1 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+
 
 phi2='microsoft/phi-2'
 
-apptainer exec --nv /scratch/mi8uu/mrm/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --model_name_or_path $phi2 \
 --version v1 \
 --data_path ./playground/data/llava_v1_5_mix665k.json \
 --image_folder ./playground/data \
 --vision_tower openai/clip-vit-large-patch14-336 \
---pretrain_mm_mlp_adapter './$BOD/llava-phi-TT-0.5/mm_projector.bin' \
+--pretrain_mm_mlp_adapter './ckpts/phi2/pretrain/llava-phi-TT-0.01/mm_projector.bin' \
+--pretrain_embed_tokens True \
+--use_contrastive_loss ${use_clip_loss[${SLURM_ARRAY_TASK_ID}]} \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
 --mm_use_im_patch_token False \

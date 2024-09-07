@@ -76,7 +76,7 @@ class ModelArguments:
     vision_tower: Optional[str] = field(default=None)
     mm_vision_select_layer: Optional[int] = field(default=-1)
     pretrain_mm_mlp_adapter: Optional[str] = field(default=None)
-    pretrain_embed_tokens: Optional[str] = field(default=None)
+    pretrain_embed_tokens: bool = field(default=False)
     mm_projector_type: Optional[str] = field(default='linear')
     share_moe: bool = field(default=False)
     cross_attention: bool = field(default=False)
