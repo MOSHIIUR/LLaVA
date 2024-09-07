@@ -36,7 +36,7 @@ output_dir=( $BOD/llava-phi-c01 $BOD/llava-phi-c02 $BOD/llava-phi-c03 $BOD/llava
 
 phi2='microsoft/phi-2'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_phi.sif deepspeed --master_port $PORT llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_port $PORT llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --model_name_or_path $phi2 \
 --version v1 \
