@@ -17,18 +17,20 @@ export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 module purge
 module load apptainer
 
-num_experts=(4 4 4 5 6)
-num_experts_per_tok=(2 2 2 2 3)
+num_experts=(4 4 4 4 4 4 4 4 4 4)
+num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2)
 num_heads=(2 2 2 2 2)
 batch_size=(16 16 16 16 16)
-tune_embed_tokens=(False False False False)
-share_moe=(False True False False)
-mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe')
-use_clip_loss=(True True True True True True True True True True False)
+pretrain_embed_tokens=(True True True True True True)
+share_moe=(False False False False True True)
+mm_projector_type=('mlp2x_gelu' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe')
+use_clip_loss=(True False True False True False)
+clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01)
+
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
-BOD='./ckpts/phi2/finetune'
+BOD='./ckpts/phi2/test'
 output_dir=( $BOD/llava-phi-TT-0.01 $BOD/llava-phi-TF-0.01 $BOD/llava-phi-TT-1 $BOD/llava-phi-TF-1 $BOD/llava-phi-TT-0.05 $BOD/llava-phi-TF-0.05 $BOD/llava-phi-TT-0.1 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
@@ -42,8 +44,9 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $P
 --image_folder ./playground/data \
 --vision_tower openai/clip-vit-large-patch14-336 \
 --pretrain_mm_mlp_adapter './ckpts/phi2/pretrain/llava-phi-TT-0.01/mm_projector.bin' \
---pretrain_embed_tokens True \
+--pretrain_embed_tokens ${pretrain_embed_tokens[${SLURM_ARRAY_TASK_ID}]} \
 --use_contrastive_loss ${use_clip_loss[${SLURM_ARRAY_TASK_ID}]} \
+--clip_loss_coef ${clip_loss_coef[${SLURM_ARRAY_TASK_ID}]} \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
 --mm_use_im_patch_token False \
