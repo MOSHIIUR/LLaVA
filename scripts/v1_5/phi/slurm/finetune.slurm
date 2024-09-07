@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
+#SBATCH --array=0-6
 #SBATCH --ntasks=1 
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a100:4
+#SBATCH --gres=gpu:a100:2
 #SBATCH -N 1 
 #SBATCH --cpus-per-task=64
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
@@ -19,19 +19,19 @@ module load apptainer
 
 num_experts=(4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
-num_layers=(2 2 2 2 2)
-num_heads=(2 2 2 2 2)
-batch_size=(16 16 16 16 16)
-pretrain_embed_tokens=(True True True True True True)
-share_moe=(False False False False True True)
-mm_projector_type=('mlp2x_gelu' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe')
-use_clip_loss=(True False True False True False)
-clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01)
+num_layers=(2 2 2 2 2 2 2 2 2)
+num_heads=(2 2 2 2 2 2 2 2 2)
+batch_size=(16 16 16 16 16 16 16 16 16)
+pretrain_embed_tokens=(True True True True True True False)
+share_moe=(False False False False True True False)
+use_clip_loss=(True False True False True False False)
+mm_projector_type=('mlp2x_gelu' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu')
+clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
 
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/phi2/test'
-output_dir=( $BOD/llava-phi-TT-0.01 $BOD/llava-phi-TF-0.01 $BOD/llava-phi-TT-1 $BOD/llava-phi-TF-1 $BOD/llava-phi-TT-0.05 $BOD/llava-phi-TF-0.05 $BOD/llava-phi-TT-0.1 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+output_dir=( $BOD/llava-phi-c01 $BOD/llava-phi-c02 $BOD/llava-phi-c03 $BOD/llava-phi-c04 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 phi2='microsoft/phi-2'
