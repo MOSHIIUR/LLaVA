@@ -98,6 +98,12 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
                 cfg_pretrained = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
                 model = LlavaMptForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=cfg_pretrained, **kwargs)
             
+            elif 'phi' in model_name.lower():
+                tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False, padding_side=padding_side)
+                cfg_pretrained = LlavaPhiConfig.from_pretrained(model_path)
+                model = LlavaPhiForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=cfg_pretrained, **kwargs)
+                model.config.eos_token_id = tokenizer.eos_token_id            
+
             else:
                 tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
                 cfg_pretrained = AutoConfig.from_pretrained(model_path)
