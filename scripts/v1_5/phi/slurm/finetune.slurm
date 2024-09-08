@@ -1,9 +1,9 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
+#SBATCH --array=4-5
 #SBATCH --ntasks=1 
-#SBATCH -t 01:00:00 
+#SBATCH -t 25:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:2
 #SBATCH -N 1 
@@ -59,7 +59,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_phi.sif deepspeed --
 --num_layers ${num_layers[${SLURM_ARRAY_TASK_ID}]} \
 --num_heads ${num_heads[${SLURM_ARRAY_TASK_ID}]} \
 --aux_loss_coef 0.01 \
---share_moe False \
+--share_moe ${share_moe[${SLURM_ARRAY_TASK_ID}]} \
 --cross_attention False \
 --mm_projector_type ${mm_projector_type[${SLURM_ARRAY_TASK_ID}]} \
 --num_train_epochs 1 \
