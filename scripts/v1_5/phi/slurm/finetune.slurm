@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-3
+#SBATCH --array=0
 #SBATCH --ntasks=1 
 #SBATCH -t 25:00:00 
 #SBATCH -p gpu
@@ -36,8 +36,8 @@ output_dir=( $BOD/llava-phi-c08 $BOD/llava-phi-c09 $BOD/llava-phi-c10 $BOD/llava
 
 phi2='microsoft/phi-2'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_phi.sif deepspeed --master_port $PORT llava/train/train_mem.py \
---deepspeed ./scripts/zero3.json \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
+--deepspeed ./scripts/zero2.json \
 --model_name_or_path $phi2 \
 --version phi \
 --data_path ./playground/data/llava_v1_5_mix665k.json \
