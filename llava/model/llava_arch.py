@@ -323,6 +323,24 @@ class LlavaMetaForCausalLM(ABC):
         
         # return total_loss.half()
         return total_loss
+    
+    def process_no_images(self, cur_input_ids, cur_labels, image_features, cur_image_idx):
+        cur_input_embeds_1 = self.get_model().embed_tokens(cur_input_ids)
+        cur_input_embeds = torch.cat([cur_input_embeds_1, image_features[cur_image_idx:cur_image_idx+0]], dim=0)
+        return cur_input_embeds
+    
+    def process_with_images(self, cur_input_ids, cur_labels, image_token_index):
+        image_token_indices = [-1] + torch.where(cur_input_ids == image_token_index)[0].tolist() + [cur_input_ids.shape[0]]
+        cur_input_ids_noim = []
+        cur_labels_noim = []
+
+        for i in range(len(image_token_indices) - 1):
+            start = image_token_indices[i] + 1
+            end = image_token_indices[i + 1]
+            cur_input_ids_noim.append(cur_input_ids[start:end])
+            cur_labels_noim.append(cur_labels[start:end])
+
+        return cur_input_ids_noim, cur_labels_noim
         
 
 
@@ -449,6 +467,7 @@ class LlavaMetaForCausalLM(ABC):
         _labels = labels
         _position_ids = position_ids
         _attention_mask = attention_mask
+        
         if attention_mask is None:
             attention_mask = torch.ones_like(input_ids, dtype=torch.bool)
         else:
@@ -514,12 +533,19 @@ class LlavaMetaForCausalLM(ABC):
                 splits.append(0)
                 continue
 
+                cur_input_embeds = process_no_images(cur_input_ids, labels[batch_idx], image_features, cur_image_idx)
+                text_features.append(cur_input_embeds)
+                text_labels.append(labels[batch_idx])
+                splits.append(0)
+                cur_image_idx += 1
+                continue
             # cur_input_ids = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])  
             # labels = torch.tensor([20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32])  
 
             # suppose 0, 4, 9 and 12 are the image tokens
 
-            # Output: [-1, 3, 7, 22] (start, image positions, sequence_size) -> in this sequence 3rd and 7th token has the image token
+            # Output: [-1, 3, 7, 22] (start, image positions, current_sequence_size) 
+            # -> in this sequence 3rd and 7th token has the image token
             image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
             # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
 
@@ -668,7 +694,6 @@ class LlavaMetaForCausalLM(ABC):
                 cur_labels_noim = text_labels[x]
                 split_sizes = splits[x]
                 # print(f"split_sizes: {split_sizes}, type: {type(split_sizes)}")
-
                 
                 if split_sizes == 0:
                     # Handle the case where split_sizes is 0, e.g., skip splitting
