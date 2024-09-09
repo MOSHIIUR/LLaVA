@@ -667,7 +667,6 @@ class LlavaMetaForCausalLM(ABC):
                 # print(cur_input_embeds_no_im.shape)
                 cur_labels_noim = text_labels[x]
                 split_sizes = splits[x]
-                # print(f"split_sizes: {split_sizes}, type: {type(split_sizes)}")
 
                 cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
                 
@@ -675,6 +674,7 @@ class LlavaMetaForCausalLM(ABC):
                     # Handle the case where split_sizes is string, e.g., skip splitting
                     cur_input_embeds_no_im = cur_input_embeds_no_im
                 else:
+                    print(f"split_sizes: {split_sizes}, type: {type(split_sizes)}")
                     cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
 
                 cur_new_input_embeds = []
