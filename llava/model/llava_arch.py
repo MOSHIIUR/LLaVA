@@ -338,7 +338,8 @@ class LlavaMetaForCausalLM(ABC):
         image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
         # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
 
-        # print(f'image_token_indices: {image_token_indices}')
+        print(f'Current Input ids: {cur_input_ids}')
+        print(f'image_token_indices: {image_token_indices}')
         cur_input_ids_noim = []
         cur_labels_noim = []
         
