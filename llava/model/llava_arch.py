@@ -363,6 +363,7 @@ class LlavaMetaForCausalLM(ABC):
                 
         cur_new_input_embeds = []
         cur_new_labels = []
+        print(f'Number of images in the sequence: {num_images}')
 
         for i in range(num_images + 1):
             cur_new_input_embeds.append(cur_input_embeds_no_im[i])
@@ -552,9 +553,9 @@ class LlavaMetaForCausalLM(ABC):
 
             if num_images == 0:
                 
-                # print('*'*+100)
-                # print('NO IMAGE')
-                # print('*'*+100)
+                print('*'*+100)
+                print('NO IMAGE')
+                print('*'*+100)
 
                 # cur_input_embeds -> combineds both image and text embeds. here the image embeds are empty tensor
                 cur_input_embeds, text_embed, img_embed = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
