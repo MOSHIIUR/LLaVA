@@ -324,24 +324,56 @@ class LlavaMetaForCausalLM(ABC):
         # return total_loss.half()
         return total_loss
     
-    def process_no_images(self, cur_input_ids, cur_labels, image_features, cur_image_idx):
-        cur_input_embeds_1 = self.get_model().embed_tokens(cur_input_ids)
-        cur_input_embeds = torch.cat([cur_input_embeds_1, image_features[cur_image_idx:cur_image_idx+0]], dim=0)
-        return cur_input_embeds
+    def process_no_images(self, cur_input_ids, image_features, cur_image_idx):
+        cur_image_features = image_features[cur_image_idx]
+        text_embed = self.get_model().embed_tokens(cur_input_ids)
+        cur_input_embeds = torch.cat([text_embed, cur_image_features[0:0]], dim=0)
+        return cur_input_embeds, text_embed, cur_image_features[0:0]
     
-    def process_with_images(self, cur_input_ids, cur_labels, image_token_index):
-        image_token_indices = [-1] + torch.where(cur_input_ids == image_token_index)[0].tolist() + [cur_input_ids.shape[0]]
-        cur_input_ids_noim = []
-        cur_labels_noim = []
+    def process_with_images(self, cur_input_ids, cur_labels, IMAGE_TOKEN_INDEX):
+            # suppose 0, 4, 9 and 12 are the image tokens
 
-        for i in range(len(image_token_indices) - 1):
-            start = image_token_indices[i] + 1
-            end = image_token_indices[i + 1]
-            cur_input_ids_noim.append(cur_input_ids[start:end])
-            cur_labels_noim.append(cur_labels[start:end])
+            # Output: [-1, 3, 7, 22] (start, image positions, current_sequence_size) 
+            # -> in this sequence 3rd and 7th token has the image token
+            image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
+            # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
 
-        return cur_input_ids_noim, cur_labels_noim
-        
+            # print(f'image_token_indices: {image_token_indices}')
+            cur_input_ids_noim = []
+            cur_labels_noim = []
+            
+            for i in range(len(image_token_indices) - 1):
+
+                start = image_token_indices[i] + 1 
+                end = image_token_indices[i + 1]
+
+                # Extract the segment (exclusive of the image token):
+                cur_input_ids_noim.append(cur_input_ids[start:end])
+                cur_labels_noim.append(cur_labels[start:end])
+
+                # cur_input_ids_noim.append(cur_input_ids[image_token_indices[i]+1:image_token_indices[i+1]])
+                # cur_labels_noim.append(cur_labels[image_token_indices[i]+1:image_token_indices[i+1]])
+
+            # cur_input_ids_noim: [tensor([1, 2, 3]), tensor([5, 6, 7, 8]), tensor([10, 11])] 
+            # cur_labels_noim:   [tensor([21, 22, 23]), tensor([25, 26, 27, 28]), tensor([30, 31])]
+
+    def interleave_img_text_features(self, cur_input_embeds_no_im, cur_labels_noim, image_features, img_features_v2, cur_image_idx, num_images, device, dtype):
+                
+        cur_new_input_embeds = []
+        cur_new_labels = []
+
+        for i in range(num_images + 1):
+            cur_new_input_embeds.append(cur_input_embeds_no_im[i])
+            cur_new_labels.append(cur_labels_noim[i])
+            if i < num_images:
+                cur_image_features = image_features[cur_image_idx]
+                img_features_v2.append(cur_image_features)
+                cur_image_idx += 1
+                cur_new_input_embeds.append(cur_image_features)
+                cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=device, dtype=dtype))
+
+        return cur_new_input_embeds, cur_new_labels, img_features_v2
+
 
 
     def prepare_inputs_labels_for_multimodal(
@@ -496,6 +528,7 @@ class LlavaMetaForCausalLM(ABC):
         new_input_embeds = []
         new_labels = []
         text_features = []
+        img_features_v2 = []
         splits = []
         text_labels = []
         cur_image_idx = 0
@@ -521,53 +554,23 @@ class LlavaMetaForCausalLM(ABC):
                 # print('NO IMAGE')
                 # print('*'*+100)
 
-                cur_image_features = image_features[cur_image_idx]
-                cur_input_embeds_1 = self.get_model().embed_tokens(cur_input_ids)
-                cur_input_embeds = torch.cat([cur_input_embeds_1, cur_image_features[0:0]], dim=0)
+                # cur_input_embeds -> combineds both image and text embeds. here the image embeds are empty tensor
+                cur_input_embeds, text_embed, img_embed = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
                 # print(cur_input_embeds)
                 new_input_embeds.append(cur_input_embeds)
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
-                text_features.append(cur_input_embeds)
+                text_features.append(text_embed)
+                img_features_v2.append(img_embed)
                 text_labels.append(labels[batch_idx])
                 splits.append(0)
-                continue
-
-                cur_input_embeds = process_no_images(cur_input_ids, labels[batch_idx], image_features, cur_image_idx)
-                text_features.append(cur_input_embeds)
-                text_labels.append(labels[batch_idx])
-                splits.append(0)
-                cur_image_idx += 1
                 continue
             # cur_input_ids = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])  
             # labels = torch.tensor([20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32])  
 
-            # suppose 0, 4, 9 and 12 are the image tokens
-
-            # Output: [-1, 3, 7, 22] (start, image positions, current_sequence_size) 
-            # -> in this sequence 3rd and 7th token has the image token
-            image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
-            # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
-
-            # print(f'image_token_indices: {image_token_indices}')
-            cur_input_ids_noim = []
             cur_labels = labels[batch_idx]
-            cur_labels_noim = []
-            
-            for i in range(len(image_token_indices) - 1):
+            cur_input_ids_noim, cur_labels_noim = self.process_with_images(cur_input_ids, cur_labels, IMAGE_TOKEN_INDEX)
 
-                start = image_token_indices[i] + 1 
-                end = image_token_indices[i + 1]
-
-                # Extract the segment (exclusive of the image token):
-                cur_input_ids_noim.append(cur_input_ids[start:end])
-                cur_labels_noim.append(cur_labels[start:end])
-
-                # cur_input_ids_noim.append(cur_input_ids[image_token_indices[i]+1:image_token_indices[i+1]])
-                # cur_labels_noim.append(cur_labels[image_token_indices[i]+1:image_token_indices[i+1]])
-
-            # cur_input_ids_noim: [tensor([1, 2, 3]), tensor([5, 6, 7, 8]), tensor([10, 11])] 
-            # cur_labels_noim:   [tensor([21, 22, 23]), tensor([25, 26, 27, 28]), tensor([30, 31])]
 
             # Stores the lengths of each text segment in cur_input_ids_noim/cur_labels_noim
             split_sizes = [x.shape[0] for x in cur_labels_noim] # split_sizes:  ([3, 4, 2] in our example).
@@ -584,25 +587,21 @@ class LlavaMetaForCausalLM(ABC):
             cur_input_embeds_no_im = torch.split(cur_input_embeds, split_sizes, dim=0)
 
             text_features.append(cur_input_embeds)
-            text_labels.append(cur_labels_noim)
+            text_labels.append(torch.cat(cur_labels_noim))
             splits.append(split_sizes)
 
             
-            if cross_attention != True:
+            if not cross_attention:
 
                 # print('inside cross attension not true')
+                cur_new_input_embeds, cur_new_labels, img_features_v2 = self.interleave_img_text_features(
+                                                            cur_input_embeds_no_im, 
+                                                            cur_labels_noim, 
+                                                            image_features,
+                                                            img_features_v2, 
+                                                            cur_image_idx, 
+                                                            num_images, device=cur_labels.device, dtype=cur_labels.dtype)
                 
-                cur_new_input_embeds = []
-                cur_new_labels = []
-
-                for i in range(num_images + 1):
-                    cur_new_input_embeds.append(cur_input_embeds_no_im[i])
-                    cur_new_labels.append(cur_labels_noim[i])
-                    if i < num_images:
-                        cur_image_features = image_features[cur_image_idx]
-                        cur_image_idx += 1
-                        cur_new_input_embeds.append(cur_image_features)
-                        cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=cur_labels.device, dtype=cur_labels.dtype))
                 
                 # print('*'*100)
                 # for i in range(len(cur_new_input_embeds)):
@@ -628,6 +627,7 @@ class LlavaMetaForCausalLM(ABC):
         #     print(f' Shape of text_feature of: {txt_feature.shape}')
             
         text_features = [x.to(self.device) for x in text_features]
+        img_features_v2 = torch.stack(img_features_v2)   
 
         padded_text_features = self.pad_text_features(text_features)
         # print(f'padded text feature shape: {padded_text_features.shape}')
@@ -637,13 +637,14 @@ class LlavaMetaForCausalLM(ABC):
         
         
         if cross_attention:
+            
+            image_features_has_zero = (img_features_v2 == 0).any().item()
 
-            image_features_has_zero = (image_features == 0).any().item()
             if image_features_has_zero:
                 print('img feature got zero before passing to cross attn')
 
             # image_features, co_text_features = self.cross_attention(padded_text_features, image_features, padded_text_features_attention_mask)
-            image_features, co_text_features = self.cross_attention(padded_text_features, image_features, padded_text_features_attention_mask)
+            image_features, co_text_features = self.cross_attention(padded_text_features, img_features_v2, padded_text_features_attention_mask)
 
             # text_features = self.remove_padding(co_text_features, padded_text_features_attention_mask)
 
@@ -680,7 +681,7 @@ class LlavaMetaForCausalLM(ABC):
             
             
             if use_contrastive_loss:
-                align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
+                align_loss = self.clip_contrastive_loss(co_text_features, image_features, padded_text_features_attention_mask)
 
             # print('unpad text features')
             # for i in text_features:
@@ -698,6 +699,7 @@ class LlavaMetaForCausalLM(ABC):
                 if split_sizes == 0:
                     # Handle the case where split_sizes is 0, e.g., skip splitting
                     cur_input_embeds_no_im = cur_input_embeds_no_im
+                    
                 else:
                     cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
 
@@ -729,7 +731,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_labels.append(cur_new_labels)
 
         elif use_contrastive_loss:
-            align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
+            align_loss = self.clip_contrastive_loss(padded_text_features, img_features_v2, padded_text_features_attention_mask)
 
 
         # ##########################################################################################################################################################################
