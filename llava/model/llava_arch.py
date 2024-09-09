@@ -562,9 +562,11 @@ class LlavaMetaForCausalLM(ABC):
                 # cur_input_embeds -> combineds both image and text embeds. here the image embeds are empty tensor
                 cur_input_embeds, text_embed, img_embed = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
                 # print(cur_input_embeds)
-                new_input_embeds.append(cur_input_embeds)
-                new_labels.append(labels[batch_idx])
-                cur_image_idx += 1
+                if not cross_attention:
+                    new_input_embeds.append(cur_input_embeds)
+                    new_labels.append(labels[batch_idx])
+                    cur_image_idx += 1
+
                 text_features.append(text_embed)
                 img_features_v2.append(img_embed)
                 text_labels.append(labels[batch_idx])
@@ -592,7 +594,7 @@ class LlavaMetaForCausalLM(ABC):
             cur_input_embeds_no_im = torch.split(cur_input_embeds, split_sizes, dim=0)
 
             text_features.append(cur_input_embeds)
-            text_labels.append(torch.cat(cur_labels_noim))
+            text_labels.append(cur_labels_noim)
             splits.append(split_sizes)
             print(f'splits: {splits}')
 
@@ -704,10 +706,14 @@ class LlavaMetaForCausalLM(ABC):
                 
                 if split_sizes == 0:
                     # Handle the case where split_sizes is 0, e.g., skip splitting
-                    cur_input_embeds_no_im = cur_input_embeds_no_im
-                    
-                else:
-                    cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
+                    cur_image_features = image_features[cur_image_idx]
+                    cur_input_embeds = torch.cat([cur_input_embeds_no_im, cur_image_features[0:0]], dim=0)
+                    new_input_embeds.append(cur_input_embeds)
+                    new_labels.append(cur_labels_noim)
+                    continue
+                   
+                
+                cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
 
                 cur_new_input_embeds = []
                 cur_new_labels = []
@@ -737,6 +743,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_labels.append(cur_new_labels)
 
         elif use_contrastive_loss:
+            
             align_loss = self.clip_contrastive_loss(padded_text_features, img_features_v2, padded_text_features_attention_mask)
 
 
