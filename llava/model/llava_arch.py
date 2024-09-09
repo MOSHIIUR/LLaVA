@@ -338,8 +338,8 @@ class LlavaMetaForCausalLM(ABC):
         image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
         # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
 
-        print(f'Current Input ids: {cur_input_ids}')
-        print(f'image_token_indices: {image_token_indices}')
+        # print(f'Current Input ids: {cur_input_ids}')
+        # print(f'image_token_indices: {image_token_indices}')
         cur_input_ids_noim = []
         cur_labels_noim = []
         
@@ -364,7 +364,6 @@ class LlavaMetaForCausalLM(ABC):
                 
         cur_new_input_embeds = []
         cur_new_labels = []
-        print(f'Number of images in the sequence: {num_images}')
 
         for i in range(num_images + 1):
             cur_new_input_embeds.append(cur_input_embeds_no_im[i])
@@ -596,7 +595,7 @@ class LlavaMetaForCausalLM(ABC):
             text_features.append(cur_input_embeds)
             text_labels.append(cur_labels_noim)
             splits.append(split_sizes)
-            print(f'splits: {splits}')
+            # print(f'splits: {splits}')
 
             
             if not cross_attention:
