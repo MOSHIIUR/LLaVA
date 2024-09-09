@@ -463,6 +463,7 @@ class LlavaMetaForCausalLM(ABC):
                             ), dim=0)
                     new_image_features.append(image_feature)
                 image_features = new_image_features
+            
             else:
                 raise ValueError(f"Unexpected mm_patch_merge_type: {self.config.mm_patch_merge_type}")
         
@@ -592,6 +593,7 @@ class LlavaMetaForCausalLM(ABC):
             text_features.append(cur_input_embeds)
             text_labels.append(torch.cat(cur_labels_noim))
             splits.append(split_sizes)
+            print(f'splits: {splits}')
 
             
             if not cross_attention:
@@ -693,7 +695,7 @@ class LlavaMetaForCausalLM(ABC):
 
 
             for x in range(len(co_text_features)):
-                cur_input_embeds_no_im = text_features[x]
+                cur_input_embeds_no_im = co_text_features[x]
                 # print(cur_input_embeds_no_im.shape)
                 cur_labels_noim = text_labels[x]
                 split_sizes = splits[x]
