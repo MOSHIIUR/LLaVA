@@ -511,7 +511,7 @@ class LlavaMetaForCausalLM(ABC):
                 cur_image_idx += 1
                 text_features.append(cur_input_embeds)
                 text_labels.append(labels[batch_idx])
-                splits.append(0)
+                splits.append('')
                 continue
 
             # cur_input_ids = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])  
@@ -671,8 +671,8 @@ class LlavaMetaForCausalLM(ABC):
 
                 cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
                 
-                if split_sizes == 0:
-                    # Handle the case where split_sizes is 0, e.g., skip splitting
+                if isinstance(split_sizes, str):
+                    # Handle the case where split_sizes is string, e.g., skip splitting
                     cur_input_embeds_no_im = cur_input_embeds_no_im
                 else:
                     cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
