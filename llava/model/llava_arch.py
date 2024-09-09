@@ -331,31 +331,33 @@ class LlavaMetaForCausalLM(ABC):
         return cur_input_embeds, text_embed, cur_image_features[0:0]
     
     def process_with_images(self, cur_input_ids, cur_labels, IMAGE_TOKEN_INDEX):
-            # suppose 0, 4, 9 and 12 are the image tokens
+        # suppose 0, 4, 9 and 12 are the image tokens
 
-            # Output: [-1, 3, 7, 22] (start, image positions, current_sequence_size) 
-            # -> in this sequence 3rd and 7th token has the image token
-            image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
-            # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
+        # Output: [-1, 3, 7, 22] (start, image positions, current_sequence_size) 
+        # -> in this sequence 3rd and 7th token has the image token
+        image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
+        # image_token_indices = torch.tensor([-1, 0, 4, 9, 12])  
 
-            # print(f'image_token_indices: {image_token_indices}')
-            cur_input_ids_noim = []
-            cur_labels_noim = []
-            
-            for i in range(len(image_token_indices) - 1):
+        # print(f'image_token_indices: {image_token_indices}')
+        cur_input_ids_noim = []
+        cur_labels_noim = []
+        
+        for i in range(len(image_token_indices) - 1):
 
-                start = image_token_indices[i] + 1 
-                end = image_token_indices[i + 1]
+            start = image_token_indices[i] + 1 
+            end = image_token_indices[i + 1]
 
-                # Extract the segment (exclusive of the image token):
-                cur_input_ids_noim.append(cur_input_ids[start:end])
-                cur_labels_noim.append(cur_labels[start:end])
+            # Extract the segment (exclusive of the image token):
+            cur_input_ids_noim.append(cur_input_ids[start:end])
+            cur_labels_noim.append(cur_labels[start:end])
 
-                # cur_input_ids_noim.append(cur_input_ids[image_token_indices[i]+1:image_token_indices[i+1]])
-                # cur_labels_noim.append(cur_labels[image_token_indices[i]+1:image_token_indices[i+1]])
+            # cur_input_ids_noim.append(cur_input_ids[image_token_indices[i]+1:image_token_indices[i+1]])
+            # cur_labels_noim.append(cur_labels[image_token_indices[i]+1:image_token_indices[i+1]])
 
-            # cur_input_ids_noim: [tensor([1, 2, 3]), tensor([5, 6, 7, 8]), tensor([10, 11])] 
-            # cur_labels_noim:   [tensor([21, 22, 23]), tensor([25, 26, 27, 28]), tensor([30, 31])]
+        # cur_input_ids_noim: [tensor([1, 2, 3]), tensor([5, 6, 7, 8]), tensor([10, 11])] 
+        # cur_labels_noim:   [tensor([21, 22, 23]), tensor([25, 26, 27, 28]), tensor([30, 31])]
+        return cur_input_ids_noim, cur_labels_noim
+        
 
     def interleave_img_text_features(self, cur_input_embeds_no_im, cur_labels_noim, image_features, img_features_v2, cur_image_idx, num_images, device, dtype):
                 
@@ -689,7 +691,7 @@ class LlavaMetaForCausalLM(ABC):
 
 
 
-            for x in range(len(text_features)):
+            for x in range(len(co_text_features)):
                 cur_input_embeds_no_im = text_features[x]
                 # print(cur_input_embeds_no_im.shape)
                 cur_labels_noim = text_labels[x]
