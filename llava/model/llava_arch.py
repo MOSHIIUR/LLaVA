@@ -371,6 +371,7 @@ class LlavaMetaForCausalLM(ABC):
             if i < num_images:
                 cur_image_features = image_features[cur_image_idx]
                 img_features_v2.append(cur_image_features)
+                print(f'length of image features_v2:{len(img_features_v2)}')
                 cur_image_idx += 1
                 cur_new_input_embeds.append(cur_image_features)
                 cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=device, dtype=dtype))
@@ -567,7 +568,9 @@ class LlavaMetaForCausalLM(ABC):
                     cur_image_idx += 1
 
                 text_features.append(text_embed)
+                print(f'image embed: {img_embed.shape}')
                 img_features_v2.append(img_embed)
+                print(f'length of image features_v2:{len(img_features_v2)}')
                 text_labels.append(labels[batch_idx])
                 splits.append(0)
                 continue
@@ -617,6 +620,7 @@ class LlavaMetaForCausalLM(ABC):
 
                 cur_new_input_embeds = [x.to(self.device) for x in cur_new_input_embeds]
                 cur_new_input_embeds = torch.cat(cur_new_input_embeds)
+                print(f'length of image features_v2:{len(img_features_v2)}')
 
                 # print('*'*100)
                 # print(f'current new input embeds: {cur_new_input_embeds.shape}')
@@ -635,7 +639,8 @@ class LlavaMetaForCausalLM(ABC):
             
         text_features = [x.to(self.device) for x in text_features]
         img_features_v2 = torch.stack(img_features_v2)   
-
+        print(f'length of image features_v2:{len(img_features_v2)}')
+        
         padded_text_features = self.pad_text_features(text_features)
         # print(f'padded text feature shape: {padded_text_features.shape}')
         padded_text_features_attention_mask = padded_text_features.sum(dim=-1) != 0
