@@ -308,7 +308,6 @@ class LlavaMetaForCausalLM(ABC):
         logits_per_image = logits_per_image / temperature
         logits_per_text = logits_per_text / temperature
 
-        # print(f"Similarity matrix:\n{F.softmax(logits_per_image)}")
 
         # Ground truth labels
         batch_size = text_embeddings.shape[0]
@@ -554,9 +553,9 @@ class LlavaMetaForCausalLM(ABC):
 
             if num_images == 0:
                 
-                print('*'*+100)
-                print('NO IMAGE')
-                print('*'*+100)
+                # print('*'*+100)
+                # print('NO IMAGE')
+                # print('*'*+100)
 
                 # cur_input_embeds -> combineds both image and text embeds. here the image embeds are empty tensor
                 cur_input_embeds, text_embed, img_embed = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
