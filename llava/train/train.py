@@ -483,12 +483,25 @@ def preprocess_v1(
     tokenizer: transformers.PreTrainedTokenizer,
     has_image: bool = False
 ) -> Dict:
+    
     conv = conversation_lib.default_conversation.copy()
+    '''
+    Conversation(
+    system="A chat between a curious user and an artificial intelligence assistant. "
+    "The assistant gives helpful, detailed, and polite answers to the user's questions.",
+    roles=("USER", "ASSISTANT"),
+    version="v1",
+    messages=(),
+    offset=0,
+    sep_style=SeparatorStyle.TWO,
+    sep=" ",
+    sep2="</s>",
+    )
+    '''
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
     # {'human': 'USER', 'gpt': 'ASSISTANT'}
 
     '''
-
     sources = [[{'from': 'human',
    'value': '<image>\n'
             'Give a short and clear explanation of the subsequent image.'},
@@ -506,7 +519,7 @@ def preprocess_v1(
     conversations = []
     for i, source in enumerate(sources):
         pprint.pprint(f'for {i} , sources in enumerate(sources)-> {source}')
-        pprint.ppriny(f'source[0]["from"] -> {source[0]["from"]} && conv.roles[0]-> {conv.roles[0]}')
+        pprint.pprint(f'source[0]["from"] -> {source[0]["from"]} && conv.roles[0]-> {conv.roles[0]}')
         
         if roles[source[0]["from"]] != conv.roles[0]:
             # Skip the first one if it is not from human
