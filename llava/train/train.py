@@ -518,12 +518,15 @@ def preprocess_v1(
     # Apply prompt templates
     conversations = []
     for i, source in enumerate(sources):
-        pprint.pprint(f'for {i} , sources in enumerate(sources)-> {source}')
-        pprint.pprint(f'source[0]["from"] -> {source[0]["from"]} && conv.roles[0]-> {conv.roles[0]}')
+        # pprint.pprint(f'for {i} , sources in enumerate(sources)-> {source}')
+        # pprint.pprint(f'source[0]["from"] -> {source[0]["from"]} && conv.roles[0]-> {conv.roles[0]}')
+        # source[0]["from"] -> human && conv.roles[0]-> USER
         
         if roles[source[0]["from"]] != conv.roles[0]:
             # Skip the first one if it is not from human
+            print('S K I P P I N G')
             source = source[1:]
+            pprint.pprint(source)
 
         conv.messages = []
         for j, sentence in enumerate(source):
@@ -531,6 +534,9 @@ def preprocess_v1(
             assert role == conv.roles[j % 2], f"{i}"
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
+        
+        print('-'*100)
+        pprint.pprint(conversations)
 
     # Tokenize conversations
 
