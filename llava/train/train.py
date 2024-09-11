@@ -535,23 +535,22 @@ def preprocess_v1(
             assert role == conv.roles[j % 2], f"{i}"
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
-        '''
-        [
-        A chat between a curious user and an artificial intelligence assistant. 
-        The assistant gives helpful, detailed, and polite answers to the user's questions. 
-        USER: <image>\nCreate a compact narrative representing the image presented. 
-        ASSISTANT: sun shining through an old beech tree</s>
-        ]
-        '''
-        
-    print('-'*100)
-    pprint.pprint(conversations)
-    print('-'*100)
-
+    '''
+    [
+    A chat between a curious user and an artificial intelligence assistant. 
+    The assistant gives helpful, detailed, and polite answers to the user's questions. 
+    USER: <image>\nCreate a compact narrative representing the image presented. 
+    ASSISTANT: sun shining through an old beech tree</s>
+    ]
+    '''
     # Tokenize conversations
+
 
     if has_image:
         input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
+        print('-'*100)
+        pprint.pprint(input_ids)
+        print('-'*100)
     
     else:
         input_ids = tokenizer(
