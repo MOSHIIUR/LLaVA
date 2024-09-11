@@ -313,7 +313,7 @@ conv_llava_llama_3_1 = Conversation(
     offset=0,
     sep_style=SeparatorStyle.LLAMA_3_1,
     # tokenizer=llama_tokenizer,
-    stop_token_ids=[128009, 128008, 128001],
+    # stop_token_ids=[128009, 128008, 128001],
 )
 conv_mpt = Conversation(
     system="""<|im_start|>system
