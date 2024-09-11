@@ -525,7 +525,7 @@ def preprocess_llama_3_1(
     for conversation, target in zip(conversations, targets):
         total_len = int(target.shape[0])
 
-        rounds = conversation.split(conv.tokenizer.eos_token)
+        rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
 
         cur_len = 1
