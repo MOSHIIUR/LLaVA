@@ -1275,9 +1275,6 @@ def train(attn_implementation=None):
     ######################################################################################################################################################################################## 
     # ---------------------------------------------------------------END OF APPLYING LORA---------------------------------------------------------------
     ######################################################################################################################################################################################## 
-    if 'llama' in model_args.model_name_or_path and rank0status:
-        os.environ["TOKENIZER_PATH"] = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-        os.environ["HF_TOKEN"] = "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"
 
     if 'mpt' in model_args.model_name_or_path:
         tokenizer = transformers.AutoTokenizer.from_pretrained(
