@@ -548,9 +548,17 @@ def preprocess_v1(
 
     if has_image:
         input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
-        print('-'*100)
-        pprint.pprint(input_ids)
-        print('-'*100)
+        '''
+        tensor([[    1,   319, 13563,  1546,   263, 12758,  1404,   322,   385, 23116,
+         21082, 20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,
+           322,  1248,   568,  6089,   304,   278,  1404, 29915, 29879,  5155,
+         29889,  3148,  1001, 29901, 29871,  -200, 29871,    13,  9662,   388,
+           263, 11473, 29892,  2821,  3633,   310,   278,  7623,  4318, 29889,
+           319,  1799,  9047, 13566, 29901, 11210,  1919,  1766,   562,   294,
+           373,   278,  3239,   310,   278,  7353,   869,     2]])
+
+           -200 = image token
+        '''
     
     else:
         input_ids = tokenizer(
@@ -561,12 +569,17 @@ def preprocess_v1(
             truncation=True,
         ).input_ids
 
-    targets = input_ids.clone()
+    targets = input_ids.clone() # Create a copy of input_ids as targets
 
+    # Ensure  conv.sep_style separator style is as expected as conversation_lib.SeparatorStyle.TWO
     assert conv.sep_style == conversation_lib.SeparatorStyle.TWO
 
     # Mask targets
     sep = conv.sep + conv.roles[1] + ": "
+    print('-'*30+'SEPERATOR'+'-'*30)
+    print(sep)
+    print('-'*100)
+    
     for conversation, target in zip(conversations, targets):
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
 
