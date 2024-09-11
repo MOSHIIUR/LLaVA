@@ -16,6 +16,7 @@
 
 import os
 import copy
+import pprint
 from dataclasses import dataclass, field
 import json
 import logging
@@ -487,9 +488,9 @@ def preprocess_v1(
     # {'human': 'USER', 'gpt': 'ASSISTANT'}
 
     print('-'*100)
-    print(sources)
+    pprint.pprint(sources)
     print('-'*100)
-    print(conv)
+    pprint.pprint(conv)
     print('-'*100)
 
 
