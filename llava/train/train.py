@@ -496,6 +496,8 @@ def preprocess_v1(
    'value': 'young man sits on bench in a park and talks to somebody on the '
             'phone'}]]
     '''
+    pprint.pprint(sources)
+    print('-'*100)
     '''
     conv.roles[0] = USER
     conv.roles[1] = ASSISTANT
