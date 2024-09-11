@@ -487,16 +487,25 @@ def preprocess_v1(
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
     # {'human': 'USER', 'gpt': 'ASSISTANT'}
 
-    print('-'*100)
-    pprint.pprint(sources)
-    print('-'*100)
-    pprint.pprint(conv)
-    print('-'*100)
+    '''
 
-
+    sources = [[{'from': 'human',
+   'value': '<image>\n'
+            'Give a short and clear explanation of the subsequent image.'},
+  {'from': 'gpt',
+   'value': 'young man sits on bench in a park and talks to somebody on the '
+            'phone'}]]
+    '''
+    '''
+    conv.roles[0] = USER
+    conv.roles[1] = ASSISTANT
+    '''
     # Apply prompt templates
     conversations = []
     for i, source in enumerate(sources):
+        pprint.pprint(f'for {i} , sources in enumerate(sources)-> {source}')
+        pprint.ppriny(f'source[0]["from"] -> {source[0]["from"]} && conv.roles[0]-> {conv.roles[0]}')
+        
         if roles[source[0]["from"]] != conv.roles[0]:
             # Skip the first one if it is not from human
             source = source[1:]
