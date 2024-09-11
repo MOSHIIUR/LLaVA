@@ -374,7 +374,7 @@ class LlavaMetaForCausalLM(ABC):
                 cur_new_input_embeds.append(cur_image_features)
                 cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=device, dtype=dtype))
 
-        return cur_new_input_embeds, cur_new_labels, img_features_v2
+        return cur_new_input_embeds, cur_new_labels, img_features_v2, cur_image_idx
 
 
 
@@ -601,7 +601,7 @@ class LlavaMetaForCausalLM(ABC):
             if not cross_attention:
 
                 # print('inside cross attension not true')
-                cur_new_input_embeds, cur_new_labels, img_features_v2 = self.interleave_img_text_features(
+                cur_new_input_embeds, cur_new_labels, img_features_v2, cur_image_idx = self.interleave_img_text_features(
                                                             cur_input_embeds_no_im, 
                                                             cur_labels_noim, 
                                                             image_features,
@@ -614,7 +614,6 @@ class LlavaMetaForCausalLM(ABC):
                 # for i in range(len(cur_new_input_embeds)):
                 #     print(f'shape of index: {i} is {cur_new_input_embeds[i].shape}')
                 # print('*'*100)
-
                 cur_new_input_embeds = [x.to(self.device) for x in cur_new_input_embeds]
                 cur_new_input_embeds = torch.cat(cur_new_input_embeds)
 
@@ -688,7 +687,7 @@ class LlavaMetaForCausalLM(ABC):
             
             
             if use_contrastive_loss:
-                align_loss = self.clip_contrastive_loss(co_text_features, image_features, padded_text_features_attention_mask)
+                align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
 
             # print('unpad text features')
             # for i in text_features:
@@ -696,8 +695,8 @@ class LlavaMetaForCausalLM(ABC):
 
 
 
-            for x in range(len(co_text_features)):
-                cur_input_embeds_no_im = co_text_features[x]
+            for x in range(len(text_features)):
+                cur_input_embeds_no_im = text_features[x]
                 # print(cur_input_embeds_no_im.shape)
                 cur_labels_noim = text_labels[x]
                 split_sizes = splits[x]
@@ -709,6 +708,7 @@ class LlavaMetaForCausalLM(ABC):
                     cur_input_embeds = torch.cat([cur_input_embeds_no_im, cur_image_features[0:0]], dim=0)
                     new_input_embeds.append(cur_input_embeds)
                     new_labels.append(cur_labels_noim)
+                    cur_image_idx += 1
                     continue
                    
                 

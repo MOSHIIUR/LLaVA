@@ -1,9 +1,11 @@
 import dataclasses
+import os
 from enum import auto, Enum
 from typing import List, Tuple
 import base64
 from io import BytesIO
 from PIL import Image
+from transformers import AutoTokenizer
 
 
 class SeparatorStyle(Enum):
@@ -13,6 +15,7 @@ class SeparatorStyle(Enum):
     MPT = auto()
     PLAIN = auto()
     LLAMA_2 = auto()
+    LLAMA_3_1 = auto()
 
 
 @dataclasses.dataclass
@@ -289,6 +292,28 @@ conv_llava_llama_2 = Conversation(
     sep2="</s>",
 )
 
+# define the correct tokenizer path
+
+# export HF_TOKEN=hf_read_token
+# export TOKENIZER_PATH=meta-llama/Meta-Llama-3.1-8B-Instruct
+
+tokenizer_path= os.getenv("TOKENIZER_PATH")
+llama_tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+
+
+conv_llava_llama_3_1 = Conversation(
+    system="You are a helpful language and vision assistant. " 
+           "You are able to understand the visual content that the user provides, "
+           "and assist the user with a variety of tasks using natural language.",
+    #roles=("<|start_header_id|>user", "<|start_header_id|>assistant"),
+    roles=("user", "assistant"),
+    version="llama_3_1",
+    messages=[],
+    offset=0,
+    sep_style=SeparatorStyle.LLAMA_3_1,
+    tokenizer=llama_tokenizer,
+    stop_token_ids=[128009, 128008, 128001],
+)
 conv_mpt = Conversation(
     system="""<|im_start|>system
 A conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers.""",
@@ -399,7 +424,7 @@ conv_templates = {
     "llava_v1": conv_llava_v1,
     "v1_mmtag": conv_llava_v1_mmtag,
     "llava_llama_2": conv_llava_llama_2,
-
+    "llama_3_1": conv_llava_llama_3_1,
     "mpt": conv_mpt,
 }
 
