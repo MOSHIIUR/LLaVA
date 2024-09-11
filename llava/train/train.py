@@ -1149,7 +1149,7 @@ def train(attn_implementation=None):
             load_in_8bit=training_args.bits == 8,
             quantization_config=BitsAndBytesConfig(
                 load_in_4bit=training_args.bits == 4,
-                load_in_8bit=training_args.bits == 8,
+                # load_in_8bit=training_args.bits == 8,
                 llm_int8_skip_modules=["mm_projector"],
                 llm_int8_threshold=6.0,
                 llm_int8_has_fp16_weight=False,
