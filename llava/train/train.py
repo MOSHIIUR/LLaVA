@@ -484,6 +484,14 @@ def preprocess_v1(
 ) -> Dict:
     conv = conversation_lib.default_conversation.copy()
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
+    # {'human': 'USER', 'gpt': 'ASSISTANT'}
+
+    print('-'*100)
+    print(sources)
+    print('-'*100)
+    print(conv)
+    print('-'*100)
+
 
     # Apply prompt templates
     conversations = []
@@ -503,6 +511,7 @@ def preprocess_v1(
 
     if has_image:
         input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
+    
     else:
         input_ids = tokenizer(
             conversations,
