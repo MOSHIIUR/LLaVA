@@ -528,15 +528,25 @@ def preprocess_v1(
             source = source[1:]
             pprint.pprint(source)
 
+        # iterate over the turns in the sample/conversation
         conv.messages = []
         for j, sentence in enumerate(source):
             role = roles[sentence["from"]]
             assert role == conv.roles[j % 2], f"{i}"
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
+        '''
+        [
+        A chat between a curious user and an artificial intelligence assistant. 
+        The assistant gives helpful, detailed, and polite answers to the user's questions. 
+        USER: <image>\nCreate a compact narrative representing the image presented. 
+        ASSISTANT: sun shining through an old beech tree</s>
+        ]
+        '''
         
-        print('-'*100)
-        pprint.pprint(conversations)
+    print('-'*100)
+    pprint.pprint(conversations)
+    print('-'*100)
 
     # Tokenize conversations
 
