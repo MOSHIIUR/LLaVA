@@ -14,9 +14,9 @@ import os
 #             return True
 #     return False
 
-# Load the JSON file
-with open('./playground/data/llava_v1_5_mix665k.json', 'r') as file:
-    data = json.load(file)
+# # Load the JSON file
+# with open('./playground/data/llava_v1_5_mix665k.json', 'r') as file:
+#     data = json.load(file)
 # # Initialize counters and lists
 # total_samples = len(data)
 # missing_images_count = 0
@@ -64,17 +64,26 @@ image_directories = [
     './playground/data/vg/VG_100K_2'
 ]
 
-# Set to store unique file extensions
-image_extensions = set()
+# Define the image file extensions (you can add more if needed)
+image_extensions = ('.jpg', '.JPG')
 
-# Extract the file extension from each 'image' key
-for sample in data:
-    if 'image' in sample:
-        image_name = sample['image']
-        _, ext = os.path.splitext(image_name)  # Split the file name and extension
-        if ext:
-            image_extensions.add(ext)  # Add the extension to the set (converted to lowercase)
+# Function to count image files in a directory
+def count_images_in_directory(directory):
+    image_count = 0
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith(image_extensions):
+                image_count += 1
+    return image_count
 
-# Print the unique image extensions found
-print("Unique image file extensions found in the JSON data:")
-print(image_extensions)
+# Total count of images across all directories
+total_image_count = 0
+
+# Count images in each directory
+for directory in image_directories:
+    count = count_images_in_directory(directory)
+    total_image_count += count
+    print(f"Directory '{directory}' contains {count} images.")
+
+# Final total count
+print(f"Total number of images across all directories: {total_image_count}")
