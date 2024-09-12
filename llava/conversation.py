@@ -94,6 +94,18 @@ class Conversation:
                 else:
                     ret += ""
             ret = ret.lstrip(self.sep)
+        
+        elif self.sep_style == SeparatorStyle.LLAMA_3_1:
+            chat_template_messages = [{"role": "system", "content": self.system}]
+            for role, message in messages:
+                if message:
+                    if type(message) is tuple:
+                        message, images = message
+                        message = "<image>" * len(images) + message
+                    chat_template_messages.append({"role": role, "content": message})
+
+            return self.tokenizer.apply_chat_template(chat_template_messages, tokenize=False, add_generation_prompt=False)
+        
         elif self.sep_style == SeparatorStyle.PLAIN:
             seps = [self.sep, self.sep2]
             ret = self.system
