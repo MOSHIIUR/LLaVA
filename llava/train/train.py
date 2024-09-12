@@ -886,7 +886,8 @@ def preprocess_phi(
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
 
-        print(f' target[:cur_len] : { target[:cur_len] }')
+        print(f' target : { target }')
+        print(f' target[:cur_len] : { target}')
         
         for i, rou in enumerate(rounds):
             if rou == "":
@@ -942,9 +943,6 @@ def preprocess_phi(
                 # instruction contain the user part only
                 instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 1
 
-                print(f'round length: {round_len}')
-                print(f'instruction length: {instruction_len}')
-                print('-'*100)
             
             else:
                 round_len = len(tokenizer(rou).input_ids) + 1  # for eos_token
@@ -953,6 +951,8 @@ def preprocess_phi(
             #       round_len, instruction_len, target[cur_len : cur_len + instruction_len], target[cur_len : cur_len + round_len])
             
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
+            print('target[cur_len : cur_len + instruction_len]')
+            print(target[cur_len : cur_len + instruction_len])
 
             cur_len += round_len
         target[cur_len:] = IGNORE_INDEX
