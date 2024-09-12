@@ -868,6 +868,8 @@ def preprocess_phi(
         rounds = conversation.split(conv.sep2)
         print('len(rounds)', len(rounds))
         print('-'*100)
+        pprint.pprint(rounds)
+        print('-'*100)
 
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
