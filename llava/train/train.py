@@ -143,7 +143,7 @@ class TrainingArguments(transformers.TrainingArguments):
     mm_projector_lr: Optional[float] = None
     group_by_modality_length: bool = field(default=False)
     llm_backbone: str = field(default=None)
-
+    llm_pad_token: str = field(default=None)
 
 def maybe_zero_3(param, ignore_status=False, name=None):
     from deepspeed import zero
@@ -1332,6 +1332,18 @@ def train(attn_implementation=None):
     
     elif model_args.version == "v0.5":
         tokenizer.pad_token = tokenizer.unk_token
+
+    # select the correct PAD token for llama_3_1 and llama_3
+    elif training_args.llm_backbone == "llama_3_1":
+        print(f"pad token: {training_args.llm_pad_token}")
+        if training_args.llm_pad_token == 'end_of_text':
+            tokenizer.pad_token_id= 128001
+        elif training_args.llm_pad_token == 'eot':
+            tokenizer.pad_token_id= 128009
+        elif training_args.llm_pad_token == 'pad':
+            tokenizer.pad_token_id= 128004
+        else:
+            raise ValueError(f"Unknown llm_pad_token")
     
     else:
         # if tokenizer do not have "unk_token" add this when you initialize the tokenizer
