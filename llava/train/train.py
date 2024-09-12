@@ -854,7 +854,8 @@ def preprocess_phi(
     assert conv.sep_style == conversation_lib.SeparatorStyle.TWO
     # print(tokenizer)
     # Mask targets
-    sep = conv.sep + conv.roles[1] + ": "
+    sep = conv.sep + conv.roles[1] + ": "   # ASSISTANT:  
+    
     # print('sep', sep)
     for conversation, target in zip(conversations, targets):
 
@@ -887,16 +888,33 @@ def preprocess_phi(
         for i, rou in enumerate(rounds):
             if rou == "":
                 break
-
-            print('-'*100)
-            print(rou)
-            print('-'*100)
-
             parts = rou.split(sep)
+            '''
+            ROU
+            ----
+            A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. 
+            USER: <image> Create a compact narrative representing the image presented. 
+            ASSISTANT: pop artist performs on stage during the charity event celebrating the 25th anniversary     
             
-            print(parts)
-            print(f'SEP: {sep}')
+            SEP
+            ---  
+            ASSISTANT:  
+
+            PARTS
+            -----
+            [
+            "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. 
+            USER: <image>\nCreate a compact narrative representing the image presented.", 
+            'pop artist performs on stage during the charity event celebrating the 25th anniversary'
+            ]
+            
+            '''
             print('-'*100)
+            print(f'len(parts): {len(parts)}')
+            print(f'parts[0]: {parts[0]}')
+            print('-'*100)
+
+            
             
             # print('i rou, parts', i, rou, parts)
             if len(parts) != 2:
@@ -904,9 +922,15 @@ def preprocess_phi(
             parts[0] += sep
             # print('after add sep, parts', parts)
 
+            print(f'parts[0] += sep')
+            print(parts[0])
+            print('-'*100)
+            print(f'has image: {has_image}')
+
             if has_image:
                 round_len = len(tokenizer_image_token(rou, tokenizer)) + 1  # for eos_token
                 instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 1
+            
             else:
                 round_len = len(tokenizer(rou).input_ids) + 1  # for eos_token
                 instruction_len = len(tokenizer(parts[0]).input_ids) - 1
