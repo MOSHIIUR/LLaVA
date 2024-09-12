@@ -857,18 +857,18 @@ def preprocess_phi(
     sep = conv.sep + conv.roles[1] + ": "
     # print('sep', sep)
     for conversation, target in zip(conversations, targets):
+        pprint.pprint(conversation)
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
-        print('-'*30+'target.ne(tokenizer.pad_token_id)'+'-'*30)
-        pprint.pprint(target.ne(tokenizer.pad_token_id))
-        print('-'*100)
-        pprint.pprint(f'target.ne(tokenizer.pad_token_id).sum(): {target.ne(tokenizer.pad_token_id).sum()}')
-        print('total_len', total_len)
-        print('-'*100)
+        '''
+        target.ne(tokenizer.pad_token_id) -> tensor([True, True, True, True, True, True, True, True, True, True, True, True])
+        .sum() -> 12
+        total_len = 12
+        '''
 
         rounds = conversation.split(conv.sep2)
         print('len(rounds)', len(rounds))
         print('-'*100)
-        
+
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
         for i, rou in enumerate(rounds):
