@@ -64,26 +64,24 @@ image_directories = [
     './playground/data/vg/VG_100K_2'
 ]
 
-# Define the image file extensions (you can add more if needed)
-image_extensions = ('.jpg', '.JPG')
-
-# Function to count image files in a directory
-def count_images_in_directory(directory):
-    image_count = 0
+# Function to count all files in a directory
+def count_files_in_directory(directory):
+    file_count = 0
     for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.lower().endswith(image_extensions):
-                image_count += 1
-    return image_count
+        file_count += len(files)
+    return file_count
 
-# Total count of images across all directories
-total_image_count = 0
+# Total count of files across all directories
+total_file_count = 0
 
-# Count images in each directory
+# Count files in each directory
 for directory in image_directories:
-    count = count_images_in_directory(directory)
-    total_image_count += count
-    print(f"Directory '{directory}' contains {count} images.")
+    if os.path.exists(directory):
+        count = count_files_in_directory(directory)
+        total_file_count += count
+        print(f"Directory '{directory}' contains {count} files.")
+    else:
+        print(f"Directory '{directory}' does not exist or is not accessible.")
 
 # Final total count
-print(f"Total number of images across all directories: {total_image_count}")
+print(f"Total number of files across all directories: {total_file_count}")
