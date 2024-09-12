@@ -499,10 +499,6 @@ def preprocess_llama_3_1(
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
 
-    print('-'*30+'Conversations'+''*30)
-    pprint.pprint(conversations)
-    print('-'*100)
-
     # Tokenize conversations
 
     if has_image:
@@ -516,41 +512,26 @@ def preprocess_llama_3_1(
             truncation=True,
         ).input_ids
 
-    print('-'*30+'input_ids'+''*30)
-    pprint.pprint(input_ids)
-    print('-'*100)
-
     # remove the first bos token
     if input_ids[0][0] == input_ids[0][1] == tokenizer.bos_token_id:
         input_ids = input_ids[:, 1:]
     
     targets = input_ids.clone()
     
-    print('-'*30+'input_ids = input_ids[:, 1:]'+''*30)
-    pprint.pprint(input_ids)
-    print('-'*100)
-
     assert conv.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1
 
     # Mask targets
     sep= '<|start_header_id|>' + conv.roles[1] + '<|end_header_id|>' + '\n\n'
+    '''<|start_header_id|>assistant<|end_header_id|>'''
 
     #sep = conv.sep + conv.roles[1] + ": "
     for conversation, target in zip(conversations, targets):
         total_len = int(target.shape[0])
-
+        
+        # seperating # <|eot_id|> tokens from the conversation
         rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
 
-        print('-'*30+'conversation'+''*30)
-        pprint.pprint(conversation)
-        print('-'*100)
-        print(f'tokenizer.eos_token: {tokenizer.eos_token}')
-        print('-'*30+'rounds'+''*30)
-        pprint.pprint(rounds)
-        print('-'*100)
-        print(f'sep: {sep}')
-        print('-'*100)
         
         cur_len = 1
         target[:cur_len] = IGNORE_INDEX
@@ -561,6 +542,13 @@ def preprocess_llama_3_1(
             parts = rou.split(sep)
             if len(parts) != 2 and i != 0:
                 break
+
+            print('-'*30+'rou'+''*30)
+            pprint.pprint(rou)
+            print('-'*100)
+            print('-'*30+'parts'+''*30)
+            pprint.pprint(parts)
+            print('-'*100)
 
             if i == 0:
                 round_len = len(tokenizer(rou, add_special_tokens=False).input_ids)
@@ -891,6 +879,7 @@ def preprocess_phi(
         total_len = 12
         '''
      
+        # seperating end of sequence tokens
         rounds = conversation.split(conv.sep2)
 
         '''
