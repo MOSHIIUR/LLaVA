@@ -1,11 +1,12 @@
 import dataclasses
 import os
 from enum import auto, Enum
-from typing import List, Tuple
+from typing import List, Any, Dict, Union, Tuple
 import base64
 from io import BytesIO
 from PIL import Image
 from transformers import AutoTokenizer
+
 
 
 class SeparatorStyle(Enum):
@@ -31,6 +32,8 @@ class Conversation:
     version: str = "Unknown"
 
     skip_next: bool = False
+    tokenizer: Any = None
+    stop_token_ids: List[int] = None
 
     def get_prompt(self):
         messages = self.messages
@@ -201,7 +204,10 @@ class Conversation:
             sep_style=self.sep_style,
             sep=self.sep,
             sep2=self.sep2,
-            version=self.version)
+            version=self.version,
+            tokenizer=self.tokenizer,
+            stop_token_ids=self.stop_token_ids,
+            )
 
     def dict(self):
         if len(self.get_images()) > 0:
