@@ -951,12 +951,25 @@ def preprocess_phi(
             #       round_len, instruction_len, target[cur_len : cur_len + instruction_len], target[cur_len : cur_len + round_len])
             
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
-            print('target[cur_len : cur_len + instruction_len]')
-            print(target[cur_len : cur_len + instruction_len])
-            print(target)
+            '''
+            tensor([ -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
+                    -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
+                    -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
+                    -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
+                    -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
+                    10047,   837,  1667, 40263,   319,   262,  4469,   286,   262,  6056,
+                    764, 50256])            
+          '''
 
             cur_len += round_len
+            ''' cur_len from 0 to now round_len'''
+        
         target[cur_len:] = IGNORE_INDEX
+        print('target[cur_len:]')
+        print(target)
+        print('-'*100)
+
+        print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
 
         if cur_len < tokenizer.model_max_length:
             # import ipdb
@@ -967,6 +980,7 @@ def preprocess_phi(
                     f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
                     f" (ignored)"
                 )
+    
     # print(input_ids, target)
     return dict(
         input_ids=input_ids,
