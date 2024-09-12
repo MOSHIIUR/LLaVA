@@ -14,7 +14,7 @@ deepspeed llava/train/train_mem.py \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --tune_mm_mlp_adapter True \
     --tune_embed_tokens True \
-    --use_contrastive_loss True \
+    --use_contrastive_loss False \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \

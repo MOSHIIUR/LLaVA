@@ -566,7 +566,7 @@ class LlavaMetaForCausalLM(ABC):
                     cur_image_idx += 1
 
                 text_features.append(text_embed)
-                # print(f'image embed: {img_embed.shape}')
+                print(f'image embed: {img_embed.shape}')
                 img_features_v2.append(img_embed)
                 text_labels.append(labels[batch_idx])
                 splits.append(0)
@@ -633,13 +633,6 @@ class LlavaMetaForCausalLM(ABC):
         #     print(f' Shape of text_feature of: {txt_feature.shape}')
             
         text_features = [x.to(self.device) for x in text_features]
-        img_features_v2 = torch.stack(img_features_v2)   
-
-        print('-'*100)
-        print(f'images features shape: {img_features_v2.shape}')
-        print(f'text features shape: {text_features.shape}')
-        print('-'*100)
-
         
         padded_text_features = self.pad_text_features(text_features)
         # print(f'padded text feature shape: {padded_text_features.shape}')
@@ -649,7 +642,7 @@ class LlavaMetaForCausalLM(ABC):
         
         
         if cross_attention:
-            
+            img_features_v2 = torch.stack(img_features_v2)
             image_features_has_zero = (img_features_v2 == 0).any().item()
 
             if image_features_has_zero:
@@ -749,6 +742,7 @@ class LlavaMetaForCausalLM(ABC):
 
         elif use_contrastive_loss:
             
+            img_features_v2 = torch.stack(img_features_v2)   
             align_loss = self.clip_contrastive_loss(padded_text_features, img_features_v2, padded_text_features_attention_mask)
 
 
