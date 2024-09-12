@@ -931,15 +931,11 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
     3. Tokenize the concatenated conversation;
     4. Make a deepcopy as the target. Mask human words with IGNORE_INDEX.
     """
-    print(f'conversation_lib.default_conversation.sep_style: {conversation_lib.default_conversation.sep_style}')
-    print(f'conversation_lib.SeparatorStyle.LLAMA_3_1: {conversation_lib.SeparatorStyle.LLAMA_3_1}')
-    print(f'conversation version: {conversation_lib.default_conversation.version}')
-
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.PLAIN:
         return preprocess_plain(sources, tokenizer)
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_2:
         return preprocess_llama_2(sources, tokenizer, has_image=has_image)
-    if conversation_lib.default_conversation.version.startswith("llama_3_1"):  # for llama3.1
+    if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1:
         print('*'*100)
         print('Inside the version LLAMA_3_1')
         print('*'*100)
@@ -1356,11 +1352,11 @@ def train(attn_implementation=None):
         # if tokenizer do not have "unk_token" add this when you initialize the tokenizer
         tokenizer.pad_token = tokenizer.unk_token
 
-        if model_args.version in conversation_lib.conv_templates:
-            conversation_lib.default_conversation = conversation_lib.conv_templates[model_args.version]
-        
-        else:
-            conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1"]
+    if model_args.version in conversation_lib.conv_templates:
+        conversation_lib.default_conversation = conversation_lib.conv_templates[model_args.version]
+    
+    else:
+        conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1"]
 
 
 
