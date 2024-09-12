@@ -44,6 +44,8 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --data_path ./playground/data/llava_v1_5_mix665k.json \
 --image_folder ./playground/data \
 --vision_tower openai/clip-vit-large-patch14-336 \
+--llm_backbone llama_3_1 \
+--llm_pad_token pad \
 --tune_mm_mlp_adapter True \
 --use_contrastive_loss ${use_clip_loss[${SLURM_ARRAY_TASK_ID}]} \
 --clip_loss_coef ${clip_loss_coef[${SLURM_ARRAY_TASK_ID}]} \
