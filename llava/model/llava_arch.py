@@ -566,7 +566,7 @@ class LlavaMetaForCausalLM(ABC):
                     cur_image_idx += 1
 
                 text_features.append(text_embed)
-                print(f'image embed: {img_embed.shape}')
+                # print(f'image embed: {img_embed.shape}')
                 img_features_v2.append(img_embed)
                 text_labels.append(labels[batch_idx])
                 splits.append(0)
