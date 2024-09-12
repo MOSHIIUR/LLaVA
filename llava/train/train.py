@@ -858,9 +858,17 @@ def preprocess_phi(
     # print('sep', sep)
     for conversation, target in zip(conversations, targets):
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
-        # print('total_len', total_len)
+        print('-'*30+'target.ne(tokenizer.pad_token_id)'+'-'*30)
+        pprint.pprint(target.ne(tokenizer.pad_token_id))
+        print('-'*100)
+        pprint.pprint(f'target.ne(tokenizer.pad_token_id).sum(): {target.ne(tokenizer.pad_token_id).sum()}')
+        print('total_len', total_len)
+        print('-'*100)
+
         rounds = conversation.split(conv.sep2)
-        # print('len(rounds)', len(rounds))
+        print('len(rounds)', len(rounds))
+        print('-'*100)
+        
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
         for i, rou in enumerate(rounds):
