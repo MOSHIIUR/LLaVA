@@ -526,7 +526,7 @@ def preprocess_llama_3_1(
     
     targets = input_ids.clone()
     
-    print('-'*30+'input_ids'+''*30)
+    print('-'*30+'input_ids = input_ids[:, 1:]'+''*30)
     pprint.pprint(input_ids)
     print('-'*100)
 
@@ -544,8 +544,11 @@ def preprocess_llama_3_1(
 
         print('-'*30+'conversation'+''*30)
         pprint.pprint(conversation)
+        print('-'*100)
         print(f'tokenizer.eos_token: {tokenizer.eos_token}')
+        print('-'*30+'rounds'+''*30)
         pprint.pprint(rounds)
+        print('-'*100)
         print(f'sep: {sep}')
         print('-'*100)
         
