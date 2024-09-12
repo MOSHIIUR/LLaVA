@@ -532,7 +532,7 @@ def preprocess_llama_3_1(
         rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
         print('-'*30+'rounds'+''*30)
-        pprint.pprint(rou)
+        pprint.pprint(rounds)
         print('-'*100)
         
         cur_len = 1
