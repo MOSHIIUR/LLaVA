@@ -2,20 +2,12 @@ import json
 import os
 
 # Define the base directories where the images might be stored
-image_directories = [
-    'coco/train2017',
-    'gqa/images',
-    'ocr_vqa/images',
-    'textvqa/train_images',
-    'vg/VG_100K',
-    'vg/VG_100K_2'
-]
+directory = './playground/data'
 
 # Function to check if an image exists in any of the directories
 def image_exists(image_name):
-    for directory in image_directories:
-        image_path = os.path.join(directory, image_name)
-        if os.path.exists(image_path):
+    image_path = os.path.join(directory, image_name)
+    if os.path.exists(image_path):
             return True
     return False
 
