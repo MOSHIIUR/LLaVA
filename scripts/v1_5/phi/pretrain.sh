@@ -27,7 +27,7 @@ deepspeed llava/train/train_mem.py \
     --num_heads 2 \
     --clip_loss_coef 0.01 \
     --share_moe True \
-    --cross_attention True \
+    --cross_attention False \
     --mm_projector_type 'sparse_moe'\
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
