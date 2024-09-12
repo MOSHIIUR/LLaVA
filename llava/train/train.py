@@ -499,6 +499,10 @@ def preprocess_llama_3_1(
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
 
+    print('-'*30+'Conversations'+''*30)
+    pprint.pprint(conversations)
+    print('-'*100)
+
     # Tokenize conversations
 
     if has_image:
@@ -512,15 +516,25 @@ def preprocess_llama_3_1(
             truncation=True,
         ).input_ids
 
+    print('-'*30+'input_ids'+''*30)
+    pprint.pprint(input_ids)
+    print('-'*100)
+
     # remove the first bos token
     if input_ids[0][0] == input_ids[0][1] == tokenizer.bos_token_id:
         input_ids = input_ids[:, 1:]
+    
     targets = input_ids.clone()
+    
+    print('-'*30+'input_ids'+''*30)
+    pprint.pprint(input_ids)
+    print('-'*100)
 
     assert conv.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1
 
     # Mask targets
     sep= '<|start_header_id|>' + conv.roles[1] + '<|end_header_id|>' + '\n\n'
+
     #sep = conv.sep + conv.roles[1] + ": "
     for conversation, target in zip(conversations, targets):
         total_len = int(target.shape[0])
@@ -528,6 +542,13 @@ def preprocess_llama_3_1(
         rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
 
+        print('-'*30+'conversation'+''*30)
+        pprint.pprint(conversation)
+        print(f'tokenizer.eos_token: {tokenizer.eos_token}')
+        pprint.pprint(rounds)
+        print(f'sep: {sep}')
+        print('-'*100)
+        
         cur_len = 1
         target[:cur_len] = IGNORE_INDEX
         for i, rou in enumerate(rounds):
@@ -686,6 +707,7 @@ def preprocess_v1(
                 break
 
             parts = rou.split(sep)
+
             if len(parts) != 2:
                 break
             parts[0] += sep
@@ -949,7 +971,10 @@ def preprocess_phi(
             #       round_len, instruction_len, target[cur_len : cur_len + instruction_len], target[cur_len : cur_len + round_len])
             
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
+
             '''
+            target[cur_len : cur_len + instruction_len]: MASKING THE USER PROMPT
+            -------------------------------------------
             tensor([ -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
                     -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
                     -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,  -100,
@@ -962,13 +987,7 @@ def preprocess_phi(
             cur_len += round_len
             ''' cur_len from 0 to now round_len'''
 
-        print(f'current length: {cur_len}')
-        print('target')
-        print(target)
         target[cur_len:] = IGNORE_INDEX
-        print('target[cur_len:]')
-        print(target)
-        print('-'*100)
 
         print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
 
@@ -1533,9 +1552,11 @@ def train(attn_implementation=None):
     print(model)
     print('*'*100)
 
-    # for name, param in model.named_parameters():
-    #     if param.requires_grad:
-    #         print(f'{name} : Trainable')
+    # count parameters in the model
+    count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    count_par = sum(p.numel() for p in model.parameters())
+    rank0_print(f"Trainable parameters: {count_par_trainable}")
+    rank0_print(f"Total parameters: {count_par}")
 
 
     trainer = LLaVATrainer(model=model,
