@@ -426,6 +426,7 @@ Answer the questions.""",
 )
 
 default_conversation = conv_vicuna_v1
+
 conv_templates = {
     "default": conv_vicuna_v0,
     "v0": conv_vicuna_v0,

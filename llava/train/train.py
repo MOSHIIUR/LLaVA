@@ -931,6 +931,10 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
     3. Tokenize the concatenated conversation;
     4. Make a deepcopy as the target. Mask human words with IGNORE_INDEX.
     """
+    print(f'conversation_lib.default_conversation.sep_style: {conversation_lib.default_conversation.sep_style}')
+    print(f'conversation_lib.SeparatorStyle.LLAMA_3_1: {conversation_lib.SeparatorStyle.LLAMA_3_1}')
+    print(f'conversation version: {conversation_lib.default_conversation.version}')
+
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.PLAIN:
         return preprocess_plain(sources, tokenizer)
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_2:
@@ -941,9 +945,6 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
         print('*'*100)
         return preprocess_llama_3_1(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version.startswith("v1"):
-        print('*'*100)
-        print('Inside the version v1')
-        print('*'*100)
         return preprocess_v1(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version.startswith("phi"):  # for phi and qwen
         return preprocess_phi(sources, tokenizer, has_image=has_image)
