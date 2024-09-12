@@ -939,7 +939,7 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
         return preprocess_plain(sources, tokenizer)
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_2:
         return preprocess_llama_2(sources, tokenizer, has_image=has_image)
-    if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1:
+    if conversation_lib.default_conversation.version.startswith("llama_3_1"):  # for llama3.1
         print('*'*100)
         print('Inside the version LLAMA_3_1')
         print('*'*100)
