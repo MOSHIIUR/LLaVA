@@ -3,11 +3,11 @@
 #SBATCH -A collabrobogroup
 #SBATCH --array=5
 #SBATCH --ntasks=1 
-#SBATCH -t 25:00:00 
+#SBATCH -t 18:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:2
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
 
