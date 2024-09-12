@@ -8,7 +8,7 @@ deepspeed llava/train/train_mem.py \
     --deepspeed ./scripts/zero2.json \
     --model_name_or_path $phi2 \
     --llm_backbone phi2 \
-    --version plain \
+    --version phi \
     --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
     --image_folder ./playground/data/images \
     --vision_tower openai/clip-vit-large-patch14-336 \
