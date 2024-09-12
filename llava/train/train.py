@@ -868,6 +868,7 @@ def preprocess_phi(
         rounds = conversation.split(conv.sep2)
         print('len(rounds)', len(rounds))
         print('-'*100)
+        pprint.pprint('conv.sep2: ', conv.sep2)
         pprint.pprint(rounds)
         print('-'*100)
 
