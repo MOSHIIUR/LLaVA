@@ -22,6 +22,7 @@ unique_images = set()
 for sample in data:
     if 'image' in sample:
         image_name = sample['image']
+        print(image_name)
         unique_images.add(image_name)
 
 # Number of unique images
