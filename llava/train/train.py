@@ -953,6 +953,7 @@ def preprocess_phi(
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
             print('target[cur_len : cur_len + instruction_len]')
             print(target[cur_len : cur_len + instruction_len])
+            print(target)
 
             cur_len += round_len
         target[cur_len:] = IGNORE_INDEX
