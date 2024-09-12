@@ -15,31 +15,18 @@ def image_exists(image_name):
 with open('./playground/data/llava_v1_5_mix665k.json', 'r') as file:
     data = json.load(file)
 
-# Initialize counters
-total_samples = len(data)
-missing_images_count = 0
-missing_image_key_count = 0
-processed_count = 0
+# Set to store unique top-level directories
+unique_directories = set()
 
-# Iterate through each sample and check if the image exists
+# Extract and store unique top-level directories from each 'image' key
 for sample in data:
-    processed_count += 1
-    
-    # Check if the 'image' key exists in the sample
-    if 'image' not in sample:
-        # print(f"Missing 'image' key in sample with ID: {sample.get('id', 'Unknown ID')}")
-        # missing_image_key_count += 1
-        continue
+    if 'image' in sample:
+        image_path = sample['image']
+        # Extract the top-level directory part of the image path
+        top_level_directory = image_path.split('/')[0]
+        unique_directories.add(top_level_directory)
 
-    image_name = sample['image']
-    
-    if not image_exists(image_name):
-        print(f"Missing image: {image_name}")
-        missing_images_count += 1
-
-    # Print status every 100 samples processed
-    if processed_count % 100 == 0:
-        print(f"Processed {processed_count}/{total_samples} samples. Missing images so far: {missing_images_count}")
-
-# Final status
-print(f"Processing completed. Total samples: {total_samples}, Missing images: {missing_images_count}")
+# Print the unique top-level directories found
+print("Unique top-level directories found in the JSON data:")
+for directory in sorted(unique_directories):
+    print(directory)
