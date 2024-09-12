@@ -936,8 +936,14 @@ def preprocess( sources: Sequence[str], tokenizer: transformers.PreTrainedTokeni
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_2:
         return preprocess_llama_2(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1:
+        print('*'*100)
+        print('Inside the version LLAMA_3_1')
+        print('*'*100)
         return preprocess_llama_3_1(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version.startswith("v1"):
+        print('*'*100)
+        print('Inside the version v1')
+        print('*'*100)
         return preprocess_v1(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.version.startswith("phi"):  # for phi and qwen
         return preprocess_phi(sources, tokenizer, has_image=has_image)
