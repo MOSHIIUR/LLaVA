@@ -3,12 +3,12 @@ import os
 
 # Define the base directories where the images might be stored
 image_directories = [
-    './playground/data/coco/train2017',
-    './playground/data/gqa/images',
-    './playground/data/ocr_vqa/images',
-    './playground/data/textvqa/train_images',
-    './playground/data/vg/VG_100K',
-    './playground/data/vg/VG_100K_2'
+    'playground/data/coco/train2017',
+    'playground/data/gqa/images',
+    'playground/data/ocr_vqa/images',
+    'playground/data/textvqa/train_images',
+    'playground/data/vg/VG_100K',
+    'playground/data/vg/VG_100K_2'
 ]
 
 # Function to check if an image exists in any of the directories
