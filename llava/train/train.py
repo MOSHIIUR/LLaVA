@@ -883,11 +883,9 @@ def preprocess_phi(
         <|endoftext|>
         
         '''
-        print(f' target : { target }')
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
 
-        print(f' target[:cur_len] : { target}')
         
         for i, rou in enumerate(rounds):
             if rou == "":
@@ -963,7 +961,10 @@ def preprocess_phi(
 
             cur_len += round_len
             ''' cur_len from 0 to now round_len'''
-        
+
+        print(f'current length: {cur_len}')
+        print('target')
+        print(target)
         target[cur_len:] = IGNORE_INDEX
         print('target[cur_len:]')
         print(target)
