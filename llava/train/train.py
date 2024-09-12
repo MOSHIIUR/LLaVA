@@ -882,11 +882,11 @@ def preprocess_phi(
         CONV.SEP2
         <|endoftext|>
         
-        '''   
+        '''
+        print(f' target : { target }')
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
 
-        print(f' target : { target }')
         print(f' target[:cur_len] : { target}')
         
         for i, rou in enumerate(rounds):
