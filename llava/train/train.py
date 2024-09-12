@@ -885,6 +885,9 @@ def preprocess_phi(
         '''   
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
+
+        print(f' target[:cur_len] : { target[:cur_len] }')
+        
         for i, rou in enumerate(rounds):
             if rou == "":
                 break
@@ -908,13 +911,7 @@ def preprocess_phi(
             'pop artist performs on stage during the charity event celebrating the 25th anniversary'
             ]
             
-            '''
-            print('-'*100)
-            print(f'len(parts): {len(parts)}')
-            print(f'parts[0]: {parts[0]}')
-            print('-'*100)
-
-            
+            '''            
             
             # print('i rou, parts', i, rou, parts)
             if len(parts) != 2:
@@ -922,20 +919,39 @@ def preprocess_phi(
             parts[0] += sep
             # print('after add sep, parts', parts)
 
-            print(f'parts[0] += sep')
-            print(parts[0])
-            print('-'*100)
-            print(f'has image: {has_image}')
+            '''
+            len(parts)
+            ----------
+            2
 
+            parts[0]
+            ---------
+            A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. 
+            USER: <image> Relay a brief, clear account of the picture shown.             
+
+            parts[0] += sep --> add the ASSISTANT token to it
+            ---------------
+            A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. 
+            USER: <image> Relay a brief, clear account of the picture shown. ASSISTANT:             
+
+            '''
             if has_image:
+                # round_len contain both user and assistant part
                 round_len = len(tokenizer_image_token(rou, tokenizer)) + 1  # for eos_token
+
+                # instruction contain the user part only
                 instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 1
+
+                print(f'round length: {round_len}')
+                print(f'instruction length: {instruction_len}')
+                print('-'*100)
             
             else:
                 round_len = len(tokenizer(rou).input_ids) + 1  # for eos_token
                 instruction_len = len(tokenizer(parts[0]).input_ids) - 1
             # print('round_len, instruction_len, target[cur_len : cur_len + instruction_len]',
             #       round_len, instruction_len, target[cur_len : cur_len + instruction_len], target[cur_len : cur_len + round_len])
+            
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX  # instruction_len is before the answer
 
             cur_len += round_len
