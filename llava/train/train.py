@@ -857,28 +857,47 @@ def preprocess_phi(
     sep = conv.sep + conv.roles[1] + ": "
     # print('sep', sep)
     for conversation, target in zip(conversations, targets):
-        pprint.pprint(conversation)
+
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
         '''
         target.ne(tokenizer.pad_token_id) -> tensor([True, True, True, True, True, True, True, True, True, True, True, True])
         .sum() -> 12
         total_len = 12
         '''
-
+     
         rounds = conversation.split(conv.sep2)
-        print('len(rounds)', len(rounds))
-        print('-'*100)
-        pprint.pprint(f'conv.sep2: {conv.sep2}')
-        pprint.pprint(rounds)
-        print('-'*100)
 
+        '''
+        CONVERSATION
+
+        A chat between a curious user and an artificial intelligence assistant. 
+        The assistant gives helpful, detailed, and polite answers to the user's questions.
+        USER: <image>\n Create a compact narrative representing the image presented. 
+        ASSISTANT: sun shining through an old beech tree<|endoftext|>
+
+        ROUNDS
+        2
+
+        CONV.SEP2
+        <|endoftext|>
+        
+        '''   
         cur_len = 0
         target[:cur_len] = IGNORE_INDEX
         for i, rou in enumerate(rounds):
             if rou == "":
                 break
 
+            print('-'*100)
+            print(rou)
+            print('-'*100)
+
             parts = rou.split(sep)
+            
+            print(parts)
+            print(f'SEP: {sep}')
+            print('-'*100)
+            
             # print('i rou, parts', i, rou, parts)
             if len(parts) != 2:
                 break
