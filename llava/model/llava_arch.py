@@ -634,6 +634,12 @@ class LlavaMetaForCausalLM(ABC):
             
         text_features = [x.to(self.device) for x in text_features]
         img_features_v2 = torch.stack(img_features_v2)   
+
+        print('-'*100)
+        print(f'images features shape: {img_features_v2.shape}')
+        print(f'text features shape: {text_features.shape}')
+        print('-'*100)
+
         
         padded_text_features = self.pad_text_features(text_features)
         # print(f'padded text feature shape: {padded_text_features.shape}')
