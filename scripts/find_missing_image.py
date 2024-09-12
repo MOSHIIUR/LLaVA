@@ -9,8 +9,8 @@ directory = './playground/data'
 def image_exists(image_name):
     image_path = os.path.join(directory, image_name)
     if os.path.exists(image_path):
-            return True
-    return False
+            return image_path
+    return None
 
 def is_image_valid(image_path):
     try:
