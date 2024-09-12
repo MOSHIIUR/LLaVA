@@ -531,7 +531,9 @@ def preprocess_llama_3_1(
         # seperating # <|eot_id|> tokens from the conversation
         rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
-
+        print('-'*30+'rounds'+''*30)
+        pprint.pprint(rou)
+        print('-'*100)
         
         cur_len = 1
         target[:cur_len] = IGNORE_INDEX
@@ -981,7 +983,7 @@ def preprocess_phi(
 
         target[cur_len:] = IGNORE_INDEX
 
-        print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
+        # print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
 
         if cur_len < tokenizer.model_max_length:
             # import ipdb
