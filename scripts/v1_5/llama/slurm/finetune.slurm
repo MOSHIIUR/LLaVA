@@ -37,7 +37,7 @@ output_dir=( $BOD/llava-llama-c08 $BOD/llava-phi-c09 $BOD/llava-phi-c10 $BOD/lla
 phi2='microsoft/phi-2'
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $PORT llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_port $PORT llava/train/train_mem.py \
 --deepspeed ./scripts/zero2.json \
 --model_name_or_path $llama \
 --version llama_3_1 \
