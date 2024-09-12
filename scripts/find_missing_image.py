@@ -15,7 +15,7 @@ def image_exists(image_name):
     return False
 
 # Load the JSON file
-with open('your_file.json', 'r') as file:
+with open('./playground/data/llava_v1_5_mix665k.json', 'r') as file:
     data = json.load(file)
 
 # Initialize counters
