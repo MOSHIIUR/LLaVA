@@ -13,7 +13,7 @@ deepspeed llava/train/train_mem.py \
 --llm_backbone llama_3_1 \
 --llm_pad_token pad \
 --tune_mm_mlp_adapter True \
---use_contrastive_loss True \
+--use_contrastive_loss False \
 --clip_loss_coef 1 \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
