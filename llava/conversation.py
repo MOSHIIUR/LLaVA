@@ -317,7 +317,9 @@ conv_llava_llama_2 = Conversation(
 # os.environ["HF_TOKEN"] = "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"
 
 # tokenizer_path= os.getenv("TOKENIZER_PATH")
+os.environ["HF_TOKEN"] = "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"
 llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
+
 
 
 conv_llava_llama_3_1 = Conversation(
