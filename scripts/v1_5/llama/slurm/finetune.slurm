@@ -1,22 +1,18 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
-#SBATCH --ntasks-per-node=1
+#SBATCH --array=0-2
+#SBATCH --ntasks=1 
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
-#SBATCH --gpus-per-node=a100:1
-#SBATCH --nodes=4
+#SBATCH --gres=gpu:a100:4
+#SBATCH -N 1 
 #SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
-
-export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
-export MASTER_PORT=`comm -23 <(seq 5000 6000 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1`
-export OMP_NUM_THREADS=1
 
 module purge
 module load apptainer
@@ -25,7 +21,7 @@ num_experts=(4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 4 2 4 2 2 2 2 2)
 num_heads=(2 4 2 4 2 2 2 2 2)
-batch_size=(16 16 16 16 16 16 16 16 16)
+batch_size=(8 8 8 16 16 16 16 16 16)
 pretrain_embed_tokens=(False False False False True True False)
 share_moe=(False False True True True True False)
 use_clip_loss=(False False False False True False False)
@@ -36,7 +32,7 @@ clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/llama/finetune'
-output_dir=( $BOD/llava-llama-test $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
@@ -71,7 +67,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 1 \
+--gradient_accumulation_steps 2 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
