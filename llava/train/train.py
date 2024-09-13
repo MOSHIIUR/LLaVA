@@ -581,7 +581,7 @@ def preprocess_llama_3_1(
             cur_len += round_len
 
         target[cur_len:] = IGNORE_INDEX
-        cur_len= cur_len + len(tokenizer(sep, add_special_tokens=False).input_ids)
+        # cur_len= cur_len + len(tokenizer(sep, add_special_tokens=False).input_ids)
         # print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
         # if cur_len > tokenizer.model_max_length: print(f"WARNING: max length context")
         if cur_len < tokenizer.model_max_length:
