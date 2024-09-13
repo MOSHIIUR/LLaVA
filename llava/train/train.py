@@ -531,7 +531,7 @@ def preprocess_llama_3_1(
         # seperating # <|eot_id|> tokens from the conversation
         rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
-        print('-'*30+'rounds'+''*30)
+        print('-'*30+'rounds'+'-'*30)
         pprint.pprint(rounds)
         print('-'*100)
         
@@ -545,10 +545,10 @@ def preprocess_llama_3_1(
             if len(parts) != 2 and i != 0:
                 break
 
-            print('-'*30+'rou'+''*30)
+            print('-'*30+'rou'+'-'*30)
             pprint.pprint(rou)
             print('-'*100)
-            print('-'*30+'parts'+''*30)
+            print('-'*30+'parts'+'-'*30)
             pprint.pprint(parts)
             print('-'*100)
 
@@ -557,6 +557,7 @@ def preprocess_llama_3_1(
                 instruction_len = len(tokenizer(rou, add_special_tokens=False).input_ids)
 
             else:
+                # adding assistant token
                 parts[0] += sep
                 if has_image:
                     round_len = len(tokenizer_image_token(rou, tokenizer)) + 1
