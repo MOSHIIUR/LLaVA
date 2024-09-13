@@ -2,7 +2,7 @@
 
 #SBATCH -A collabrobogroup
 #SBATCH --array=0
-#SBATCH --ntasks=1 
+#SBATCH --ntasks-per-node=1
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
 #SBATCH --gpus-per-node=1:a100
