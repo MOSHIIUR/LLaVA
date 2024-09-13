@@ -570,11 +570,11 @@ def preprocess_llama_3_1(
                 
                 if has_image:
                     round_len = len(tokenizer_image_token(rou, tokenizer))
-                    instruction_len = len(tokenizer_image_token(parts[0], tokenizer))
+                    instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 2
                 
                 else:
                     round_len = len(tokenizer(rou).input_ids)
-                    instruction_len = len(tokenizer(parts[0]).input_ids)
+                    instruction_len = len(tokenizer(parts[0]).input_ids) - 2
 
             # if i > 0: round_len += 1
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
