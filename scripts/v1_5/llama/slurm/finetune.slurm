@@ -4,7 +4,7 @@
 #SBATCH --array=0
 #SBATCH --ntasks-per-node=1
 #SBATCH --nodes=4
-#SBATCH --gpus-per-node=1:a100
+#SBATCH --gpus-per-node=a100:1
 #SBATCH --cpus-per-task=16
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
