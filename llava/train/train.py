@@ -684,9 +684,9 @@ def preprocess_v1(
         ).input_ids
 
     targets = input_ids.clone() # Create a copy of input_ids as targets
-    print('-'*30+'targets'+'-'*30)
-    pprint.pprint(targets)
-    print('-'*100)
+    # print('-'*30+'targets'+'-'*30)
+    # pprint.pprint(targets)
+    # print('-'*100)
 
     # Ensure  conv.sep_style separator style is as expected as conversation_lib.SeparatorStyle.TWO
     assert conv.sep_style == conversation_lib.SeparatorStyle.TWO
@@ -699,9 +699,9 @@ def preprocess_v1(
 
     for conversation, target in zip(conversations, targets):
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
-        print('-'*30+'target'+'-'*30)
-        pprint.pprint(target)
-        print('-'*100)
+        # print('-'*30+'target'+'-'*30)
+        # pprint.pprint(target)
+        # print('-'*100)
 
         rounds = conversation.split(conv.sep2)
         cur_len = 1
@@ -733,6 +733,8 @@ def preprocess_v1(
                 # eos token already present no need to add that
                 round_len = len(tokenizer_image_token(rou, tokenizer))
                 instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 2
+                print(f'round length: {round_len}; instruction length: {instruction_len}')
+            
             else:
                 round_len = len(tokenizer(rou).input_ids)
                 instruction_len = len(tokenizer(parts[0]).input_ids) - 2
