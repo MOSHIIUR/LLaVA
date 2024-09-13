@@ -6,13 +6,16 @@
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
 #SBATCH --nodes=4
-#SBATCH --gpus-per-node=a100:2
+#SBATCH --gpus-per-node=a100:1
 #SBATCH --cpus-per-task=40 
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
+export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+export MASTER_PORT=`comm -23 <(seq 5000 6000 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1`
+export OMP_NUM_THREADS=1
 
 module purge
 module load apptainer
@@ -37,7 +40,7 @@ output_dir=( $BOD/llava-llama-test $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BO
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_port $PORT llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --model_name_or_path $llama \
 --version llama_3_1 \
