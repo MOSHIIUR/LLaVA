@@ -552,6 +552,8 @@ def preprocess_llama_3_1(
             pprint.pprint(parts)
             print('-'*100)
 
+            # first round: system message or meta-information
+            # both set to their full length as we are gonna ignore this whole first round
             if i == 0:
                 round_len = len(tokenizer(rou, add_special_tokens=False).input_ids)
                 instruction_len = len(tokenizer(rou, add_special_tokens=False).input_ids)
@@ -559,9 +561,11 @@ def preprocess_llama_3_1(
             else:
                 # adding assistant token
                 parts[0] += sep
+                
                 if has_image:
                     round_len = len(tokenizer_image_token(rou, tokenizer)) + 1
                     instruction_len = len(tokenizer_image_token(parts[0], tokenizer))
+                
                 else:
                     round_len = len(tokenizer(rou).input_ids) + 1
                     instruction_len = len(tokenizer(parts[0]).input_ids)
@@ -705,6 +709,18 @@ def preprocess_v1(
             if len(parts) != 2:
                 break
             parts[0] += sep
+
+            print('-'*30+'rou'+'-'*30)
+            pprint.pprint(rou)
+            print('-'*100)
+            print('-'*30+'parts'+'-'*30)
+            pprint.pprint(parts)
+            print('-'*100)
+            print('-'*30+'parts[0]+=sep'+'-'*30)
+            pprint.pprint(parts[0])
+            print('-'*100)
+
+
 
             if has_image:
                 round_len = len(tokenizer_image_token(rou, tokenizer))
