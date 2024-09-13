@@ -684,6 +684,9 @@ def preprocess_v1(
         ).input_ids
 
     targets = input_ids.clone() # Create a copy of input_ids as targets
+    print('-'*30+'rou'+'-'*30)
+    pprint.pprint(targets)
+    print('-'*100)
 
     # Ensure  conv.sep_style separator style is as expected as conversation_lib.SeparatorStyle.TWO
     assert conv.sep_style == conversation_lib.SeparatorStyle.TWO
@@ -696,6 +699,7 @@ def preprocess_v1(
 
     for conversation, target in zip(conversations, targets):
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
+        print(f'eos token id: {tokenizer.eos_token_id}')
 
         rounds = conversation.split(conv.sep2)
         cur_len = 1
@@ -705,7 +709,7 @@ def preprocess_v1(
                 break
 
             parts = rou.split(sep)
-            
+
             print('-'*30+'rou'+'-'*30)
             pprint.pprint(rou)
             print('-'*100)
