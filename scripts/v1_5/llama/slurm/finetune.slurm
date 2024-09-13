@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
-#SBATCH --gpus-per-node=a100:2
+#SBATCH --gpus-per-node=a100:1
 #SBATCH --nodes=4
 #SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
@@ -13,6 +13,10 @@
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
+
+export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+export MASTER_PORT=`comm -23 <(seq 5000 6000 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1`
+export OMP_NUM_THREADS=1
 
 module purge
 module load apptainer
