@@ -569,11 +569,11 @@ def preprocess_llama_3_1(
                 parts[0] += sep
                 
                 if has_image:
-                    round_len = len(tokenizer_image_token(rou, tokenizer)) + 1
+                    round_len = len(tokenizer_image_token(rou, tokenizer))
                     instruction_len = len(tokenizer_image_token(parts[0], tokenizer))
                 
                 else:
-                    round_len = len(tokenizer(rou).input_ids) + 1
+                    round_len = len(tokenizer(rou).input_ids)
                     instruction_len = len(tokenizer(parts[0]).input_ids)
 
             # if i > 0: round_len += 1
