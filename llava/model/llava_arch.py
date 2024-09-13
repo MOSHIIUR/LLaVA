@@ -565,16 +565,15 @@ class LlavaMetaForCausalLM(ABC):
                 # cur_input_embeds -> combineds both image and text embeds. here the image embeds are empty tensor
                 cur_input_embeds, text_embed, img_embed = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
                 # print(cur_input_embeds)
-                if not cross_attention:
-                    new_input_embeds.append(cur_input_embeds)
-                    new_labels.append(labels[batch_idx])
-                    cur_image_idx += 1
+                new_input_embeds.append(cur_input_embeds)
+                new_labels.append(labels[batch_idx])
+                cur_image_idx += 1
 
-                text_features.append(text_embed)
-                # print(f'image embed: {img_embed.shape}')
-                img_features_v2.append(img_embed)
-                text_labels.append(labels[batch_idx])
-                splits.append(0)
+                # text_features.append(text_embed)
+                print(f'image embed: {img_embed.shape}')
+                # img_features_v2.append(img_embed)
+                # text_labels.append(labels[batch_idx])
+                # splits.append(0)
                 continue
             # cur_input_ids = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])  
             # labels = torch.tensor([20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32])  
@@ -647,14 +646,13 @@ class LlavaMetaForCausalLM(ABC):
         
         
         if cross_attention:
-            img_features_v2 = torch.stack(img_features_v2)
-            image_features_has_zero = (img_features_v2 == 0).any().item()
+            image_features_has_zero = (image_features == 0).any().item()
 
             if image_features_has_zero:
                 print('img feature got zero before passing to cross attn')
 
             # image_features, co_text_features = self.cross_attention(padded_text_features, image_features, padded_text_features_attention_mask)
-            image_features, co_text_features = self.cross_attention(padded_text_features, img_features_v2, padded_text_features_attention_mask)
+            image_features, co_text_features = self.cross_attention(padded_text_features, image_features, padded_text_features_attention_mask)
 
             # text_features = self.remove_padding(co_text_features, padded_text_features_attention_mask)
 
@@ -706,14 +704,14 @@ class LlavaMetaForCausalLM(ABC):
                 split_sizes = splits[x]
                 # print(f"split_sizes: {split_sizes}, type: {type(split_sizes)}")
                 
-                if split_sizes == 0:
-                    # Handle the case where split_sizes is 0, e.g., skip splitting
-                    cur_image_features = image_features[cur_image_idx]
-                    cur_input_embeds = torch.cat([cur_input_embeds_no_im, cur_image_features[0:0]], dim=0)
-                    new_input_embeds.append(cur_input_embeds)
-                    new_labels.append(cur_labels_noim)
-                    cur_image_idx += 1
-                    continue
+                # if split_sizes == 0:
+                #     # Handle the case where split_sizes is 0, e.g., skip splitting
+                #     cur_image_features = image_features[cur_image_idx]
+                #     cur_input_embeds = torch.cat([cur_input_embeds_no_im, cur_image_features[0:0]], dim=0)
+                #     new_input_embeds.append(cur_input_embeds)
+                #     new_labels.append(cur_labels_noim)
+                #     cur_image_idx += 1
+                #     continue
                    
                 
                 cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
