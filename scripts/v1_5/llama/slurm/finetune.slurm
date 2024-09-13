@@ -1,13 +1,11 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-2
-#SBATCH --ntasks=1 
-#SBATCH -t 24:00:00 
-#SBATCH -p gpu
-#SBATCH --gres=gpu:a100:4
-#SBATCH -N 1 
-#SBATCH --cpus-per-task=40
+#SBATCH --array=0
+#SBATCH --ntasks-per-node=1
+#SBATCH --nodes=4
+#SBATCH --gpus-per-node=1:a100
+#SBATCH --cpus-per-task=16
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
@@ -32,7 +30,7 @@ clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/llama/finetune'
-output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+output_dir=( $BOD/llava-llama-test $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
