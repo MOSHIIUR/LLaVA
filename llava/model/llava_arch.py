@@ -325,8 +325,13 @@ class LlavaMetaForCausalLM(ABC):
     
     def process_no_images(self, cur_input_ids, image_features, cur_image_idx):
         cur_image_features = image_features[cur_image_idx]
+        print('-'*30+'No IMAGE'+'-'*30)
+        print(f'cur_image_features: {cur_image_features.shape}')
         text_embed = self.get_model().embed_tokens(cur_input_ids)
         cur_input_embeds = torch.cat([text_embed, cur_image_features[0:0]], dim=0)
+        print(f'text_embed: {text_embed.shape}')
+        print(f'cur_input_embeds: {cur_input_embeds.shape}')
+        print('-'*100)
         return cur_input_embeds, text_embed, cur_image_features[0:0]
     
     def process_with_images(self, cur_input_ids, cur_labels, IMAGE_TOKEN_INDEX):
@@ -745,6 +750,10 @@ class LlavaMetaForCausalLM(ABC):
             img_features_v2 = torch.stack(img_features_v2)   
             align_loss = self.clip_contrastive_loss(padded_text_features, img_features_v2, padded_text_features_attention_mask)
 
+        print('-'*100)
+        for i, sample in enumerate(new_input_embeds):
+            print(f'Idx: {i} input embeds shape: {sample.shape}')
+        print('-'*100)
 
         # ##########################################################################################################################################################################
 
