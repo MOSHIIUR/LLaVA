@@ -45,7 +45,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --vision_tower openai/clip-vit-large-patch14-336 \
 --llm_backbone llama_3_1 \
 --llm_pad_token pad \
---pretrain_mm_mlp_adapter './pretrained_weight/LLaVA_MORE-llama_3_1_8B-pretrain/mm_projector.bin' \
+--pretrain_mm_mlp_adapter './pretrained_weight/LLaVA_MORE-llama_3_1-8B-pretrain/mm_projector.bin' \
 --use_contrastive_loss ${use_clip_loss[${SLURM_ARRAY_TASK_ID}]} \
 --clip_loss_coef ${clip_loss_coef[${SLURM_ARRAY_TASK_ID}]} \
 --mm_vision_select_layer -2 \
