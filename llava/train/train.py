@@ -644,7 +644,7 @@ def preprocess_v1(
         
         if roles[source[0]["from"]] != conv.roles[0]:
             # Skip the first one if it is not from human
-            print('S K I P P I N G')
+            # print('S K I P P I N G')
             source = source[1:]
             # pprint.pprint(source)
 
@@ -718,20 +718,9 @@ def preprocess_v1(
 
             parts = rou.split(sep)
 
-            print('-'*30+'rou'+'-'*30)
-            pprint.pprint(rou)
-            print('-'*100)
-            print('-'*30+'parts'+'-'*30)
-            pprint.pprint(parts)
-            print('-'*100)
-
             if len(parts) != 2:
                 break
             parts[0] += sep
-
-            print('-'*30+'parts[0]+=sep'+'-'*30)
-            pprint.pprint(parts[0])
-            print('-'*100)
 
 
 
@@ -739,7 +728,6 @@ def preprocess_v1(
                 # eos token already present no need to add that
                 round_len = len(tokenizer_image_token(rou, tokenizer))
                 instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 2
-                print(f'round length: {round_len}; instruction length: {instruction_len}')
             
             else:
                 round_len = len(tokenizer(rou).input_ids)
@@ -754,7 +742,6 @@ def preprocess_v1(
             cur_len += round_len
         target[cur_len:] = IGNORE_INDEX
 
-        print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
 
 
         if cur_len < tokenizer.model_max_length:
