@@ -1,15 +1,15 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
+#SBATCH --array=0-2
+#SBATCH --ntasks=1 
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
-#SBATCH --ntasks-per-node=1
-#SBATCH --nodes=4
-#SBATCH --gpus-per-node=2
-#SBATCH --cpus-per-task=16
+#SBATCH --gres=gpu:a100:4
+#SBATCH -N 1 
+#SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
-#SBATCH -J llama_test
+#SBATCH -J llama
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
@@ -23,15 +23,16 @@ num_layers=(2 4 2 4 2 2 2 2 2)
 num_heads=(2 4 2 4 2 2 2 2 2)
 batch_size=(16 16 16 16 16 16 16 16 16)
 pretrain_embed_tokens=(False False True True True True False)
-share_moe=(False False False True True True False)
+share_moe=(False False True True True True False)
 use_clip_loss=(False False True False True False False)
-mm_projector_type=('mlp2x_gelu' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu')
+cross_attention=(False False True False True False False)
+mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu')
 clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
 
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/llama/finetune'
-output_dir=( $BOD/llava-llama-test $BOD/llava-phi-c09 $BOD/llava-phi-c10 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
@@ -61,7 +62,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --num_heads ${num_heads[${SLURM_ARRAY_TASK_ID}]} \
 --aux_loss_coef 0.01 \
 --share_moe ${share_moe[${SLURM_ARRAY_TASK_ID}]} \
---cross_attention False \
+--cross_attention ${cross_attention[${SLURM_ARRAY_TASK_ID}]} \
 --mm_projector_type ${mm_projector_type[${SLURM_ARRAY_TASK_ID}]} \
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
