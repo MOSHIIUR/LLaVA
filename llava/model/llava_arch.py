@@ -296,12 +296,8 @@ class LlavaMetaForCausalLM(ABC):
         # Create a mask for non-zero vectors
         attention_mask = attention_mask.float()
 
-        # mean vision embeddings
-        # mean_vision_embeds = normalized_vision_embeds.mean(dim=1)  # [batch_size, embed_dim]
-        mean_vision_embeds = normalized_vision_embeds[:, 0]  # taking the cls tokens as mean
-        print('-'*100)
-        print(f'mean_vision_embeds: {mean_vision_embeds.shape}')
-        print('-'*100)
+        # mean vision/text embeddings: vision feature are patch embeddings. hench pooling mean
+        mean_vision_embeds = normalized_vision_embeds.mean(dim=1)  # [batch_size, embed_dim]
         mean_text_embeddings = normalized_text_embeds.sum(dim=1) / attention_mask.sum(dim=1).unsqueeze(-1)
 
         # Compute the cosine similarity between all pairs
