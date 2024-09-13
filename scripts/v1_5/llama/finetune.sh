@@ -29,7 +29,10 @@ deepspeed llava/train/train_mem.py \
 --aux_loss_coef 0.01 \
 --share_moe False \
 --cross_attention False \
---mm_projector_type 'mlp2x_gelu' \
+--mm_projector_type 'sparse_moe' \
+--num_experts_per_tok 2 \
+--num_experts 4 \
+--share_moe True \
 --num_train_epochs 1 \
 --per_device_train_batch_size 16 \
 --per_device_eval_batch_size 16 \
