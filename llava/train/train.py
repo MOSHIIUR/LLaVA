@@ -684,7 +684,7 @@ def preprocess_v1(
         ).input_ids
 
     targets = input_ids.clone() # Create a copy of input_ids as targets
-    print('-'*30+'rou'+'-'*30)
+    print('-'*30+'targets'+'-'*30)
     pprint.pprint(targets)
     print('-'*100)
 
@@ -699,7 +699,9 @@ def preprocess_v1(
 
     for conversation, target in zip(conversations, targets):
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
-        print(f'eos token id: {tokenizer.eos_token_id}')
+        print('-'*30+'target'+'-'*30)
+        pprint.pprint(target)
+        print('-'*100)
 
         rounds = conversation.split(conv.sep2)
         cur_len = 1
@@ -728,6 +730,7 @@ def preprocess_v1(
 
 
             if has_image:
+                # eos token already present no need to add that
                 round_len = len(tokenizer_image_token(rou, tokenizer))
                 instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 2
             else:
