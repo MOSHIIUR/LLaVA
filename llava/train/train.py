@@ -517,11 +517,11 @@ def preprocess_llama_3_1(
         input_ids = input_ids[:, 1:]
     
     targets = input_ids.clone()
-    print('-'*30+'targets'+'-'*30)
-    pprint.pprint(targets)
-    print('-'*100)  
-    print(f'tokenizer.eos_token: {tokenizer.eos_token}') 
-    print('-'*100)   
+    # print('-'*30+'targets'+'-'*30)
+    # pprint.pprint(targets)
+    # print('-'*100)  
+    # print(f'tokenizer.eos_token: {tokenizer.eos_token}') 
+    # print('-'*100)   
 
 
     assert conv.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1
@@ -537,9 +537,9 @@ def preprocess_llama_3_1(
         # seperating # <|eot_id|> tokens from the conversation
         rounds = conversation.split(tokenizer.eos_token)
         rounds= [rounds[0]] + [rounds[idx] + rounds[idx+1] for idx in range(1, len(rounds)-1, 2)]
-        print('-'*30+'rounds'+'-'*30)
-        pprint.pprint(rounds)
-        print('-'*100)
+        # print('-'*30+'rounds'+'-'*30)
+        # pprint.pprint(rounds)
+        # print('-'*100)
         
         cur_len = 1
         target[:cur_len] = IGNORE_INDEX
@@ -551,12 +551,12 @@ def preprocess_llama_3_1(
             if len(parts) != 2 and i != 0:
                 break
 
-            print('-'*30+'rou'+'-'*30)
-            pprint.pprint(rou)
-            print('-'*100)
-            print('-'*30+'parts'+'-'*30)
-            pprint.pprint(parts)
-            print('-'*100)
+            # print('-'*30+'rou'+'-'*30)
+            # pprint.pprint(rou)
+            # print('-'*100)
+            # print('-'*30+'parts'+'-'*30)
+            # pprint.pprint(parts)
+            # print('-'*100)
 
             # first round: system message or meta-information
             # both set to their full length as we are gonna ignore this whole first round
@@ -569,12 +569,12 @@ def preprocess_llama_3_1(
                 parts[0] += sep
                 
                 if has_image:
-                    round_len = len(tokenizer_image_token(rou, tokenizer))
-                    instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 2
+                    round_len = len(tokenizer_image_token(rou, tokenizer)) + 1
+                    instruction_len = len(tokenizer_image_token(parts[0], tokenizer))
                 
                 else:
-                    round_len = len(tokenizer(rou).input_ids)
-                    instruction_len = len(tokenizer(parts[0]).input_ids) - 2
+                    round_len = len(tokenizer(rou).input_ids) + 1
+                    instruction_len = len(tokenizer(parts[0]).input_ids)
 
             # if i > 0: round_len += 1
             target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
