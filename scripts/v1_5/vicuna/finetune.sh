@@ -2,7 +2,10 @@
 
 phi2='microsoft/phi-2'
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
-vicuna='lmsys/vicuna-13b-v1.5'
+vicuna='lmsys/vicuna-7b-v1.5'
+prompt_version_vicuna=v1
+prompt_version_llama=llama_3_1
+prompt_version_phi2=phi
 
 
 deepspeed llava/train/train_mem.py \

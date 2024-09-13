@@ -705,17 +705,18 @@ def preprocess_v1(
                 break
 
             parts = rou.split(sep)
-
-            if len(parts) != 2:
-                break
-            parts[0] += sep
-
+            
             print('-'*30+'rou'+'-'*30)
             pprint.pprint(rou)
             print('-'*100)
             print('-'*30+'parts'+'-'*30)
             pprint.pprint(parts)
             print('-'*100)
+
+            if len(parts) != 2:
+                break
+            parts[0] += sep
+
             print('-'*30+'parts[0]+=sep'+'-'*30)
             pprint.pprint(parts[0])
             print('-'*100)
@@ -737,6 +738,9 @@ def preprocess_v1(
 
             cur_len += round_len
         target[cur_len:] = IGNORE_INDEX
+
+        print(f'Total length: {total_len}; current length: {cur_len}; model max length: {tokenizer.model_max_length}')
+
 
         if cur_len < tokenizer.model_max_length:
             if cur_len != total_len:
