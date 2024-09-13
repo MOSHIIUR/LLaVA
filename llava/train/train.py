@@ -517,7 +517,13 @@ def preprocess_llama_3_1(
         input_ids = input_ids[:, 1:]
     
     targets = input_ids.clone()
-    
+    print('-'*30+'targets'+'-'*30)
+    pprint.pprint(targets)
+    print('-'*100)  
+    print(f'tokenizer.eos_token: {tokenizer.eos_token}') 
+    print('-'*100)   
+
+
     assert conv.sep_style == conversation_lib.SeparatorStyle.LLAMA_3_1
 
     # Mask targets
