@@ -13,7 +13,7 @@ deepspeed llava/train/train_mem.py \
 --llm_backbone llama_3_1 \
 --llm_pad_token pad \
 --tune_mm_mlp_adapter True \
---use_contrastive_loss False \
+--use_contrastive_loss True \
 --clip_loss_coef 1 \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
@@ -27,7 +27,7 @@ deepspeed llava/train/train_mem.py \
 --num_layers 2 \
 --num_heads 2 \
 --aux_loss_coef 0.01 \
---share_moe False \
+--share_moe True \
 --cross_attention False \
 --mm_projector_type 'sparse_moe' \
 --num_experts_per_tok 2 \
