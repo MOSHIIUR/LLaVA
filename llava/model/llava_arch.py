@@ -534,6 +534,7 @@ class LlavaMetaForCausalLM(ABC):
         splits = []
         text_labels = []
         cur_image_idx = 0
+        num_no_images = 0
 
         # input_ids = [batch_size, sequence]
         # will pick one sequence from batch at a time
@@ -549,6 +550,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_input_embeds.append(cur_input_embeds)
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
+                num_no_images += 1
                 # print(f'image embed: {img_embed.shape}')
                 continue
             # cur_input_ids = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])  
@@ -594,10 +596,13 @@ class LlavaMetaForCausalLM(ABC):
                 new_input_embeds.append(cur_new_input_embeds)
                 new_labels.append(cur_new_labels)
                         
+        print('-'*100)
         text_features = [x.to(self.device) for x in text_features]
-        print(f'text feature shape: {text_features.shape}')
+        print(f'Num No Images: {num_no_images}')
+        print(f'text feature shape: {len(text_features)}')
         for txt_embeds in text_features:
             print(f'text embeds shape: {txt_embeds.shape}')
+        print('-'*100)
         
         padded_text_features = self.pad_text_features(text_features)
         padded_text_features_attention_mask = padded_text_features.sum(dim=-1) != 0
