@@ -508,9 +508,6 @@ class LlavaMetaForCausalLM(ABC):
             for feature in image_features:
                 if torch.all(feature == 0):
                     dummy_features += 1
-            print('-'*100)
-            print(f'Dummy Features: {dummy_features}')
-            print('-'*100)
         
         # TODO: image start / end is not implemented here to support pretraining.
         if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):
@@ -568,7 +565,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
                 num_no_images += 1
-                # print(f'image embed: {img_embed.shape}')
+                print(f'cur_input_embeds: {cur_input_embeds.shape}')
                 continue
             # cur_input_ids = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])  
             # labels = torch.tensor([20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32])  
@@ -615,7 +612,11 @@ class LlavaMetaForCausalLM(ABC):
 
         print('-'*100)
         print(f'Num No Images: {num_no_images}')
+        for embeds in new_input_embeds:
+            print(f'New input embedding: {embeds.shape}')
         print('-'*100)
+
+
         
         if cross_attention:
         
