@@ -45,7 +45,7 @@ output_dir=( $BOD/llava-llama-c01-mn $BOD/llava-llama-c02-mn $BOD/llava-llama-c0
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_addr ${MASTER_ADDR} --master_port ${MASTER_PORT} llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --model_name_or_path $llama \
 --version llama_3_1 \
