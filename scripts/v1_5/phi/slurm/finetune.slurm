@@ -3,7 +3,7 @@
 #SBATCH -A collabrobogroup
 #SBATCH --array=5
 #SBATCH --ntasks=1 
-#SBATCH -t 24:00:00 
+#SBATCH -t 25:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:2
 #SBATCH -N 1 
@@ -31,7 +31,7 @@ clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/phi2/finetune'
-output_dir=( $BOD/llava-phi-c08 $BOD/llava-phi-c09 $BOD/llava-phi-c10 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+output_dir=( $BOD/llava-phi-c08 $BOD/llava-phi-c09 $BOD/llava-phi-c10 $BOD/llava-phi-c11 $BOD/llava-phi-c05-V2 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 phi2='microsoft/phi-2'
