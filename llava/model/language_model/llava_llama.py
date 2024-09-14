@@ -145,7 +145,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
             encoder_moe_loss = None
             llm_loss = out['loss']
             
-            if self.config.use_contrastive_loss:
+            if self.config.use_contrastive_loss and alignment_loss is not None:
                 alignment_loss = (alignment_loss * self.config.clip_loss_coef).to(llm_loss.device)
 
             # Calculate load balancing loss if the projector type is 'sparse_moe'
@@ -180,7 +180,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
                 loss_dict["load_balancing_loss"] = load_balancing_loss
                 if encoder_moe_loss is not None:
                     loss_dict["encoder_load_balancing_loss"] = encoder_moe_loss
-            if self.config.use_contrastive_loss:
+            if self.config.use_contrastive_loss and alignment_loss is not None:
                 loss_dict["alignment_loss"] = alignment_loss
 
             compute_and_log_losses(loss_dict)
