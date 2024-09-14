@@ -591,98 +591,97 @@ class LlavaMetaForCausalLM(ABC):
                 
                 cur_new_input_embeds = [x.to(self.device) for x in cur_new_input_embeds]
                 cur_new_input_embeds = torch.cat(cur_new_input_embeds)
-
                 cur_new_labels = torch.cat(cur_new_labels)
                 new_input_embeds.append(cur_new_input_embeds)
                 new_labels.append(cur_new_labels)
-                        
-        print('-'*100)
-        text_features = [x.to(self.device) for x in text_features]
-        print(f'Num No Images: {num_no_images}')
-        print(f'text feature shape: {len(text_features)}')
-        for txt_embeds in text_features:
-            print(f'text embeds shape: {txt_embeds.shape}')
-        print('-'*100)
-        
-        padded_text_features = self.pad_text_features(text_features)
-        padded_text_features_attention_mask = padded_text_features.sum(dim=-1) != 0
-        padded_text_features_attention_mask =  padded_text_features_attention_mask.to(dtype=attention_mask.dtype, device=attention_mask.device)
-        
+
+
         
         if cross_attention:
-            image_features_has_zero = (image_features == 0).any().item()
+        
+            if text_features:        
+                text_features = [x.to(self.device) for x in text_features]        
+                padded_text_features = self.pad_text_features(text_features)
+                padded_text_features_attention_mask = padded_text_features.sum(dim=-1) != 0
+                padded_text_features_attention_mask =  padded_text_features_attention_mask.to(dtype=attention_mask.dtype, device=attention_mask.device)
 
-            if image_features_has_zero:
-                print('img feature got zero before passing to cross attn')
+                image_features_has_zero = (image_features == 0).any().item()
 
-            image_features, co_text_features = self.cross_attention(padded_text_features, image_features, padded_text_features_attention_mask)
+                if image_features_has_zero:
+                    print('img feature got zero before passing to cross attn')
 
-
-
-
-            # Check for NaN values
-            text_features_has_nan = torch.isnan(co_text_features).any().item()
-            image_features_has_nan = torch.isnan(image_features).any().item()
-
-            # Check for infinity values
-            image_features_has_inf = torch.isinf(image_features).any().item()
-            text_features_has_inf = torch.isinf(co_text_features).any().item()
-
-            # Check for zero values
-            image_features_has_zero = (image_features == 0).any().item()
-
-            if text_features_has_nan:
-                print("text_features_has_nan Contains NaN")
-            if text_features_has_inf:
-                print("text_features_has_inf Contains Inf")
-            if image_features_has_nan:
-                print("image_features_has_nan Contains NaN")
-            if image_features_has_inf:
-                print("image_features_has_inf Contains Inf:")
-
-            
-            for x in co_text_features:
-                text_features_has_zero = (x == 0).any().item()
-                if text_features_has_zero:
-                    print("text_features_has_zero Contains Zero:", text_features_has_zero)
-
-            if image_features_has_zero:
-                print("image_features_has_zero Contains Zero:", image_features_has_zero)
-            
-            
-            if use_contrastive_loss:
-                align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
+                image_features, co_text_features = self.cross_attention(padded_text_features, image_features, padded_text_features_attention_mask)
 
 
-            for x in range(len(text_features)):
-                cur_input_embeds_no_im = text_features[x]
-                cur_labels_noim = text_labels[x]
-                split_sizes = splits[x]
+
+
+                # Check for NaN values
+                text_features_has_nan = torch.isnan(co_text_features).any().item()
+                image_features_has_nan = torch.isnan(image_features).any().item()
+
+                # Check for infinity values
+                image_features_has_inf = torch.isinf(image_features).any().item()
+                text_features_has_inf = torch.isinf(co_text_features).any().item()
+
+                # Check for zero values
+                image_features_has_zero = (image_features == 0).any().item()
+
+                if text_features_has_nan:
+                    print("text_features_has_nan Contains NaN")
+                if text_features_has_inf:
+                    print("text_features_has_inf Contains Inf")
+                if image_features_has_nan:
+                    print("image_features_has_nan Contains NaN")
+                if image_features_has_inf:
+                    print("image_features_has_inf Contains Inf:")
+
                 
-                cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
+                for x in co_text_features:
+                    text_features_has_zero = (x == 0).any().item()
+                    if text_features_has_zero:
+                        print("text_features_has_zero Contains Zero:", text_features_has_zero)
 
-                cur_new_input_embeds = []
-                cur_new_labels = []
-
-                for i in range(num_images + 1):
-                    cur_new_input_embeds.append(cur_input_embeds_no_im[i])
-                    cur_new_labels.append(cur_labels_noim[i])
-                    if i < num_images:
-                        cur_image_features = image_features[cur_image_idx]
-                        cur_image_idx += 1
-                        cur_new_input_embeds.append(cur_image_features)
-                        cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=cur_labels.device, dtype=cur_labels.dtype))
+                if image_features_has_zero:
+                    print("image_features_has_zero Contains Zero:", image_features_has_zero)
                 
-                cur_new_input_embeds = [x.to(self.device) for x in cur_new_input_embeds]
-                cur_new_input_embeds = torch.cat(cur_new_input_embeds)
+                
+                if use_contrastive_loss:
+                    align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
 
-                cur_new_labels = torch.cat(cur_new_labels)
-                new_input_embeds.append(cur_new_input_embeds)
-                new_labels.append(cur_new_labels)
+
+                for x in range(len(text_features)):
+                    cur_input_embeds_no_im = text_features[x]
+                    cur_labels_noim = text_labels[x]
+                    split_sizes = splits[x]
+                    
+                    cur_input_embeds_no_im = torch.split(cur_input_embeds_no_im, split_sizes, dim=0)
+
+                    cur_new_input_embeds = []
+                    cur_new_labels = []
+
+                    for i in range(num_images + 1):
+                        cur_new_input_embeds.append(cur_input_embeds_no_im[i])
+                        cur_new_labels.append(cur_labels_noim[i])
+                        if i < num_images:
+                            cur_image_features = image_features[cur_image_idx]
+                            cur_image_idx += 1
+                            cur_new_input_embeds.append(cur_image_features)
+                            cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=cur_labels.device, dtype=cur_labels.dtype))
+                    
+                    cur_new_input_embeds = [x.to(self.device) for x in cur_new_input_embeds]
+                    cur_new_input_embeds = torch.cat(cur_new_input_embeds)
+
+                    cur_new_labels = torch.cat(cur_new_labels)
+                    new_input_embeds.append(cur_new_input_embeds)
+                    new_labels.append(cur_new_labels)
 
         elif use_contrastive_loss:
-            
-            align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
+            if text_features:        
+                text_features = [x.to(self.device) for x in text_features]        
+                padded_text_features = self.pad_text_features(text_features)
+                padded_text_features_attention_mask = padded_text_features.sum(dim=-1) != 0
+                padded_text_features_attention_mask =  padded_text_features_attention_mask.to(dtype=attention_mask.dtype, device=attention_mask.device)
+                align_loss = self.clip_contrastive_loss(padded_text_features, image_features, padded_text_features_attention_mask)
 
         # print('-'*100)
         # for i, sample in enumerate(new_input_embeds):
