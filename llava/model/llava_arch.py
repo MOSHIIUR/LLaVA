@@ -595,6 +595,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_labels.append(cur_new_labels)
                         
         text_features = [x.to(self.device) for x in text_features]
+        print(f'text feature shape: {text_features.shape}')
         for txt_embeds in text_features:
             print(f'text embeds shape: {txt_embeds.shape}')
         
