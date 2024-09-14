@@ -75,7 +75,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 1 \
+--gradient_accumulation_steps 4 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
