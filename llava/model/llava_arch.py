@@ -503,6 +503,14 @@ class LlavaMetaForCausalLM(ABC):
 
             else:
                 raise ValueError("Unexpected return value from encode_images.")
+
+            dummy_features = 0
+            for feature in image_features:
+                if torch.all(feature == 0):
+                    dummy_features += 1
+            print('-'*100)
+            print(f'Dummy Features: {dummy_features}')
+            print('-'*100)
         
         # TODO: image start / end is not implemented here to support pretraining.
         if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):
