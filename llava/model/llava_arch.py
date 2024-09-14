@@ -597,7 +597,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_labels.append(cur_new_labels)
 
         print('-'*100)
-        print(f'Num Images: {num_no_images}')
+        print(f'Num No Images: {num_no_images}')
         print('-'*100)
         
         if cross_attention:
