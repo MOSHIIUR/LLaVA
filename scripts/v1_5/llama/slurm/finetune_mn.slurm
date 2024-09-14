@@ -17,6 +17,11 @@ export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 export MASTER_PORT=`comm -23 <(seq 5000 6000 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1`
 export OMP_NUM_THREADS=1
 
+echo "CPUs: $SLURM_CPUS_PER_TASK"
+echo "GPUs: $SLURM_GPUS_PER_NODE"
+echo "MASTER ADDR: ${MASTER_ADDR}"
+echo "MASTER PORT: ${MASTER_PORT}"
+
 module purge
 module load apptainer
 
