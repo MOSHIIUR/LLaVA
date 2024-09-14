@@ -545,7 +545,7 @@ class LlavaMetaForCausalLM(ABC):
             if num_images == 0:
 
                 # cur_input_embeds -> combineds both image and text embeds. here the image embeds are empty tensor
-                cur_input_embeds, text_embed, img_embed = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
+                cur_input_embeds, _, _ = self.process_no_images(cur_input_ids, image_features, cur_image_idx)
                 new_input_embeds.append(cur_input_embeds)
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
