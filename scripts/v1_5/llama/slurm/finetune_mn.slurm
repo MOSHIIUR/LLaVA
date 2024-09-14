@@ -6,7 +6,7 @@
 #SBATCH -t 40:00:00 
 #SBATCH -p gpu
 #SBATCH --nodes=4
-#SBATCH --gpus-per-node=a100:2
+#SBATCH --gpus-per-node=a40:4
 #SBATCH --cpus-per-task=16
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
@@ -40,7 +40,7 @@ clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/llama/finetune'
-output_dir=( $BOD/llava-llama-c01-mn $BOD/llava-llama-c02-mn $BOD/llava-llama-c03-mn $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
+output_dir=( $BOD/llava-llama-c01-mn-a40 $BOD/llava-llama-c02-mn-a40 $BOD/llava-llama-c03-mn-a40 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
 
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
@@ -75,7 +75,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 4 \
+--gradient_accumulation_steps 1 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
