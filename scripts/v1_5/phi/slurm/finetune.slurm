@@ -7,6 +7,7 @@
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a6000:4
 #SBATCH -N 1 
+#SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
 
