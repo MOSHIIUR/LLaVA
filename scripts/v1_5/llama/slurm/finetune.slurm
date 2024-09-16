@@ -1,13 +1,13 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=3-9
+#SBATCH --array=1-4
 #SBATCH --ntasks=1 
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=40
+#SBATCH --cpus-per-task=64
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
@@ -32,7 +32,7 @@ clip_loss_coef=(0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/llama/finetune'
-output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c04 $BOD/llava-llama-c05 $BOD/llava-llama-c06 $BOD/llava-llama-c07 $BOD/llava-llama-c08 $BOD/llava-llama-c09 $BOD/llava-llama-c10 $BOD/llava-llama-c11)
+output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-llama-c04 $BOD/llava-llama-c05 $BOD/llava-llama-c06 $BOD/llava-llama-c07 $BOD/llava-llama-c08 $BOD/llava-llama-c09 $BOD/llava-llama-c10 $BOD/llava-llama-c11)
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
