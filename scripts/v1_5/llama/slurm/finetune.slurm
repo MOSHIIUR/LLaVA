@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-2
+#SBATCH --array=3-9
 #SBATCH --ntasks=1 
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
@@ -17,23 +17,22 @@ export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 module purge
 module load apptainer
 
-num_experts=(4 4 4 4 4 4 4 4 4 4)
-num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
-num_layers=(2 4 2 4 2 2 2 2 2)
-num_heads=(2 4 2 4 2 2 2 2 2)
-batch_size=(8 8 8 16 16 16 16 16 16)
-pretrain_embed_tokens=(False False False False True True False)
-share_moe=(False False True True True True False)
-use_clip_loss=(False False False False True False False)
-cross_attention=(False False False False True False False)
-mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu')
-clip_loss_coef=(0.01 0.01 0.01 0.01 0.01 0.01 0.01)
+num_experts=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4)
+num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+num_layers=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+num_heads=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+batch_size=(8 8 8 8 8 8 8 8 8 8 8 8 8 8 8)
+pretrain_embed_tokens=(False False False False True True False False False False False True True False)
+share_moe=(False False True False False True True False False True)
+use_clip_loss=(False False False True True True False True False False)
+cross_attention=(False False False False False False False True True True)
+mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe')
+clip_loss_coef=(0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05)
 
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/llama/finetune'
-output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c11 $BOD/llava-phi-c05 $BOD/llava-phi-TF-c06 $BOD/llava-phi-c07 $BOD/llava-phi-TF-0.1 $BOD/llava-phi-TT-0.5 $BOD/llava-phi-TF-0.5 $BOD/llava-phi-FF)
-
+output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD/llava-phi-c04 $BOD/llava-llama-c05 $BOD/llava-llama-c06 $BOD/llava-llama-c07 $BOD/llava-llama-c08 $BOD/llava-llama-c09 $BOD/llava-llama-c10 $BOD/llava-llama-c11)
 
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
