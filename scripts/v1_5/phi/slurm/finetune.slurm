@@ -7,7 +7,7 @@
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:2
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=40
+#SBATCH --cpus-per-task=64
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
 
@@ -44,7 +44,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed llava/train/trai
 --data_path ./playground/data/llava_v1_5_mix665k.json \
 --image_folder ./playground/data \
 --vision_tower openai/clip-vit-large-patch14-336 \
---pretrain_mm_mlp_adapter './ckpts/phi2/pretrain/llava-phi-FF//mm_projector.bin' \
+--pretrain_mm_mlp_adapter './ckpts/phi2/pretrain/llava-phi-FF/mm_projector.bin' \
 --use_contrastive_loss ${use_clip_loss[${SLURM_ARRAY_TASK_ID}]} \
 --clip_loss_coef ${clip_loss_coef[${SLURM_ARRAY_TASK_ID}]} \
 --mm_vision_select_layer -2 \
