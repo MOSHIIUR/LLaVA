@@ -40,7 +40,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed --master_port $P
 --model_name_or_path $phi2 \
 --version plain \
 --data_path ./playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
---image_folder ./playground/data/images \
+--image_folder ./playground/data/LLaVA-Pretrain/images \
 --vision_tower openai/clip-vit-large-patch14-336 \
 --tune_mm_mlp_adapter True \
 --tune_embed_tokens ${tune_embed_tokens[${SLURM_ARRAY_TASK_ID}]} \
