@@ -1,13 +1,13 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0-6
+#SBATCH --array=3-6
 #SBATCH --ntasks=1 
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a6000:4
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
 
