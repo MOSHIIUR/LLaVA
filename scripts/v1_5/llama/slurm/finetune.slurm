@@ -7,7 +7,7 @@
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
