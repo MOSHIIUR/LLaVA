@@ -3,7 +3,7 @@
 #SBATCH -A collabrobogroup
 #SBATCH --array=3-6
 #SBATCH --ntasks=1 
-#SBATCH -t 24:00:00 
+#SBATCH -t 40:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a40:4
 #SBATCH -N 1 
@@ -21,7 +21,7 @@ num_experts=(4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2)
-batch_size=(16 16 16 16 16 16 16 16 16)
+batch_size=(16 16 16 8 8 8 8 8 8)
 pretrain_embed_tokens=(True True True True True True False)
 share_moe=(False False True True False False True)
 use_clip_loss=(True True True False True False False)
@@ -65,7 +65,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed lla
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 1 \
+--gradient_accumulation_steps 2 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
