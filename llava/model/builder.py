@@ -42,6 +42,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type='nf4'
         )
+    
     else:
         kwargs['torch_dtype'] = torch.float16
 

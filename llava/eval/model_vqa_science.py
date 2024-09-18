@@ -1,4 +1,5 @@
 import argparse
+import pprint
 import torch
 import os
 import json
@@ -73,6 +74,8 @@ def eval_model(args):
         conv.append_message(conv.roles[0], qs)
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
+        pprint.pprint(prompt)
+        print('-'*100)
 
         input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
