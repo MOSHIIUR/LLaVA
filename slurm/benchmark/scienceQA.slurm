@@ -28,7 +28,7 @@ current_output=${outputs[${SLURM_ARRAY_TASK_ID}]}
 current_result=${results[${SLURM_ARRAY_TASK_ID}]}
 current_model_path=${model_paths[${SLURM_ARRAY_TASK_ID}]}
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif \
 python3 -m llava.eval.model_vqa_science \
     --model-path ${current_model_path} \
     --question-file ./playground/data/eval/scienceqa/llava_test_CQM-A.json \
@@ -38,7 +38,7 @@ python3 -m llava.eval.model_vqa_science \
     --temperature 0 \
     --conv-mode vicuna_v1
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif \
 python3 llava/eval/eval_science_qa.py \
     --base-dir ./playground/data/eval/scienceqa \
     --result-file ./playground/data/eval/scienceqa/answers/${current_file_name}/${current_file_name}.jsonl \
