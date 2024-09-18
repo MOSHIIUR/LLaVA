@@ -18,7 +18,7 @@ export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 module purge
 module load apptainer
 
-model_paths=('./ckpts/llama/finetune/llava-llama-c01/' './ckpts/llama/finetune/snapshots/llava-more/' './ckpts_it/moe_full/llava-moe-e4t2-finetune' './ckpts_it/moe_full/llava-moe-e5t3-finetune' './ckpts_it/moe/llava-moe-e8t2-finetune')
+model_paths=('./ckpts/llama/finetune/llava-llama-c01/' './ckpts/llama/finetune/llava-more/' './ckpts_it/moe_full/llava-moe-e4t2-finetune' './ckpts_it/moe_full/llava-moe-e5t3-finetune' './ckpts_it/moe/llava-moe-e8t2-finetune')
 file_names=('llama_base' 'llava-more' 'moe-e4t4' 'moe-e5t3' 'moe-e8t2')
 outputs=('llama_base_output' 'llava-more_output' 'moe-e5t3_output' 'moe-e8t2_output')
 results=('llama_base_result' 'llava-more_result' 'moe-e5t3_result' 'moe-e8t2_result')
