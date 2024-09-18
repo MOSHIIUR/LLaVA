@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=1
+#SBATCH --array=0
 #SBATCH --ntasks=1 
 #SBATCH -t 00:30:00 
 #SBATCH -p gpu
@@ -36,7 +36,7 @@ python3 -m llava.eval.model_vqa_science \
     --answers-file ./playground/data/eval/scienceqa/answers/${current_file_name}/${current_file_name}.jsonl \
     --single-pred-prompt \
     --temperature 0 \
-    --conv-mode vicuna_v1
+    --conv-mode llama_3_1
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif \
 python3 llava/eval/eval_science_qa.py \
