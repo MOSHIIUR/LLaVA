@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0,4-6
+#SBATCH --array=0,2-3
 #SBATCH --ntasks=1 
 #SBATCH -t 26:00:00 
 #SBATCH -p gpu
@@ -22,7 +22,7 @@ num_experts=(4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2)
-batch_size=(16 16 16 8 8 8 8 8 8)
+batch_size=(16 16 16 16 8 8 8 8 8)
 pretrain_embed_tokens=(True True True True True True False)
 share_moe=(False False True True False False True)
 use_clip_loss=(True True True False True False False)
