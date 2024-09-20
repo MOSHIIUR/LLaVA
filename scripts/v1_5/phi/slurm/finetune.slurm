@@ -7,7 +7,6 @@
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a40:4
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
 #SBATCH --exclude=udc-an28-[1,7]
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
