@@ -1,13 +1,14 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=7
+#SBATCH --array=2-3
 #SBATCH --ntasks=1 
 #SBATCH -t 26:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a6000:4
 #SBATCH -N 1 
 #SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --exclude=udc-an28-[1,7]
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
@@ -66,7 +67,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_phi.sif deepspeed ll
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 2 \
+--gradient_accumulation_steps 1 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
