@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=8-9
+#SBATCH --array=9
 #SBATCH --ntasks=1 
 #SBATCH -t 24:00:00 
 #SBATCH -p gpu
@@ -20,15 +20,15 @@ module load apptainer
 
 num_experts=(4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
-num_layers=(2 2 2 2 2 2 2 2 2)
-num_heads=(2 2 2 2 2 2 2 2 2)
-batch_size=(16 16 16 16 8 8 8 8 16 16)
-pretrain_embed_tokens=(True True True True True True False)
+num_layers=(2 2 2 2 2 2 2 2 2 2 2 2)
+num_heads=(2 2 2 2 2 2 2 2 2 2 2 2)
+batch_size=(16 16 16 16 8 8 8 8 16 16 8 16 16)
+pretrain_embed_tokens=(True True True True True True False True True False)
 share_moe=(False False True True False False True True False False)
 use_clip_loss=(True True True False True False False True False False)
 cross_attention=(False False False False True True True True False False)
 mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe')
-clip_loss_coef=(0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05)
+clip_loss_coef=(0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05)
 
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
