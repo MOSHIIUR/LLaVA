@@ -1,9 +1,9 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2-3
+#SBATCH --array=8-9
 #SBATCH --ntasks=1 
-#SBATCH -t 26:00:00 
+#SBATCH -t 24:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a6000:4
 #SBATCH -N 1 
@@ -22,18 +22,18 @@ num_experts=(4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2)
-batch_size=(16 16 16 16 8 8 8 8 8 8 8 8 8)
+batch_size=(16 16 16 16 8 8 8 8 16 16)
 pretrain_embed_tokens=(True True True True True True False)
-share_moe=(False False True True False False True True)
-use_clip_loss=(True True True False True False False True)
-cross_attention=(False False False False True True True True)
-mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe')
+share_moe=(False False True True False False True True False False)
+use_clip_loss=(True True True False True False False True False False)
+cross_attention=(False False False False True True True True False False)
+mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe')
 clip_loss_coef=(0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05)
 
 PORT=$((29500 + SLURM_JOB_ID % 1000))
 
 BOD='./ckpts/phi2/finetune'
-output_dir=( $BOD/llava-phi-c01 $BOD/llava-phi-c02 $BOD/llava-phi-c03 $BOD/llava-phi-c04 $BOD/llava-phi-c05 $BOD/llava-phi-c06 $BOD/llava-phi-c07 $BOD/llava-phi-c08)
+output_dir=( $BOD/llava-phi-c01 $BOD/llava-phi-c02 $BOD/llava-phi-c03 $BOD/llava-phi-c04 $BOD/llava-phi-c05 $BOD/llava-phi-c06 $BOD/llava-phi-c07 $BOD/llava-phi-c08 $BOD/llava-phi-c09 $BOD/llava-phi-c10)
 
 
 phi2='microsoft/phi-2'
