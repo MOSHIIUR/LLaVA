@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=6
+#SBATCH --array=6-9
 #SBATCH --ntasks=1 
 #SBATCH -t 00:30:00 
 #SBATCH -p gpu
@@ -21,12 +21,12 @@ module load apptainer
 
 # for new combination
 # add model_paths, file_names, version, sif, count+=1
-count=8
+count=10
 
-model_paths=('./ckpts_it/baseline/llava-base' './ckpts_it/baseline/llava-base-v2' './ckpts_it/moe_full/llava-moe-e4t2-finetune' './ckpts_it/moe_full/llava-moe-e5t3-finetune' './ckpts_it/moe/llava-moe-e8t2-finetune' './ckpts/llama/finetune/llava-llama-c01/' './ckpts/phi2/finetune/llava-phi-c02' './ckpts/phi2/finetune/llava-phi-c05')
-file_names=('base' 'base-v2' 'moe-e4t4' 'moe-e5t3' 'moe-e8t2' 'llama-base-v2' 'llava-phi-c02' 'llava-phi-c05')
-version=(vicuna_v1 vicuna_v1 vicuna_v1 vicuna_v1 vicuna_v1 llama_3_1 phi phi)
-sif=('llava' 'llava' 'llava' 'llava' 'llava' 'llava_container_v2' 'llava_container_phi' 'llava_container_phi')
+model_paths=('./ckpts_it/baseline/llava-base' './ckpts_it/baseline/llava-base-v2' './ckpts_it/moe_full/llava-moe-e4t2-finetune' './ckpts_it/moe_full/llava-moe-e5t3-finetune' './ckpts_it/moe/llava-moe-e8t2-finetune' './ckpts/llama/finetune/llava-llama-c01/' './ckpts/phi2/finetune/llava-phi-c01' './ckpts/phi2/finetune/llava-phi-c02' './ckpts/phi2/finetune/llava-phi-c05' './ckpts/phi2/finetune/llava-phi-c06')
+file_names=('base' 'base-v2' 'moe-e4t4' 'moe-e5t3' 'moe-e8t2' 'llama-base-v2' 'llava-phi-c01' 'llava-phi-c02' 'llava-phi-c05' 'llava-phi-c06')
+version=(vicuna_v1 vicuna_v1 vicuna_v1 vicuna_v1 vicuna_v1 llama_3_1 phi phi phi phi)
+sif=('llava' 'llava' 'llava' 'llava' 'llava' 'llava_container_v2' 'llava_container_phi' 'llava_container_phi' 'llava_container_phi' 'llava_container_phi')
 
 current_file_name=${file_names[${SLURM_ARRAY_TASK_ID}]}
 current_model_path=${model_paths[${SLURM_ARRAY_TASK_ID}]}
