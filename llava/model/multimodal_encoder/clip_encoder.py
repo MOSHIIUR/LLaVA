@@ -57,12 +57,13 @@ class CLIPVisionTower(nn.Module):
             print('shared moe encoder initialized')
 
             # Wrap the model with the LogitCollectorWrapper
-            self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
+            # make sure to use the vison tower encoder layers grad true if it truned on
+            # self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
 
             # backnone freezing
             self.vision_tower.requires_grad_(False)
 
-            for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
+            for layer in self.vision_tower.model.vision_model.encoder.layers:
                 if isinstance(layer, ModifiedEncoderLayer):
                     for param in layer.moe.parameters():
                         param.requires_grad = True
@@ -112,7 +113,7 @@ class CLIPVisionTower(nn.Module):
 
             else:
                 for image in images:
-                    image_forward_out = self.wrapped_vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
+                    image_forward_out = self.vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
                     image_features = self.feature_select(image_forward_outs).to(images.dtype)
                     # print(f'image_features shape : {image_features.shape}')
                     image_features.append(image_feature)
@@ -124,10 +125,10 @@ class CLIPVisionTower(nn.Module):
         else:
             
             if self.moe: 
-                image_forward_outs = self.wrapped_vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+                image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
                 image_features = self.feature_select(image_forward_outs).to(images.dtype)
-                router_logits = self.wrapped_vision_tower.get_collected_logits()
-                self.wrapped_vision_tower.clear_logits()
+                # router_logits = self.wrapped_vision_tower.get_collected_logits()
+                # self.wrapped_vision_tower.clear_logits()
 
             
             else: 
