@@ -3,7 +3,7 @@
 #SBATCH -A collabrobogroup
 #SBATCH --array=2,5-6
 #SBATCH --ntasks=1 
-#SBATCH -t 30:00:00 
+#SBATCH -t 40:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
@@ -22,7 +22,7 @@ num_experts=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
-batch_size=(16 16 16 16 16 16 16 16 16 16 16 16)
+batch_size=(8 8 8 8 8 8 8 8 8 8 8 8 8 8 8)
 pretrain_embed_tokens=(False False False False True True False False False False False True True False)
 share_moe=(False False True False False True True False False True)
 use_clip_loss=(False False False True True True False True False False)
