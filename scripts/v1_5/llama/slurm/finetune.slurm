@@ -6,9 +6,9 @@
 #SBATCH -t 40:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:4
+#SBATCH --constraint=a100_80gb
 #SBATCH -N 1 
 #SBATCH --mem=128G
-#SBATCH --exclude=udc-an28-[1,7]
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
