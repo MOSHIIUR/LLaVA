@@ -61,14 +61,14 @@ class CLIPVisionTower(nn.Module):
             # backnone freezing
             self.vision_tower.requires_grad_(False)
 
-            for i, layer in enumerate(self.vision_tower.vision_model.encoder.layers):
+            for layer in self.vision_tower.vision_model.encoder.layers:
                 if isinstance(layer, ModifiedEncoderLayer):
-                    for param in layer.moe.parameters():
-                        param.requires_grad = True
+                    # for param in layer.moe.parameters():
+                    #     param.requires_grad = True
 
                     for param in layer.linear_projection.parameters():
                         param.requires_grad = True
-                        
+
             for name, param in self.vision_tower.named_parameters():
                 if param.requires_grad:
                     print(f"{name}")
