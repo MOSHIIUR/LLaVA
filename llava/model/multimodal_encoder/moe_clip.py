@@ -6,7 +6,7 @@ class ModifiedEncoderLayer(nn.Module):
     def __init__(self, original_layer, hidden_size, sparseMoe):
         super().__init__()
         self.self_attn = original_layer.self_attn
-        self.mlp = original_layer.mlp
+        # self.mlp = original_layer.mlp
         self.layer_norm1 = original_layer.layer_norm1
         self.layer_norm2 = original_layer.layer_norm2
 
