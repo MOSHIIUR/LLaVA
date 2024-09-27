@@ -128,7 +128,6 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
         
         if self.config.training:
             projector_type = getattr(self.config, 'mm_projector_type', 'linear')
-            encoder_moe_loss = None
             llm_loss = out['loss']
             
             if self.config.use_contrastive_loss and alignment_loss is not None:
@@ -143,7 +142,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
                 ) * self.config.aux_loss_coef
 
                 if gate_logits_encoder is not None:
-                    encoder_moe_loss = load_balancing_loss_func(
+                    load_balancing_loss += load_balancing_loss_func(
                         gate_logits_encoder, 
                         self.config.num_experts,
                         self.config.num_experts_per_tok,
@@ -164,8 +163,6 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM,):
 
             if projector_type == 'sparse_moe':
                 loss_dict["load_balancing_loss"] = load_balancing_loss
-                if encoder_moe_loss is not None:
-                    loss_dict["encoder_load_balancing_loss"] = encoder_moe_loss
             if self.config.use_contrastive_loss and alignment_loss is not None:
                 loss_dict["alignment_loss"] = alignment_loss
 

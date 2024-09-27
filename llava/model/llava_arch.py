@@ -118,6 +118,11 @@ class LlavaMetaModel:
                 vision_tower = self.vision_tower
             vision_tower.load_model()
 
+        for name, param in self.vision_tower.named_parameters():
+            if param.requires_grad:
+                print(f'{name}:{param}')
+        print('-'*100)
+
         self.config.use_mm_proj = True
         self.hidden_size = self.config.hidden_size
         self.config.mm_vision_select_layer = mm_vision_select_layer
@@ -138,7 +143,6 @@ class LlavaMetaModel:
                 return {k.split(keyword + '.')[1]: v for k, v in weights.items() if keyword in k}
             
             if self.config.mm_projector_type =='sparse_moe':
-                print('initialize moe using pretrain mlp adapter')
                 for i in range(model_args.num_experts):
                     self.mm_projector.experts[i].load_state_dict(get_w(mm_projector_weights, 'mm_projector'))
             else:
