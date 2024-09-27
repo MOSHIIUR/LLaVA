@@ -58,7 +58,7 @@ class CLIPVisionTower(nn.Module):
             self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
 
             # backnone freezing
-            self.vision_tower.y(False)
+            self.vision_tower.requires_grad_(False)
 
             for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
                 if isinstance(layer, ModifiedEncoderLayer):
