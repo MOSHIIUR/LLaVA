@@ -118,9 +118,7 @@ class LlavaMetaModel:
                 vision_tower = self.vision_tower
             vision_tower.load_model()
 
-        for name, param in self.vision_tower.named_parameters():
-            if param.requires_grad:
-                print(f'{name}:{param}')
+        
         print('-'*100)
 
         self.config.use_mm_proj = True
