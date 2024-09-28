@@ -23,6 +23,7 @@ num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 batch_size=(16 16 16 16 16 8 8 8 8 8)
+grad_accumulation=(1 1 1 1 1 2 2 2 2 2)
 pretrain_embed_tokens=(False False False False True True False False False False False True True False)
 share_moe=(False False True False False True True False False True)
 use_clip_loss=(False False False True True True False True False False)
@@ -67,7 +68,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --m
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 2 \
+--gradient_accumulation_steps ${grad_accumulation[${SLURM_ARRAY_TASK_ID}]} \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
