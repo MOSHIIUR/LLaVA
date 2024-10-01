@@ -54,8 +54,8 @@ class CLIPVisionTower(nn.Module):
 
             print('shared moe encoder initialized')
 
-            # Wrap the model with the LogitCollectorWrapper
-            self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
+            # # Wrap the model with the LogitCollectorWrapper
+            # self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
 
             # backnone freezing
             self.vision_tower.requires_grad_(False)
