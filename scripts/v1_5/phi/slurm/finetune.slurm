@@ -7,8 +7,7 @@
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a6000:4
 #SBATCH -N 1 
-#SBATCH --mem=128G
-#SBATCH --constraint=a100_80gb
+#SBATCH --mem=256G
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
 
