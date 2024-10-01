@@ -46,27 +46,32 @@ class CLIPVisionTower(nn.Module):
 
         # vision encoder with moe
         if sparseMoE is not None:
-            cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
-            self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
-            hidden_size = self.vision_tower.config.hidden_size
+            # cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name)
+            # self.vision_tower = CLIPSMoEVisionTransformer(cfg_only, sparseMoE, self.num_experts, self.num_selected)
             self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
-            
+            hidden_size = self.vision_tower.config.hidden_size
+
             for i, encoder_layer in enumerate(self.vision_tower.vision_model.encoder.layers):
                 self.vision_tower.vision_model.encoder.layers[i] = ModifiedEncoderLayer(encoder_layer, hidden_size, sparseMoE)
 
             print('shared moe encoder initialized')
 
             # Wrap the model with the LogitCollectorWrapper
-            self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
+            # self.wrapped_vision_tower = LogitCollectorWrapper(self.vision_tower)
 
             # backnone freezing
             self.vision_tower.requires_grad_(False)
 
-            for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
-                if isinstance(layer, ModifiedEncoderLayer):
-                    for param in layer.moe.parameters():
-                        param.requires_grad = True
+            # for layer in self.wrapped_vision_tower.model.vision_model.encoder.layers:
+            #     if isinstance(layer, ModifiedEncoderLayer):
+            #         for param in layer.moe.parameters():
+            #             param.requires_grad = True
 
+            #         for param in layer.linear_projection.parameters():
+            #             param.requires_grad = True
+
+            for layer in self.vision_tower.vision_model.encoder.layers:
+                if isinstance(layer, ModifiedEncoderLayer):
                     for param in layer.linear_projection.parameters():
                         param.requires_grad = True
         
@@ -112,7 +117,8 @@ class CLIPVisionTower(nn.Module):
 
             else:
                 for image in images:
-                    image_forward_out = self.wrapped_vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
+                    # image_forward_out = self.wrapped_vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
+                    image_forward_out = self.vision_tower(image.to(device=self.device, dtype=self.dtype).unsqueeze(0), output_hidden_states=True)
                     image_features = self.feature_select(image_forward_outs).to(images.dtype)
                     # print(f'image_features shape : {image_features.shape}')
                     image_features.append(image_feature)
@@ -124,10 +130,11 @@ class CLIPVisionTower(nn.Module):
         else:
             
             if self.moe: 
-                image_forward_outs = self.wrapped_vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+                # image_forward_outs = self.wrapped_vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+                image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
                 image_features = self.feature_select(image_forward_outs).to(images.dtype)
-                router_logits = self.wrapped_vision_tower.get_collected_logits()
-                self.wrapped_vision_tower.clear_logits()
+                # router_logits = self.wrapped_vision_tower.get_collected_logits()
+                # self.wrapped_vision_tower.clear_logits()
 
             
             else: 
