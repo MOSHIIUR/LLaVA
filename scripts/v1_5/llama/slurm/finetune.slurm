@@ -1,14 +1,14 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2 # 2,5-9 -> a100 2 -> a6000
+#SBATCH --array=2,5-9
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a6000:8
-#SBATCH --cpus-per-task=40
-#SBATCH --mem=128G
+#SBATCH --gres=gpu:a100:4
+#SBATCH --constraint=a100_80gb
 #SBATCH -N 1 
+#SBATCH --mem=128G
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 

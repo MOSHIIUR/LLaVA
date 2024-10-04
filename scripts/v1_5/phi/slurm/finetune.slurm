@@ -1,13 +1,14 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=1
+#SBATCH --array=2-3,6-7
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a6000:4
+#SBATCH --gres=gpu:a100:2
 #SBATCH -N 1 
-#SBATCH --mem=128G
+#SBATCH --mem=256G
+#SBATCH --constraint=a100_80gb
 #SBATCH --output=log/slurm/phi_finetune/log-%A-%a.log 
 #SBATCH -J phi_finetune
 
@@ -38,7 +39,7 @@ output_dir=( $BOD/llava-phi-c01 $BOD/llava-phi-c02 $BOD/llava-phi-c03 $BOD/llava
 phi2='microsoft/phi-2'
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed llava/train/train_mem.py \
---deepspeed ./scripts/zero2.json \
+--deepspeed ./scripts/zero3_offload.json \
 --model_name_or_path $phi2 \
 --version phi \
 --data_path ./playground/data/llava_v1_5_mix665k.json \
