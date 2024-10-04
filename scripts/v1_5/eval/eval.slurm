@@ -13,13 +13,12 @@
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
-export HF_HOME=/scratch/mi8uu/mrm/
 
 module purge
 module load apptainer
 
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 -m accelerate.commands.launch \
+apptainer exec --nv --env HF_HOME=/scratch/mi8uu/mrm/LLaVA/.cache /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 -m accelerate.commands.launch \
     --num_processes=8 \
     -m lmms_eval \
     --model llava \
