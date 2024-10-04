@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2,5-9
+#SBATCH --array=2,5-6,8-9
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
@@ -22,8 +22,8 @@ num_experts=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
-batch_size=(16 8 16 16 16 8 8 8 8 8)
-grad_accumulation=(1 2 1 1 1 2 2 2 2 2)
+batch_size=(16 8 8 8 8 8 8 8 8 8)
+grad_accumulation=(1 2 2 2 2 2 2 2 2 2)
 pretrain_embed_tokens=(False False False False True True False False False False False True True False)
 share_moe=(False False True False False True True False False True)
 use_clip_loss=(False False False True True True False True False False)
@@ -39,7 +39,7 @@ output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_port $PORT llava/train/train_mem.py \
---deepspeed ./scripts/zero3.json \
+--deepspeed ./scripts/zero3_offload.json \
 --model_name_or_path $llama \
 --version llama_3_1 \
 --data_path ./playground/data/llava_v1_5_mix665k.json \
