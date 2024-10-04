@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1 
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a40:1
+#SBATCH --gres=gpu:a6000:1
 #SBATCH -N 1 
 #SBATCH --mem=128G
 #SBATCH --output=log/slurm/evaluation/log-%A-%a.log 
@@ -14,11 +14,15 @@
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 
+echo "-----------------------------------------------------------------------------"
+echo "HF_HOME: $HF_HOME"
+echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
+echo "-----------------------------------------------------------------------------"
 module purge
 module load apptainer
 
 
-apptainer exec --nv --bind /scratch/mi8uu/mrm/LLaVA:/root/.cache /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 -m accelerate.commands.launch \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 -m accelerate.commands.launch \
     --num_processes=8 \
     -m lmms_eval \
     --model llava \
