@@ -14,10 +14,6 @@
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 
-echo "-----------------------------------------------------------------------------"
-echo "HF_HOME: $HF_HOME"
-echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
-echo "-----------------------------------------------------------------------------"
 module purge
 module load apptainer
 
