@@ -13,7 +13,7 @@
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
-export HF_HOME=/scratch/mi8uu/mrm/LLaVA/.cache
+export HF_HOME=/scratch/mi8uu/mrm/
 
 module purge
 module load apptainer
