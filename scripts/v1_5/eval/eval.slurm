@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1 
 #SBATCH -t 01:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a6000:1
+#SBATCH --gres=gpu:a40:1
 #SBATCH -N 1 
 #SBATCH --mem=128G
 #SBATCH --output=log/slurm/evaluation/log-%A-%a.log 
