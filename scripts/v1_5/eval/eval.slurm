@@ -1,4 +1,3 @@
-
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
