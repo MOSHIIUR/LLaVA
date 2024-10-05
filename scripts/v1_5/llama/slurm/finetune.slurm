@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:a6000:8
 #SBATCH -N 1 
 #SBATCH --mem=128G
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=40
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
