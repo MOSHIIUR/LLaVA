@@ -9,6 +9,7 @@
 #SBATCH -N 1 
 #SBATCH --mem=256G
 #SBATCH --cpus-per-task=64
+#SBATCH --constraint=a100_80gb
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
 
