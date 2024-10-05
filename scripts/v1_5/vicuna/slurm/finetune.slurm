@@ -13,7 +13,6 @@
 #SBATCH -J vicuna
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
-export CUDA_LAUNCH_BLOCKING=1
 
 module purge
 module load apptainer
@@ -39,7 +38,7 @@ output_dir=( $BOD/llava-vicuna-c01 $BOD/llava-vicuna-c02 $BOD/llava-vicuna-c03 $
 
 vicuna='lmsys/vicuna-7b-v1.5'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_phi.sif deepspeed llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --model_name_or_path $vicuna \
 --version v1 \
