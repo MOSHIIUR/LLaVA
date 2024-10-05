@@ -1,12 +1,11 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2,5-6,8-9
+#SBATCH --array=2
 #SBATCH --ntasks=1 
 #SBATCH -t 72:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a100:4
-#SBATCH --constraint=a100_80gb
+#SBATCH --gres=gpu:a40:8
 #SBATCH -N 1 
 #SBATCH --mem=256G
 #SBATCH --cpus-per-task=64
@@ -40,7 +39,7 @@ output_dir=( $BOD/llava-llama-c01 $BOD/llava-llama-c02 $BOD/llava-llama-c03 $BOD
 llama='meta-llama/Meta-Llama-3.1-8B-Instruct'
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_port $PORT llava/train/train_mem.py \
---deepspeed ./scripts/zero3_offload.json \
+--deepspeed ./scripts/zero2.json \
 --model_name_or_path $llama \
 --version llama_3_1 \
 --data_path ./playground/data/llava_v1_5_mix665k.json \
