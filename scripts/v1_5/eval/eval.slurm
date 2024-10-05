@@ -20,7 +20,7 @@ module purge
 module load apptainer
 
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 /scratch/mi8uu/mrm/lmms-eval/lmms_eval/__main__.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif python3 /scratch/mi8uu/mrm/lmms-eval/lmms_eval/__main__.py \
     --model llava \
     --model_args pretrained="/scratch/mi8uu/mrm/LLaVA/ckpts_it/baseline/llava-base" \
     --tasks mme \
