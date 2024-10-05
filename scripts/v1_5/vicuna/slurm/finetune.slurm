@@ -13,6 +13,7 @@
 #SBATCH -J vicuna
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
+export CUDA_LAUNCH_BLOCKING=1
 
 module purge
 module load apptainer
