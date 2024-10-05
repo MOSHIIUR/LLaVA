@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2,5-6
+#SBATCH --array=2
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a100:4
+#SBATCH --gres=gpu:a40:8
 #SBATCH -N 1 
 #SBATCH --mem=256G
 #SBATCH --cpus-per-task=64
@@ -22,8 +22,8 @@ num_experts=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
-batch_size=(16 8 8 8 8 8 8 8 8 8)
-grad_accumulation=(1 2 2 2 2 2 2 2 2 2)
+batch_size=(16 8 16 8 8 8 8 8 8 8)
+grad_accumulation=(1 2 1 2 2 2 2 2 2 2)
 share_moe=(False False True False False True True False False True)
 use_clip_loss=(False False False True True True False True False False)
 cross_attention=(False False False False False False False True True True)
