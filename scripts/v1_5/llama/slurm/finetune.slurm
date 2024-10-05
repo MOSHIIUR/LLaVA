@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2
+#SBATCH --array=5-6
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a40:8
+#SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
 #SBATCH --mem=256G
 #SBATCH --cpus-per-task=64
