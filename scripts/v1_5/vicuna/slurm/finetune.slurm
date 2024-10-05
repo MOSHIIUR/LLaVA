@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0,2,5,7
+#SBATCH --array=2,5
 #SBATCH --ntasks=1 
 #SBATCH -t 35:00:00 
 #SBATCH -p gpu
@@ -38,7 +38,7 @@ output_dir=( $BOD/llava-vicuna-c01 $BOD/llava-vicuna-c02 $BOD/llava-vicuna-c03 $
 
 vicuna='lmsys/vicuna-7b-v1.5'
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed llava/train/train_mem.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_phi.sif deepspeed llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --model_name_or_path $vicuna \
 --version v1 \
