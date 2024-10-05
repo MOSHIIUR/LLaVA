@@ -20,9 +20,9 @@ module load apptainer
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 -m accelerate.commands.launch \
     --num_processes=8 \
-    -m lmms_eval \
+    ./lmms_eval/__main__.py \
     --model llava \
-    --model_args pretrained="./ckpts_it/baseline/llava-base" \
+    --model_args pretrained="/scratch/mi8uu/mrm/LLaVA/ckpts_it/baseline/llava-base" \
     --tasks mme \
     --batch_size 1 \
     --log_samples \
