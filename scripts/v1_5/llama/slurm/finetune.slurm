@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=2,5-6,8-9
+#SBATCH --array=2,5-6
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
