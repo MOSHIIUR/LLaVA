@@ -1,16 +1,16 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
+#SBATCH --array=0-2,5,7
 #SBATCH --ntasks=1 
-#SBATCH -t 00:20:00 
+#SBATCH -t 35:00:00 
 #SBATCH -p gpu
 #SBATCH --gres=gpu:a100:4
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=40
-#SBATCH --output=log/slurm/vicuna7b_finetune/log-%A-%a.log 
-#SBATCH -J vicuna_7b
-
+#SBATCH --mem=256G
+#SBATCH --constraint=a100_80gb
+#SBATCH --output=log/slurm/vicuna/log-%A-%a.log 
+#SBATCH -J vicuna
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 
@@ -21,10 +21,11 @@ num_experts=(4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4)
 num_experts_per_tok=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_layers=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
 num_heads=(2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
-batch_size=(8 8 8 8 8 8 8 8 8 8 8 8 8 8 8)
+batch_size=(16 16 16 8 8 8 8 8 8 8 8 8 8 8 8)
+grad_accumulation=(1 1 1 2 2 2 2 2 2 2)
 pretrain_embed_tokens=(False False False False True True False False False False False True True False)
 share_moe=(False False True False False True True False False True)
-use_clip_loss=(False False False True True True False True False False)
+use_clip_loss=(True True True True True True True True True True)
 cross_attention=(False False False False False False False True True True)
 mm_projector_type=('mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe' 'sparse_moe' 'mlp2x_gelu' 'sparse_moe' 'sparse_moe')
 clip_loss_coef=(0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05)
@@ -65,7 +66,7 @@ apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava.sif deepspeed llava/train/trai
 --num_train_epochs 1 \
 --per_device_train_batch_size ${batch_size[${SLURM_ARRAY_TASK_ID}]} \
 --per_device_eval_batch_size 16 \
---gradient_accumulation_steps 1 \
+--gradient_accumulation_steps ${grad_accumulation[${SLURM_ARRAY_TASK_ID}]} \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
