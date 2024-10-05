@@ -5,10 +5,9 @@
 #SBATCH --ntasks=1 
 #SBATCH -t 30:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a100:4
-#SBATCH --constraint=a100_80gb
+#SBATCH --gres=gpu:a6000:8
 #SBATCH -N 1 
-#SBATCH --mem=256G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=64
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J llama
