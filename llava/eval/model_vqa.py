@@ -44,17 +44,30 @@ def eval_model(args):
         image_file = line["image"]
         qs = line["text"]
         cur_prompt = qs
-        
+
         if model.config.mm_use_im_start_end:
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
         else:
             qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
 
-        conv = conv_templates[args.conv_mode].copy()
-        conv.append_message(conv.roles[0], qs)
-        conv.append_message(conv.roles[1], None)
-        prompt = conv.get_prompt()
+        print('*'*100)
+        print(qs)
+        print('-'*100)
 
+
+        conv = conv_templates[args.conv_mode].copy()
+        print(conv)
+        print('*'*100)        
+        conv.append_message(conv.roles[0], qs)
+        print(conv)
+        print('*'*100)        
+        conv.append_message(conv.roles[1], None)
+        print(conv)
+        print('*'*100)        
+        prompt = conv.get_prompt()
+        print(conv)
+        print('*'*100)
+        
         input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
         image = Image.open(os.path.join(args.image_folder, image_file)).convert('RGB')
