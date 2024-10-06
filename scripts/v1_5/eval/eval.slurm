@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=0
+#SBATCH --array=0-4
 #SBATCH --ntasks=1 
 #SBATCH -t 12:00:00 
 #SBATCH -p gpu
@@ -26,6 +26,6 @@ module load apptainer
 
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif python3 VLMEvalKit/run.py \
-    --data ScienceQA_VAL \
-    --model $target_model_phi \
+    --data ScienceQA_VAL TextVQA_VAL POPE MME MMBench MMBench_CN SEEDBench_IMG MMMU_DEV_VAL HallusionBench AI2D_TEST RealWorldQA \
+    --model $target_model \
     --verbose
