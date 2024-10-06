@@ -13,6 +13,8 @@
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
+export CUDA_VISIBLE_DEVICES=0,1,2,3 
+
 
 
 
@@ -20,7 +22,7 @@ module purge
 module load apptainer
 
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif CUDA_VISIBLE_DEVICES=0,1,2,3 python3 VLMEvalKit/run.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif python3 VLMEvalKit/run.py \
     --data MMBench_DEV_EN MME SEEDBench_IMG \
     --model llava_base \
     --verbose
