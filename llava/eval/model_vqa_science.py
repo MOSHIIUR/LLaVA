@@ -70,12 +70,23 @@ def eval_model(args):
             qs = qs + '\n' + "Answer with the option's letter from the given choices directly."
             cur_prompt = cur_prompt + '\n' + "Answer with the option's letter from the given choices directly."
 
+        print('*'*100)
+        pprint.pprint(qs)
+        print('-'*100)
+
+
         conv = conv_templates[args.conv_mode].copy()
+        pprint.pprint(conv)
+        print('*'*100)        
         conv.append_message(conv.roles[0], qs)
+        pprint.pprint(conv)
+        print('*'*100)        
         conv.append_message(conv.roles[1], None)
+        pprint.pprint(conv)
+        print('*'*100)        
         prompt = conv.get_prompt()
-        # pprint.pprint(prompt)
-        # print('-'*100)
+        pprint.pprint(prompt)
+        print('*'*100)
 
         input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
