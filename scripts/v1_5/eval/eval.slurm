@@ -3,18 +3,16 @@
 #SBATCH -A collabrobogroup
 #SBATCH --array=0
 #SBATCH --ntasks=1 
-#SBATCH -t 01:00:00 
+#SBATCH -t 10:00:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a6000:4
+#SBATCH --gres=gpu:a100:1
 #SBATCH -N 1 
-#SBATCH --mem=128G
+#SBATCH --mem=256G
 #SBATCH --output=log/slurm/evaluation/log-%A-%a.log 
 #SBATCH -J eval
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
-export CUDA_VISIBLE_DEVICES=0,1,2,3 
-
 
 
 
