@@ -120,7 +120,9 @@ class CLIPVisionTower(nn.Module):
 
             
             else:
-                self.vision_tower = self.vision_tower.to(images.device) 
+                for param in self.vision_tower.parameters():
+                    param.data = param.data.to(images.device)
+                    param.grad = param.grad.to(images.device) if param.grad is not None else None
                 # image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
                 image_forward_outs = self.vision_tower(images.to(dtype=self.dtype), output_hidden_states=True)
                 image_features = self.feature_select(image_forward_outs).to(images.dtype)
