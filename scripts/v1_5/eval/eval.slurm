@@ -20,13 +20,7 @@ module purge
 module load apptainer
 
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_eval.sif python3 -m accelerate.commands.launch \
-    --num_processes=8 \
-    lmms_eval/__main__.py \
-    --model llava \
-    --model_args pretrained /scratch/mi8uu/mrm/LLaVA/ckpts_it/baseline/llava-base \
-    --tasks mme \
-    --batch_size 1 \
-    --log_samples \
-    --log_samples_suffix llava-base_mme \
-    --output_path ./logs_eval/
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif python3 VLMEvalkit/run.py \
+    --data MMBench_DEV_EN MME SEEDBench_IMG \
+    --model llava_base \
+    --verbose
