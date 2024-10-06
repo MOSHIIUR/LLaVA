@@ -16,7 +16,9 @@ export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 
 model_names=('llava_base' 'llava_base_v2' 'llava_moe_e4t2' 'llava_moe_e5t3' 'llava_moe_e8t2')
+models_phi=('llava_phi_c01')
 target_model=${model_names[${SLURM_ARRAY_TASK_ID}]}
+target_model_phi=${models_phi[${SLURM_ARRAY_TASK_ID}]}
 
 
 module purge
@@ -24,6 +26,6 @@ module load apptainer
 
 
 apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif python3 VLMEvalKit/run.py \
-    --data ScienceQA_VAL TextVQA_VAL A-OKVQA POPE MME MMBench_TEST__EN MMBench_TEST__CN MMVet SEEDBench_IMG MMMU_DEV_VAL MathVista_MINI \
-    --model $target_model \
+    --data ScienceQA_VAL \
+    --model $target_model_phi \
     --verbose
