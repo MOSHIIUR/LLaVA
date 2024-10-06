@@ -20,7 +20,7 @@ module purge
 module load apptainer
 
 
-apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif python3 VLMEvalkit/run.py \
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_VLMEvalKit.sif python3 VLMEvalKit/run.py \
     --data MMBench_DEV_EN MME SEEDBench_IMG \
     --model llava_base \
     --verbose
