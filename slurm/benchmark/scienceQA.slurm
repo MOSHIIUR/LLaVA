@@ -1,14 +1,15 @@
 #!/bin/bash -l
 
 #SBATCH -A collabrobogroup
-#SBATCH --array=10
+#SBATCH --array=5-8
 #SBATCH --ntasks=1 
 #SBATCH -t 00:30:00 
 #SBATCH -p gpu
-#SBATCH --gres=gpu:a6000:1
+#SBATCH --gres=gpu:a100:1
 #SBATCH -N 1 
-#SBATCH --cpus-per-task=32
-#SBATCH --output=log/slurm/evaluation/scienceQA/log-%A-%a.log 
+#SBATCH --mem=256G
+#SBATCH --constraint=a100_80gb
+#SBATCH --output=log/slurm/evaluation/log-%A-%a.log 
 #SBATCH -J SQA
 
 export TORCH_HOME=/project/CollabRoboGroup/.cache
