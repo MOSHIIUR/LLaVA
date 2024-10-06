@@ -277,7 +277,7 @@ conv_phi = Conversation(
     "The assistant gives helpful, detailed, and polite answers to the user's questions.",
     roles=("USER", "ASSISTANT"),
     version="phi",  # replace
-    messages=(),
+    messages=[],
     offset=0,
     sep_style=SeparatorStyle.TWO,
     sep=" ",
