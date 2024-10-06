@@ -120,8 +120,9 @@ class CLIPVisionTower(nn.Module):
 
             
             else:
-                self.vision_tower = self.vision_tower.to(images.device) 
-                image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+                # self.vision_tower = self.vision_tower.to(images.device) 
+                # image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
+                image_forward_outs = self.vision_tower(images.to(dtype=self.dtype), output_hidden_states=True)
                 image_features = self.feature_select(image_forward_outs).to(images.dtype)
 
             
