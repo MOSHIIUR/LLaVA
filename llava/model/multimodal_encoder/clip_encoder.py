@@ -120,22 +120,9 @@ class CLIPVisionTower(nn.Module):
 
             
             else:
-                
-                print(f"Vision Tower Device: {next(self.vision_tower.parameters()).device}")
-                print(f"Images Device: {images.device}")
-                
-                # Ensure vision_tower is on the correct device
-                self.vision_tower.to(device=self.device)
-
-                # Ensure images are on the same device as the model
-                images = images.to(device=self.device, dtype=self.dtype)
-
-                # Forward pass
-                image_forward_outs = self.vision_tower(images, output_hidden_states=True) 
-
-                # self.vision_tower = self.vision_tower.to(images.device) 
+                self.vision_tower = self.vision_tower.to(images.device) 
                 # image_forward_outs = self.vision_tower(images.to(device=self.device, dtype=self.dtype), output_hidden_states=True)
-                # image_forward_outs = self.vision_tower(images.to(dtype=self.dtype), output_hidden_states=True)
+                image_forward_outs = self.vision_tower(images.to(dtype=self.dtype), output_hidden_states=True)
                 image_features = self.feature_select(image_forward_outs).to(images.dtype)
 
             
