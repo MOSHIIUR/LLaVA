@@ -1457,6 +1457,10 @@ def train(attn_implementation=None):
     # select the correct PAD token for llama_3_1 and llama_3
     elif training_args.llm_backbone == "llama_3_1":
         print(f"pad token: {training_args.llm_pad_token}")
+        print(f'tokenizer pad token ID: {tokenizer.pad_token_id}')
+        print(f'tokenizer pad token: {tokenizer.pad_token}')
+        print(f'tokenizer eos token ID: {tokenizer.eos_token}')
+        
         if training_args.llm_pad_token == 'end_of_text':
             tokenizer.pad_token_id= 128001
         elif training_args.llm_pad_token == 'eot':
