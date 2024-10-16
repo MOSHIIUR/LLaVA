@@ -1454,34 +1454,49 @@ def train(attn_implementation=None):
     elif model_args.version == "v0.5":
         tokenizer.pad_token = tokenizer.unk_token
 
-    # select the correct PAD token for llama_3_1 and llama_3
-    elif training_args.llm_backbone == "llama_3_1":
-        print(f"pad token: {training_args.llm_pad_token}")
-        print(f'tokenizer pad token ID: {tokenizer.pad_token_id}')
-        print(f'tokenizer pad token: {tokenizer.pad_token}')
-        print(f'tokenizer eos token ID: {tokenizer.eos_token}')
+    # # select the correct PAD token for llama_3_1 and llama_3
+    # elif training_args.llm_backbone == "llama_3_1":
+    #     print(f"pad token: {training_args.llm_pad_token}")
+    #     print(f'tokenizer pad token ID: {tokenizer.pad_token_id}')
+    #     print(f'tokenizer pad token: {tokenizer.pad_token}')
+    #     print(f'tokenizer eos token ID: {tokenizer.eos_token}')
         
-        if training_args.llm_pad_token == 'end_of_text':
-            tokenizer.pad_token_id= 128001
-        elif training_args.llm_pad_token == 'eot':
-            tokenizer.pad_token_id= 128009
-        elif training_args.llm_pad_token == 'pad':
-            tokenizer.pad_token_id= 128004
-        else:
-            raise ValueError(f"Unknown llm_pad_token")
+    #     if training_args.llm_pad_token == 'end_of_text':
+    #         tokenizer.pad_token_id= 128001
+    #     elif training_args.llm_pad_token == 'eot':
+    #         tokenizer.pad_token_id= 128009
+    #     elif training_args.llm_pad_token == 'pad':
+    #         tokenizer.pad_token_id= 128004
+    #     else:
+    #         raise ValueError(f"Unknown llm_pad_token")
     
-    else:
-        # if tokenizer do not have "unk_token" add this when you initialize the tokenizer
+    # vicuna design choice
+    elif model_args.version == "v1":
         tokenizer.pad_token = tokenizer.unk_token
 
-    if model_args.version in conversation_lib.conv_templates:
-        conversation_lib.default_conversation = conversation_lib.conv_templates[model_args.version]
-    
-    else:
-        conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1"]
+        if model_args.version in conversation_lib.conv_templates:
+            conversation_lib.default_conversation = conversation_lib.conv_templates[model_args.version]
+        
+        else:
+            conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1"]
 
-
-
+    elif model_args.version == "llama_3_1":
+        if tokenizer.pad_token is None:
+            print(f"Adding pad token as '<pad>'")
+            smart_tokenizer_and_embedding_resize(
+                special_tokens_dict=dict(pad_token="<pad>"),
+                tokenizer=tokenizer,
+                model=model,
+            )
+        print(f'tokenizer pad token: {tokenizer.pad_token}')
+            
+        if model_args.version in conversation_lib.conv_templates:
+            conversation_lib.default_conversation = conversation_lib.conv_templates[model_args.version]
+        
+        else:
+            conversation_lib.default_conversation = conversation_lib.conv_templates["llama_3_1"]
+        
+        print(f"Using conversation format: {conversation_lib.default_conversation.version}")
 
     if model_args.vision_tower is not None:
 
