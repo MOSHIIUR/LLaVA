@@ -217,6 +217,7 @@ class LlavaMetaForCausalLM(ABC):
                 image_features = new_image_features
             else:
                 raise ValueError(f"Unexpected mm_patch_merge_type: {self.config.mm_patch_merge_type}")
+        
         else:
             image_features = self.encode_images(images)
 
