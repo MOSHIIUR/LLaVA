@@ -33,6 +33,7 @@ from llava.train.llava_trainer import LLaVATrainer
 
 from llava import conversation as conversation_lib
 from llava.model import *
+from llava.model.language_model.llava_llama_moe import MoELLaVALlamaForCausalLM
 from llava.mm_utils import process_anyres_image, tokenizer_image_token
 
 from PIL import Image
@@ -59,6 +60,9 @@ class ModelArguments:
     tune_mm_mlp_adapter: bool = field(default=False)
     vision_tower: Optional[str] = field(default=None)
     mm_vision_select_layer: Optional[int] = field(default=-1)   # default to the last layer
+    num_experts: Optional[int] = field(default=4)
+    num_experts_per_tok: Optional[int] = field(default=2)
+    router_aux_loss_coef: Optional[float] = field(default=0.01)
     pretrain_mm_mlp_adapter: Optional[str] = field(default=None)
     mm_projector_type: Optional[str] = field(default='linear')
     mm_use_im_start_end: bool = field(default=False)
@@ -116,6 +120,7 @@ class TrainingArguments(transformers.TrainingArguments):
     group_by_modality_length: bool = field(default=False)
     llm_backbone: str = field(default=None)
     llm_pad_token: str = field(default=None)
+    moe_enable: bool = field(default=False)
 
 
 def maybe_zero_3(param, ignore_status=False, name=None):
@@ -1033,7 +1038,7 @@ def train(attn_implementation=None):
             )
         ))
 
-    if model_args.vision_tower is not None:
+    if model_args.vision_tower is not None and not training_args.moe_enable:
         if 'mpt' in model_args.model_name_or_path:
             config = transformers.AutoConfig.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
             config.attn_config['attn_impl'] = training_args.mpt_attn_impl
@@ -1045,6 +1050,15 @@ def train(attn_implementation=None):
             )
         else:
             model = LlavaLlamaForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                attn_implementation=attn_implementation,
+                torch_dtype=(torch.bfloat16 if training_args.bf16 else None),
+                **bnb_model_from_pretrained_args
+            )
+
+    elif training_args.moe_enable:
+            model = MoELLaVALlamaForCausalLM.from_pretrained(
                 model_args.model_name_or_path,
                 cache_dir=training_args.cache_dir,
                 attn_implementation=attn_implementation,
