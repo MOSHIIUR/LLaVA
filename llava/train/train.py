@@ -1116,13 +1116,6 @@ def train(attn_implementation=None):
         rank0_print("Adding LoRA adapters...")
         model = get_peft_model(model, lora_config)
 
-    print('*'*100)
-    print(f'moe_enable: {training_args.moe_enable}')
-    print('*'*100)
-
-    # initialize the moe module in llm
-    if training_args.moe_enable:
-        model.initialize_moe_modules(model_args=model_args)
 
     if 'mpt' in model_args.model_name_or_path:
         tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -1218,6 +1211,13 @@ def train(attn_implementation=None):
 
         model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
         
+        print('*'*100)
+        print(f'moe_enable: {training_args.moe_enable}')
+        print('*'*100)
+
+        # initialize the moe module in llm
+        if training_args.moe_enable:
+            model.initialize_moe_modules(model_args=model_args)
 
         if model_args.tune_mm_mlp_adapter:
             model.requires_grad_(False)
@@ -1257,6 +1257,8 @@ def train(attn_implementation=None):
                 if hasattr(module, 'weight'):
                     if training_args.bf16 and module.weight.dtype == torch.float32:
                         module = module.to(torch.bfloat16)
+
+    rank0_print(model)
 
     data_module = make_supervised_data_module(tokenizer=tokenizer,
                                               data_args=data_args, model_args=model_args)
