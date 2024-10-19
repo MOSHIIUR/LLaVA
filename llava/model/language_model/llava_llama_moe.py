@@ -189,7 +189,6 @@ def MoELlamaDecoderLayer_forward(self):
         # import ipdb
         # ipdb.set_trace()
 
-
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
             hidden_states=hidden_states,
@@ -477,6 +476,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 self.config.num_experts_per_tok,
                 attention_mask,
             )
+            print(f'Aux loss: {aux_loss}')
             if labels is not None:
                 loss += self.config.router_aux_loss_coef * aux_loss.to(loss.device)  # make sure to reside in the same device
         
