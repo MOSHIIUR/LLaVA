@@ -308,9 +308,7 @@ class LlavaMetaForCausalLM(ABC):
 
         print('-'*100)
 
-        print(f'no of image: {num_images}')
-        for idx in range(num_images):
-            print(f'idx: {idx}')
+        for idx in range(len(all_split_sizes)):
             print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
             print(f'text tokens: {new_input_embeds[idx][:sum(all_split_sizes[idx])].shape}; image tokens: {new_input_embeds[idx][sum(all_split_sizes[idx]):].shape}')
         print('-'*100)
