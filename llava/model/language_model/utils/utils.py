@@ -28,7 +28,10 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
 def pad_sequence(new_input_embeds, padding_side):
 
     max_len = max(x.shape[0] for x in new_input_embeds)
+    batch_size = len(new_input_embeds)
 
+    attention_mask = torch.zeros((batch_size, max_len), dtype=attention_mask.dtype, device=attention_mask.device)
+    
     new_input_embeds_padded = []
 
     for i, cur_new_embed in enumerate(new_input_embeds):
@@ -38,16 +41,48 @@ def pad_sequence(new_input_embeds, padding_side):
                 torch.zeros((max_len - cur_len, cur_new_embed.shape[1]), dtype=cur_new_embed.dtype, device=cur_new_embed.device),
                 cur_new_embed
             ), dim=0))
+            if cur_len > 0:
+                attention_mask[i, -cur_len:] = True
 
         else:
             new_input_embeds_padded.append(torch.cat((
                 cur_new_embed,
                 torch.zeros((max_len - cur_len, cur_new_embed.shape[1]), dtype=cur_new_embed.dtype, device=cur_new_embed.device)
             ), dim=0))
-
+            if cur_len > 0:
+                attention_mask[i, -cur_len:] = True
 
     new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
-    return new_input_embeds
+    return new_input_embeds, attention_mask
+
+
+def unpad_sequence(hidden_states, attention_masks, padding_side):
+    unpad_hidden_sates = []
+    for idx, hidden_state in enumerate(hidden_states):
+
+        cur_attn_mask = attention_masks[idx]
+
+        if padding_side == 'left':
+            slice_idx = cur_attn_mask.nonzero().max().item
+            unpad_hidden_sate = hidden_state[slice_idx:]
+
+        else:
+            slice_idx = cur_attn_mask.sum().item
+            unpad_hidden_sate = hidden_state[:slice_idx]
+
+        unpad_hidden_sates.append(unpad_hidden_sate)
+
+    return unpad_hidden_sates
+
+def concat_hidden_states(text_hidden_states, img_hidden_states):
+    combined_hidden_states = []
+    
+    for text_hidden_state, img_hidden_state in zip(text_hidden_states, img_hidden_states):
+        combined_state = torch.cat((text_hidden_state, img_hidden_state), dim=0)
+        combined_hidden_states.append(combined_state)
+
+    return combined_hidden_states
+
 
     
     

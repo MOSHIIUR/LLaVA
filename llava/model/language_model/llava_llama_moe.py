@@ -37,7 +37,7 @@ from torch.nn import CrossEntropyLoss
 from transformers.models.llama.modeling_llama import logger
 from transformers.models.llama.modeling_llama import LlamaMLP
 from transformers.utils import ModelOutput
-from .utils.utils import split_seqeunce, pad_sequence
+from .utils.utils import *
 
 local_rank = None
 
@@ -217,13 +217,32 @@ def MoELlamaDecoderLayer_forward(self):
         text_splits, img_sequences = sequence_splits
         text_hidden_states, img_hidden_states = split_seqeunce(text_splits, img_sequences, hidden_states)
         padding_side = 'right'
-        text_hidden_states = pad_sequence(text_hidden_states, padding_side)
-        img_hidden_states = pad_sequence(img_hidden_states, padding_side)
+        text_hidden_states, text_attention_mask = pad_sequence(text_hidden_states, padding_side)
+        img_hidden_states, vision_attention_mask = pad_sequence(img_hidden_states, padding_side)
 
         # hidden_states = self.mlp(hidden_states)
-        l_hidden_states, text_router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
-        v_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
+        language_hidden_states, text_router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
+        vision_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
         hidden_states, router_logits = self.mlp(hidden_states) # shared_Moe call
+        print(f'hidded states: {hidden_states.shape}')
+
+        # unpad modality state
+        language_hidden_states = unpad_sequence(language_hidden_states, text_attention_mask)
+        vision_hidden_states = unpad_sequence(vision_hidden_states, vision_attention_mask)
+
+        # concat_modality_state
+        combined_hidden_states = concat_hidden_states(language_hidden_states, vision_hidden_states)
+        
+        # pad combined modality
+        combined_hidden_states, _ = pad_sequence(combined_hidden_states, padding_side)
+
+        # combined hidden states
+        hidden_states = torch.stack([combined_hidden_states, hidden_states], dim=0)
+        hidden_states = torch.mean(hidden_states, dim=0)
+
+        print(f'hidded states: [PROCESSED]: {hidden_states.shape}')
+
+
         hidden_states = residual + hidden_states
         
         # import ipdb
