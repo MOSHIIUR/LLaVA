@@ -429,9 +429,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             )
         # import ipdb
         # ipdb.set_trace()
-        
-        print(f'output router logits: {output_router_logits}')
-
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
@@ -471,6 +468,10 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
+        output_router_logits = (
+            output_router_logits if output_router_logits is not None else self.config.output_router_logits
+        )
+        print(f'output router logits: {output_router_logits}')
         aux_loss = None
         if output_router_logits:
             aux_loss = load_balancing_loss_func(
