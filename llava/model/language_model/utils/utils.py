@@ -109,8 +109,8 @@ def concat_hidden_states(text_hidden_states, img_hidden_states):
     combined_hidden_states = []
 
     for text_hidden_state, img_hidden_state in zip(text_hidden_states, img_hidden_states):
-        print(f'text_hiden_state: {text_hidden_state}')
-        print(f'img_hidden_state: {img_hidden_state}')
+        print(f'text_hiden_state: {text_hidden_state.shape}')
+        print(f'img_hidden_state: {img_hidden_state.shape}')
         print('*'*100)
         combined_state = torch.cat((text_hidden_state, img_hidden_state), dim=0)
         combined_hidden_states.append(combined_state)
