@@ -409,7 +409,9 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # print('before prepare_inputs_labels_for_multimodal')
         # import ipdb
         # ipdb.set_trace()
-
+        output_router_logits = (
+            output_router_logits if output_router_logits is not None else self.config.output_router_logits
+        )
 
         if inputs_embeds is None:
             (
@@ -452,8 +454,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
             logits = self.lm_head(hidden_states[:, -num_logits_to_keep:, :])
         
-        logits = self.lm_head(hidden_states)
-        logits = logits.float()
+        # logits = self.lm_head(hidden_states)
+        # logits = logits.float()
 
         loss = None
         if labels is not None:
@@ -467,27 +469,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # Enable model parallelism
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
-
-        output_router_logits = (
-            output_router_logits if output_router_logits is not None else self.config.output_router_logits
-        )
-
-        print(f'output router logits: {output_router_logits}')
-        # Assuming `outputs` is defined and contains the necessary attributes/elements
-        if hasattr(outputs, 'router_logits'):
-            # Check the shape of the last element if outputs is a tuple or list
-            if isinstance(outputs.router_logits, (tuple, list)):
-                last_element_shape = outputs.router_logits[-1].shape
-                print(f"Shape of last element: {last_element_shape}")
-                print(f"Shape of last element: {len(outputs.router_logits)}")
-            else:
-                print("outputs is not a tuple or list")
-
-            # router_logits_shape = outputs.router_logits.shape
-            # print(f"Shape of router_logits: {router_logits_shape}")
-        else:
-            print("outputs does not have router_logits")
-
 
         aux_loss = None
         if output_router_logits:
