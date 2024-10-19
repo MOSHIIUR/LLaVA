@@ -1,30 +1,38 @@
-#!/bin/bash
+#!/bin/bash -l
 
+#SBATCH -A collabrobogroup
+#SBATCH --array=0
+#SBATCH --ntasks=1 
+#SBATCH -t 12:00:00 
+#SBATCH -p gpu
+#SBATCH --gres=gpu:a100:4
+#SBATCH -N 1 
+#SBATCH --mem=256G
+#SBATCH --constraint=a100_80gb
+#SBATCH --output=log/slurm/llama/log-%A-%a.log 
+#SBATCH -J moe-llama
+
+export TORCH_HOME=/project/CollabRoboGroup/.cache
+export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 export WANDB_PROJECT=FineTuneLLaVa
 export TOKENIZER_PATH=aimagelab/LLaVA_MORE-llama_3_1-8B-finetuning
-export WANDB_API_KEY=
-export HF_TOKEN=
 
-IFS=',' read -r -a nodelist <<<$SLURM_NODELIST
-export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
-export MASTER_PORT=`comm -23 <(seq 5000 6000 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1`
-export OMP_NUM_THREADS=1
 
-echo "CPUs: $SLURM_CPUS_PER_TASK"
-echo "GPUs: $SLURM_GPUS_PER_NODE"
-echo "MASTER ADDR: ${MASTER_ADDR}"
-echo "MASTER PORT: ${MASTER_PORT}"
+module purge
+module load apptainer
 
 epochs=1
 llama3_path=aimagelab/LLaVA_MORE-llama_3_1-8B-finetuning
-images_path=playground/data
-data_train_path=playground/data/llava_v1_5_mix665k.json
+images_path=/scratch/mi8uu/mrm/vqa_synthetic_data/LLaVA/resource/main/images
+data_train_path=/scratch/mi8uu/mrm/vqa_synthetic_data/LLaVA/resource/main/train/dataset.json
 vision_tower=openai/clip-vit-large-patch14-336
 
 job_name="finetune-moe"
 echo "job name: $job_name"
 
-deepspeed llava/train/train_mem.py \
+PORT=$((29500 + SLURM_JOB_ID % 1000))
+
+apptainer exec --nv /scratch/mi8uu/mrm/sifs/llava_container_v2.sif deepspeed --master_port $PORT llava/train/train_mem.py \
 --deepspeed ./scripts/zero3.json \
 --llm_backbone llama_3 \
 --llm_pad_token pad \
