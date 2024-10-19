@@ -253,7 +253,6 @@ def MoELlamaModel_forward(self):
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
-        print(f'output router logits: {output_router_logits}')
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
@@ -475,8 +474,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
-        for router_logit in outputs.router_logits:
-            print(f'shape of router logit: {router_logit.shape}')
+        # for router_logit in outputs.router_logits:
+        #     print(f'shape of router logit: {router_logit.shape}')
 
         aux_loss = None
         if output_router_logits:
