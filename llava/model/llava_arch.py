@@ -308,12 +308,12 @@ class LlavaMetaForCausalLM(ABC):
         # for split in all_split_sizes:
         #     print(split)
 
-        print('-'*100)
+        # print('-'*100)
 
-        for idx in range(len(all_split_sizes)):
-            print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
-            print(f'text tokens: {new_input_embeds[idx][:sum(all_split_sizes[idx])].shape}; image tokens: {new_input_embeds[idx][sum(all_split_sizes[idx]):].shape}')
-        print('-'*100)
+        # for idx in range(len(all_split_sizes)):
+        #     print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
+        #     print(f'text tokens: {new_input_embeds[idx][:sum(all_split_sizes[idx])].shape}; image tokens: {new_input_embeds[idx][sum(all_split_sizes[idx]):].shape}')
+        # print('-'*100)
 
         # Truncate sequences to max length as image embeddings can make the sequence longer
         tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
@@ -363,14 +363,14 @@ class LlavaMetaForCausalLM(ABC):
         new_text_hidden_states = pad_sequence(new_text_hidden_states, padding_side)
         new_img_hidden_states = pad_sequence(new_img_hidden_states, padding_side)
 
-        print('*'*100)
-        print(f'new_text_hidden_states: {new_text_hidden_states.shape}')
-        print(f'new_img_hidden_states: {new_img_hidden_states.shape}')
-        print('*'*100)
+        # print('*'*100)
+        # print(f'new_text_hidden_states: {new_text_hidden_states.shape}')
+        # print(f'new_img_hidden_states: {new_img_hidden_states.shape}')
+        # print('*'*100)
 
-        for idx, txt_feature in enumerate(new_text_hidden_states):
-            print(f'txt: {txt_feature.shape} + img:{new_img_hidden_states[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
-        print('*'*100)
+        # for idx, txt_feature in enumerate(new_text_hidden_states):
+        #     print(f'txt: {txt_feature.shape} + img:{new_img_hidden_states[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
+        # print('*'*100)
 
         if _labels is None:
             new_labels = None

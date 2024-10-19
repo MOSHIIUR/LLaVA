@@ -37,13 +37,7 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
 
 
 def pad_sequence(new_input_embeds, padding_side):
-    # # Truncate sequences to max length as image embeddings can make the sequence longer
-    # tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
-    # if tokenizer_model_max_length is not None:
-    #     new_input_embeds = [x[:tokenizer_model_max_length] for x in new_input_embeds]
-    #     new_labels = [x[:tokenizer_model_max_length] for x in new_labels]
 
-    # Combine them
     max_len = max(x.shape[0] for x in new_input_embeds)
 
     new_input_embeds_padded = []

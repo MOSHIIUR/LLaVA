@@ -331,7 +331,7 @@ def MoELlamaModel_forward(self):
                 layer_outputs = torch.utils.checkpoint.checkpoint(
                     create_custom_forward(decoder_layer), hidden_states, attention_mask, position_ids
                 )
-                
+
             else:
                 layer_outputs = decoder_layer(
                     hidden_states,
@@ -416,6 +416,9 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # print('before prepare_inputs_labels_for_multimodal')
         # import ipdb
         # ipdb.set_trace()
+
+        print(self.config)
+
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
