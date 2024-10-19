@@ -262,7 +262,10 @@ def MoELlamaDecoderLayer_forward(self):
 
         print('*'*100)
         if isinstance(outputs, tuple):
-            print(len(outputs))
+            for output in outputs:
+                if isinstance(output, tuple):
+                    print(f'len: {len(output)}')
+                else: print(f'type: {type(output)}')
         else: print(type(outputs))
         print('*'*100)
             
