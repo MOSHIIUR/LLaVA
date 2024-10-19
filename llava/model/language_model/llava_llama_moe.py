@@ -542,7 +542,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 self.config.num_experts_per_tok,
                 attention_mask,
             )
-            print(f'Aux loss: {aux_loss}')
 
             # text_load_balancing_loss
             text_aux_loss = load_balancing_loss_func(
@@ -551,7 +550,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 self.config.num_experts_per_tok,
                 text_attention_mask,
             )
-            print(f'Text -> Aux loss: {text_aux_loss}')
             
             # vision_load_balancing_loss
             vision_aux_loss = load_balancing_loss_func(
@@ -559,14 +557,11 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
                 vision_attention_mask,
-            )
-            print(f'Vision -> Aux loss: {vision_aux_loss}')
-            
+            )            
 
             if labels is not None:
+                print(f'Aux loss -> Shared:{aux_loss}; Text:{text_aux_loss}; Vision:{vision_aux_loss}')
                 aux_loss += text_aux_loss + vision_aux_loss
-                print(f'combined aux loss: {aux_loss}; aux coef{self.config.router_aux_loss_coef}')
-
                 loss += self.config.router_aux_loss_coef * aux_loss.to(loss.device)  # make sure to reside in the same device
         
         # import ipdb
