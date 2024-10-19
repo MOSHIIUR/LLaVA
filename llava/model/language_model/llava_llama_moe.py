@@ -553,7 +553,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             #     assert all([torch.allclose(pretrained_state_dict[k], v) for k, v in loaded_state_dict.items()])
             #     assert all([torch.allclose(loaded_state_dict[k], v) for k, v in pretrained_state_dict.items()])
 
-        print(f'Sparse Moe Block applied')
+        print(f'Vision-Text-Shared Sparse Moe Block applied')
 
         for m in self.model.layers:
             m.forward = MoELlamaDecoderLayer_forward(m)
