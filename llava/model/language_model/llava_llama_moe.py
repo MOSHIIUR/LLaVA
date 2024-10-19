@@ -221,8 +221,8 @@ def MoELlamaDecoderLayer_forward(self):
         img_hidden_states = pad_sequence(img_hidden_states, padding_side)
 
         # hidden_states = self.mlp(hidden_states)
-        hidden_states, router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
-        hidden_states, router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
+        l_hidden_states, text_router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
+        v_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
         hidden_states, router_logits = self.mlp(hidden_states) # shared_Moe call
         hidden_states = residual + hidden_states
         
