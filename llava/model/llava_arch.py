@@ -302,8 +302,12 @@ class LlavaMetaForCausalLM(ABC):
         print('-'*100)
         for split in all_split_sizes:
             print(split)
-        print('-'*100)
 
+        print('-'*100)
+        for new_input_embed in new_input_embeds:
+            print(f'shape: {new_input_embed.shape}')
+        print('-'*100)
+        
         # Truncate sequences to max length as image embeddings can make the sequence longer
         tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
         if tokenizer_model_max_length is not None:
