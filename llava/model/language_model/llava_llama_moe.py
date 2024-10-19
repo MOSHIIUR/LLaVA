@@ -248,6 +248,7 @@ def MoELlamaModel_forward(self):
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
+        print(f'output router logits: {output_router_logits}')
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
@@ -428,7 +429,9 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             )
         # import ipdb
         # ipdb.set_trace()
-        # print('after prepare_inputs_labels_for_multimodal')
+        
+        print(f'output router logits: {output_router_logits}')
+
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
