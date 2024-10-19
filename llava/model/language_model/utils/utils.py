@@ -7,14 +7,16 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
         total_seq_len = input_embed.shape[0]
         padded_sequence = total_seq_len - (txt_seq_len + img_sequence)
 
-        print(f'input_embed shape: {input_embed.shape}')
+        # print(f'input_embed shape: {input_embed.shape}')
+
+
 
         if txt_seq_len + img_sequence + padded_sequence != total_seq_len:
             raise ValueError(f'Split sizes do not match the total sequence length'
                              f'expected {total_seq_len}, but got {txt_seq_len + img_sequence + padded_sequence}')
 
         split_size = [txt_seq_len, img_sequence, padded_sequence]
-        # print(f'split size: {split_size}')
+        print(f'split size: {split_size}')
 
         
 
