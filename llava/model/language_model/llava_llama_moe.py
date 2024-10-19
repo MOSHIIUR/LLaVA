@@ -471,7 +471,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             loss = loss_fct(shift_logits, shift_labels)
 
         for router_logit in outputs.router_logits:
-            print(f'shape of router logit: {router_logit}')
+            print(f'shape of router logit: {router_logit.shape}')
 
         aux_loss = None
         if output_router_logits:
