@@ -89,7 +89,7 @@ def split_hidden_state(hidden_states, split_sizes, modality):
                 img_hidden_states.append(img_hidden_state)
                 continue
 
-            split_size = [split_size, hidden_state.shape[0]- split_size]
+            split_size = [split_size, hidden_state.shape[0] - split_size]
 
             img_hidden_state, _ = torch.split(hidden_state, split_size, dim=0)
             img_hidden_states.append(img_hidden_state)
@@ -122,9 +122,9 @@ def concat_hidden_states(text_hidden_states, img_hidden_states):
     combined_hidden_states = []
 
     for text_hidden_state, img_hidden_state in zip(text_hidden_states, img_hidden_states):
-        print(f'text_hiden_state: {text_hidden_state.shape}')
-        print(f'img_hidden_state: {img_hidden_state.shape}')
-        print('*'*100)
+        # print(f'text_hiden_state: {text_hidden_state.shape}')
+        # print(f'img_hidden_state: {img_hidden_state.shape}')
+        # print('*'*100)
         combined_state = torch.cat((text_hidden_state, img_hidden_state), dim=0)
         combined_hidden_states.append(combined_state)
 
