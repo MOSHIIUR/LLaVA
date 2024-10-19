@@ -250,9 +250,11 @@ def MoELlamaModel_forward(self):
     ) -> Union[Tuple, MoeModelOutputWithPast]:
         
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
+        
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
+        
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
@@ -329,6 +331,7 @@ def MoELlamaModel_forward(self):
                 layer_outputs = torch.utils.checkpoint.checkpoint(
                     create_custom_forward(decoder_layer), hidden_states, attention_mask, position_ids
                 )
+                
             else:
                 layer_outputs = decoder_layer(
                     hidden_states,

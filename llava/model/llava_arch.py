@@ -24,6 +24,7 @@ from .multimodal_projector.builder import build_vision_projector
 from llava.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 
 from llava.mm_utils import get_anyres_image_grid_shape
+from llava.model.language_model.utils.utils import split_seqeunce
 
 
 class LlavaMetaModel:
@@ -250,15 +251,12 @@ class LlavaMetaForCausalLM(ABC):
         new_labels = []
         cur_image_idx = 0
         all_split_sizes = []
+        img_sequences = []
         length_of_text_tokens = []
 
-        # print('-'*100)
-        # for input_id in input_ids:
-        #     print(f'cur_ids length: {len(input_id)}')
 
         for batch_idx, cur_input_ids in enumerate(input_ids):
             num_images = (cur_input_ids == IMAGE_TOKEN_INDEX).sum()
-            print(f'Num Images: {num_images}')
             if num_images == 0:
                 cur_image_features = image_features[cur_image_idx]
                 cur_input_embeds_1 = self.get_model().embed_tokens(cur_input_ids)
@@ -267,6 +265,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
                 split_sizes = [0, len(cur_input_embeds_1)]
+                img_sequences.append(0)
                 all_split_sizes.append(split_sizes)
                 length_of_text_tokens.append(cur_input_embeds.shape[0])
                 continue
@@ -281,6 +280,7 @@ class LlavaMetaForCausalLM(ABC):
             
             split_sizes = [x.shape[0] for x in cur_labels_noim]
             all_split_sizes.append(split_sizes)
+            img_sequences.append(image_features[batch_idx].shape[0])
             cur_input_embeds = self.get_model().embed_tokens(torch.cat(cur_input_ids_noim))
             length_of_text_tokens.append(cur_input_embeds.shape[0])
             cur_input_embeds_no_im = torch.split(cur_input_embeds, split_sizes, dim=0)
@@ -351,7 +351,15 @@ class LlavaMetaForCausalLM(ABC):
                     attention_mask[i, :cur_len] = True
                     position_ids[i, :cur_len] = torch.arange(0, cur_len, dtype=position_ids.dtype, device=position_ids.device)
 
+
+
         new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
+
+        new_text_hidden_states, new_img_hidden_states = split_seqeunce(all_split_sizes, img_sequences, new_input_embeds)
+
+        for idx, txt_feature in enumerate(new_text_hidden_states):
+            print(f'txt: {txt_feature.shape} + img:{new_img_hidden_states[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
+        print('*'*100)
 
         if _labels is None:
             new_labels = None
