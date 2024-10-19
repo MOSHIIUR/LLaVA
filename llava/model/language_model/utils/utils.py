@@ -30,7 +30,8 @@ def pad_sequence(new_input_embeds, padding_side):
     max_len = max(x.shape[0] for x in new_input_embeds)
     batch_size = len(new_input_embeds)
 
-    attention_mask = torch.zeros((batch_size, max_len), dtype=new_input_embeds.dtype, device=new_input_embeds.device)
+
+    attention_mask = torch.zeros((batch_size, max_len), dtype=new_input_embeds[0].dtype, device=new_input_embeds[0].device)
     
     new_input_embeds_padded = []
 
