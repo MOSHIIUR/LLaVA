@@ -227,8 +227,8 @@ def MoELlamaDecoderLayer_forward(self):
         print(f'hidded states: {hidden_states.shape}')
 
         # unpad modality state
-        language_hidden_states = unpad_sequence(language_hidden_states, text_attention_mask)
-        vision_hidden_states = unpad_sequence(vision_hidden_states, vision_attention_mask)
+        language_hidden_states = unpad_sequence(language_hidden_states, text_attention_mask, padding_side)
+        vision_hidden_states = unpad_sequence(vision_hidden_states, vision_attention_mask, padding_side)
 
         # concat_modality_state
         combined_hidden_states = concat_hidden_states(language_hidden_states, vision_hidden_states)
