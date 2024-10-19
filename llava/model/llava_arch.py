@@ -249,6 +249,12 @@ class LlavaMetaForCausalLM(ABC):
         new_input_embeds = []
         new_labels = []
         cur_image_idx = 0
+        all_split_sizes = []
+
+        print('-'*100)
+        for cur_ids in cur_input_ids:
+            print(f'cur_ids length: {len(cur_ids)}')
+
         for batch_idx, cur_input_ids in enumerate(input_ids):
             num_images = (cur_input_ids == IMAGE_TOKEN_INDEX).sum()
             if num_images == 0:
@@ -258,6 +264,7 @@ class LlavaMetaForCausalLM(ABC):
                 new_input_embeds.append(cur_input_embeds)
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
+                all_split_sizes.append([])
                 continue
 
             image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
@@ -267,7 +274,9 @@ class LlavaMetaForCausalLM(ABC):
             for i in range(len(image_token_indices) - 1):
                 cur_input_ids_noim.append(cur_input_ids[image_token_indices[i]+1:image_token_indices[i+1]])
                 cur_labels_noim.append(cur_labels[image_token_indices[i]+1:image_token_indices[i+1]])
+            
             split_sizes = [x.shape[0] for x in cur_labels_noim]
+            all_split_sizes.append(split_sizes)
             cur_input_embeds = self.get_model().embed_tokens(torch.cat(cur_input_ids_noim))
             cur_input_embeds_no_im = torch.split(cur_input_embeds, split_sizes, dim=0)
             cur_new_input_embeds = []
@@ -289,6 +298,11 @@ class LlavaMetaForCausalLM(ABC):
 
             new_input_embeds.append(cur_new_input_embeds)
             new_labels.append(cur_new_labels)
+        
+        print('-'*100)
+        for split in all_split_sizes:
+            print(split)
+        print('-'*100)
 
         # Truncate sequences to max length as image embeddings can make the sequence longer
         tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
