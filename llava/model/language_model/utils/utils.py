@@ -79,6 +79,12 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             print(f'hidden state shape: {hidden_state.shape}')
             print(f'split size: {split_size}')
             
+            if split_size == 0:
+                img_hidden_state = hidden_state[0:0]
+                print(f'zero img _hidden_state: {img_hidden_state.shape}')
+                img_hidden_states.append(img_hidden_state)
+                continue
+
             img_hidden_state = torch.split(hidden_state, split_size, dim=0)
             img_hidden_states.append(img_hidden_state)
         
