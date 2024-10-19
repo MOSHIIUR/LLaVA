@@ -75,7 +75,7 @@ class LlamaSparseMoeBlock(nn.Module):
         hidden_states = hidden_states.view(-1, hidden_dim)
         # router_logits: (batch * sequence_length, n_experts)
         router_logits = self.gate(hidden_states)
-        print(f'Shape of router logits: {router_logits}')
+        print(f'Shape of router logits: {router_logits.shape}')
 
         routing_weights = F.softmax(router_logits, dim=1, dtype=torch.float)
         routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1)
