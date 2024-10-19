@@ -168,8 +168,6 @@ class MoEBaseModelOutputWithPast(ModelOutput):
 
 
 
-
-
 def MoELlamaDecoderLayer_forward(self):
     def forward(
             # self,
@@ -213,24 +211,26 @@ def MoELlamaDecoderLayer_forward(self):
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
         
-        # splitting_seqeunce
+        # untying modality
         text_splits, img_sequences = sequence_splits
         text_hidden_states, img_hidden_states = split_seqeunce(text_splits, img_sequences, hidden_states)
         padding_side = 'right'
         text_hidden_states, text_attention_mask = pad_sequence(text_hidden_states, padding_side)
         img_hidden_states, vision_attention_mask = pad_sequence(img_hidden_states, padding_side)
 
+        # moe calls
         # hidden_states = self.mlp(hidden_states)
         language_hidden_states, text_router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
         vision_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
         hidden_states, shared_router_logits = self.mlp(hidden_states) # shared_Moe call
 
-        # router_logits_tuple
+        # packing router logita
         router_logits = (shared_router_logits, text_router_logits, vision_router_logits)
         
         # splits
         text_splits, img_splits = sequence_splits
 
+        # tying modality 
         # unpad modality state
         language_hidden_states = split_hidden_state(language_hidden_states, text_splits, 'text')
         vision_hidden_states = split_hidden_state(vision_hidden_states, img_splits, 'vision')
@@ -536,6 +536,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         vision_aux_loss = None
 
         if output_router_logits:
+            
+            # shared load balancing loss
             aux_loss = load_balancing_loss_func(
                 shared_router_logits,
                 self.config.num_experts,
@@ -562,7 +564,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             if labels is not None:
                 print(f'Aux loss -> Shared:{aux_loss}; Text:{text_aux_loss}; Vision:{vision_aux_loss}')
                 aux_loss += text_aux_loss + vision_aux_loss
-                loss += self.config.router_aux_loss_coef * aux_loss.to(loss.device)  # make sure to reside in the same device
+                loss += self.config.router_aux_loss_coef * aux_loss.to(loss.device) 
         
         # import ipdb
         # ipdb.set_trace()
