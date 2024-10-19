@@ -613,7 +613,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # pretrained_state_dict = self.model.layers[layer_idx].mlp.state_dict()
             
             llama_mlp = self.model.layers[layer_idx].mlp
-            self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, (llama_mlp))
+            self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, llama_mlp)
             self.model.layers[layer_idx].text_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
             self.model.layers[layer_idx].vision_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
             # for e in self.model.layers[layer_idx].mlp.experts:  
