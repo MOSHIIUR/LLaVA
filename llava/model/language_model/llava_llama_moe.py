@@ -188,6 +188,11 @@ def MoELlamaDecoderLayer_forward(self):
         hidden_states = self.input_layernorm(hidden_states)
         # import ipdb
         # ipdb.set_trace()
+
+        print('*'*40+'llama-decoder-layer'+'*'*40)
+        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
+        print('*'*100)
+
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
             hidden_states=hidden_states,
@@ -215,8 +220,6 @@ def MoELlamaDecoderLayer_forward(self):
 
         if output_attentions:
             outputs += (self_attn_weights,)
-
-        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
 
         if use_cache:
             outputs += (present_key_value,)
@@ -252,7 +255,16 @@ def MoELlamaModel_forward(self):
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
+
+        print('*'*40+'llama-forward-layer'+'*'*40)
+        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
+        print('*'*100)
+        
         use_cache = use_cache if use_cache is not None else self.config.use_cache
+        print('*'*40+'llama-forward-layer-v2'+'*'*40)
+        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
+        print('*'*100)
+        
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         if (input_ids is None) ^ (inputs_embeds is not None):
@@ -333,6 +345,7 @@ def MoELlamaModel_forward(self):
 
             hidden_states = layer_outputs[0]
 
+
             if use_cache:
                 next_decoder_cache = layer_outputs[2 if output_attentions else 1]
 
@@ -400,6 +413,13 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # print('before prepare_inputs_labels_for_multimodal')
         # import ipdb
         # ipdb.set_trace()
+
+        print('*'*40+'llama-causal-LM'+'*'*40)
+        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
+        print('*'*100)
+
+
+
         if inputs_embeds is None:
             (
                 input_ids,
