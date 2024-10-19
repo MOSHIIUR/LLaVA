@@ -1116,6 +1116,10 @@ def train(attn_implementation=None):
         rank0_print("Adding LoRA adapters...")
         model = get_peft_model(model, lora_config)
 
+    # initialize the moe module in llm
+    if training_args.moe_enable:
+        model.initialize_moe_modules(model_args=model_args)
+
     if 'mpt' in model_args.model_name_or_path:
         tokenizer = transformers.AutoTokenizer.from_pretrained(
             model_args.model_name_or_path,
@@ -1210,9 +1214,6 @@ def train(attn_implementation=None):
 
         model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
         
-        # initialize the moe module in llm
-        if training_args.moe_enable:
-            model.initialize_moe_modules(model_args)
 
         if model_args.tune_mm_mlp_adapter:
             model.requires_grad_(False)
