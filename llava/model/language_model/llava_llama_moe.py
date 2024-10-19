@@ -259,6 +259,12 @@ def MoELlamaDecoderLayer_forward(self):
 
         if output_router_logits:
             outputs += (router_logits,)
+
+        print('*'*100)
+        if isinstance(outputs, tuple):
+            print(len(outputs))
+        else: print(type(outputs))
+        print('*'*100)
             
 
         return outputs
