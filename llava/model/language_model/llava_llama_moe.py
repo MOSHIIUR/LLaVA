@@ -611,10 +611,10 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # print(f'layer idx: {layer_idx}')
             # pretrained_state_dict = self.model.layers[layer_idx].mlp.state_dict()
             from copy import deepcopy
-            llama_mlp = deepcopy(self.model.layers[layer_idx].mlp)
-            self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, llama_mlp)
-            self.model.layers[layer_idx].text_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
-            self.model.layers[layer_idx].vision_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
+            llama_mlp = self.model.layers[layer_idx].mlp
+            self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, deepcopy(llama_mlp))
+            self.model.layers[layer_idx].text_moe = LlamaSparseMoeBlock(self.config, deepcopy(llama_mlp))
+            self.model.layers[layer_idx].vision_moe = LlamaSparseMoeBlock(self.config, deepcopy(llama_mlp))
             # for e in self.model.layers[layer_idx].mlp.experts:  
             #     loaded_state_dict = e.state_dict()
             #     assert all([torch.allclose(pretrained_state_dict[k], v) for k, v in loaded_state_dict.items()])
