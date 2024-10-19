@@ -56,6 +56,31 @@ def pad_sequence(new_input_embeds, padding_side):
     new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
     return new_input_embeds, attention_mask
 
+def split_hidden_state(hidden_states, split_sizes, modality):
+
+    if modality == 'text':
+        text_hidden_states = []
+        for hidden_state, split_size in zip(hidden_states, split_sizes):
+            
+            seq_len = sum(split_size)
+            split_size = [0, seq_len]
+
+            text_hidden_state = torch.split(hidden_state, split_size, dim=0)
+            text_hidden_states.append(text_hidden_state)
+        
+        return text_hidden_states
+    
+    else:
+        img_hidden_states = []
+        for hidden_state, split_size in zip(hidden_states, split_sizes):
+            
+            split_size = [0, split_size]
+
+            img_hidden_state = torch.split(hidden_state, split_size, dim=0)
+            img_hidden_states.append(img_hidden_state)
+        
+        return img_hidden_states
+
 
 def unpad_sequence(hidden_states, attention_masks, padding_side):
     unpad_hidden_states = []

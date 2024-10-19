@@ -226,10 +226,13 @@ def MoELlamaDecoderLayer_forward(self):
         hidden_states, router_logits = self.mlp(hidden_states) # shared_Moe call
         print(f'hidded states: {hidden_states.shape}')
 
-        # unpad modality state
-        language_hidden_states = unpad_sequence(language_hidden_states, text_attention_mask, padding_side)
-        vision_hidden_states = unpad_sequence(vision_hidden_states, vision_attention_mask, padding_side)
+        # splits
+        text_splits, img_splits = sequence_splits
 
+        # unpad modality state
+        language_hidden_states = split_hidden_state(language_hidden_states, text_splits, 'text')
+        vision_hidden_states = split_hidden_state(vision_hidden_states, img_splits, 'vision')
+        
         # concat_modality_state
         combined_hidden_states = concat_hidden_states(language_hidden_states, vision_hidden_states)
         
