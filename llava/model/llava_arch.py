@@ -304,9 +304,9 @@ class LlavaMetaForCausalLM(ABC):
             new_input_embeds.append(cur_new_input_embeds)
             new_labels.append(cur_new_labels)
         
-        # print('-'*100)
-        # for split in all_split_sizes:
-        #     print(split)
+        print('-'*100)
+        for split in all_split_sizes:
+            print(split)
 
         print('-'*100)
 
