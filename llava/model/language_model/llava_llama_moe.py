@@ -564,6 +564,9 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             
 
             if labels is not None:
+                aux_loss += text_aux_loss + vision_aux_loss
+                print(f'combined aux loss: {aux_loss}; aux coef{self.config.router_aux_loss_coef}')
+
                 loss += self.config.router_aux_loss_coef * aux_loss.to(loss.device)  # make sure to reside in the same device
         
         # import ipdb
