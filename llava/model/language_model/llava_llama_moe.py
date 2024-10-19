@@ -527,7 +527,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         print('*'*100)
         
         # unpack all router logits
-        shared_router_logits, text_router_logits, vision_router_logits = outputs.router_logits
+        router_logits = outputs.router_logits
+        shared_router_logits, text_router_logits, vision_router_logits = router_logits
 
         aux_loss = None
         text_aux_loss = None
