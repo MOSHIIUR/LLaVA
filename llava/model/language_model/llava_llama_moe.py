@@ -517,13 +517,13 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             loss = loss_fct(shift_logits, shift_labels)
 
         print('*'*100)
-        if isinstance(outputs, tuple):
-            print(f'Total outputs length: {len(outputs)}')
-            for output in outputs:
+        if isinstance(outputs.router_logits, tuple):
+            print(f'Total outputs.router_logits length: {len(outputs.router_logits)}')
+            for output in outputs.router_logits:
                 if isinstance(output, tuple):
                     print(f'len: {len(output)}')
                 else: print(f'type: {type(output)}')
-        else: print(type(outputs))
+        else: print(type(outputs.router_logits))
         print('*'*100)
         
         # unpack all router logits
