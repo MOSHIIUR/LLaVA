@@ -252,9 +252,9 @@ class LlavaMetaForCausalLM(ABC):
         all_split_sizes = []
         length_of_text_tokens = []
 
-        print('-'*100)
-        for input_id in input_ids:
-            print(f'cur_ids length: {len(input_id)}')
+        # print('-'*100)
+        # for input_id in input_ids:
+        #     print(f'cur_ids length: {len(input_id)}')
 
         for batch_idx, cur_input_ids in enumerate(input_ids):
             num_images = (cur_input_ids == IMAGE_TOKEN_INDEX).sum()
@@ -301,13 +301,14 @@ class LlavaMetaForCausalLM(ABC):
             new_input_embeds.append(cur_new_input_embeds)
             new_labels.append(cur_new_labels)
         
-        print('-'*100)
-        for split in all_split_sizes:
-            print(split)
+        # print('-'*100)
+        # for split in all_split_sizes:
+        #     print(split)
 
         print('-'*100)
         for idx in range(num_images):
             print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
+            print(f'text tokens: {new_input_embeds[:sum(all_split_sizes[idx])]}; image tokens: {new_input_embeds[sum(all_split_sizes[idx]):]}')
         print('-'*100)
 
         # Truncate sequences to max length as image embeddings can make the sequence longer
