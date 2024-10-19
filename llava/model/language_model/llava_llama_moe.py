@@ -226,7 +226,7 @@ def MoELlamaDecoderLayer_forward(self):
         hidden_states, shared_router_logits = self.mlp(hidden_states) # shared_Moe call
 
         # router_logits_tuple
-        router_logits += (shared_router_logits, text_router_logits, vision_router_logits)
+        router_logits = (shared_router_logits, text_router_logits, vision_router_logits)
         
         # splits
         text_splits, img_splits = sequence_splits
@@ -516,19 +516,16 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
-        print('*'*100)
-        if isinstance(outputs.router_logits, tuple):
-            print(f'Total outputs.router_logits length: {len(outputs.router_logits)}')
-            for output in outputs.router_logits:
-                if isinstance(output, tuple):
-                    print(f'len: {len(output)}')
-                else: print(f'type: {type(output)}')
-        else: print(type(outputs.router_logits))
-        print('*'*100)
-        
         # unpack all router logits
-        router_logits = outputs.router_logits
-        shared_router_logits, text_router_logits, vision_router_logits = router_logits
+        if isinstance(outputs.router_logits, tuple):
+            shared_router_logits = (); text_router_logits =(); vision_router_logits =()
+            for output in outputs.router_logits:
+                shared_logits, text_logits, vision_logits = output
+                shared_router_logits += (shared_logits,)                    
+                text_router_logits += (text_logits,)                    
+                vision_router_logits += (vision_logits,)                    
+                        
+        else: raise ValueError(f'Expected router logits as tuple got {type(outputs.router_logits)}')
 
         aux_loss = None
         text_aux_loss = None
@@ -536,7 +533,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
 
         if output_router_logits:
             aux_loss = load_balancing_loss_func(
-                shared_router_logits if return_dict else outputs[-1],
+                shared_router_logits,
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
                 attention_mask,
@@ -545,21 +542,21 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
 
             # text_load_balancing_loss
             text_aux_loss = load_balancing_loss_func(
-                text_router_logits if return_dict else outputs[-1],
+                text_router_logits,
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
                 attention_mask,
             )
-            print(f'Aux loss text: {text_aux_loss}')
+            print(f'Text -> Aux loss: {text_aux_loss}')
             
             # vision_load_balancing_loss
             vision_aux_loss = load_balancing_loss_func(
-                vision_router_logits if return_dict else outputs[-1],
+                vision_router_logits,
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
                 attention_mask,
             )
-            print(f'Aux loss vision: {vision_aux_loss}')
+            print(f'Vision -> Aux loss: {vision_aux_loss}')
             
 
             if labels is not None:
