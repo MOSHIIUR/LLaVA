@@ -24,7 +24,7 @@ from .multimodal_projector.builder import build_vision_projector
 from llava.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 
 from llava.mm_utils import get_anyres_image_grid_shape
-from llava.model.language_model.utils.utils import split_seqeunce
+from llava.model.language_model.utils.utils import *
 
 
 class LlavaMetaModel:
@@ -356,6 +356,17 @@ class LlavaMetaForCausalLM(ABC):
         new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
 
         new_text_hidden_states, new_img_hidden_states = split_seqeunce(all_split_sizes, img_sequences, new_input_embeds)
+        
+        # padd_sqquence
+        padding_side = getattr(self.config, 'tokenizer_padding_side', 'right')
+
+        new_text_hidden_states = pad_sequence(new_text_hidden_states, padding_side)
+        new_img_hidden_states = pad_sequence(new_img_hidden_states, padding_side)
+
+        print('*'*100)
+        print(f'new_text_hidden_states: {new_text_hidden_states.shape}')
+        print(f'new_img_hidden_states: {new_img_hidden_states.shape}')
+        print('*'*100)
 
         for idx, txt_feature in enumerate(new_text_hidden_states):
             print(f'txt: {txt_feature.shape} + img:{new_img_hidden_states[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')

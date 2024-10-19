@@ -21,7 +21,7 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
         
 
         text_tokens, img_tokens, padded_tokens = torch.split(input_embed, split_size, dim=0)
-        text_tokens = torch.cat((text_tokens, padded_tokens), dim=0)
+        # text_tokens = torch.cat((text_tokens, padded_tokens), dim=0)
         text_hidden_states.append(text_tokens)
         
         if img_sequence == 0:
@@ -29,10 +29,42 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
         
         img_hidden_states.append(img_tokens)
 
-    new_text_hidden_states = torch.stack(text_hidden_states, dim=0)
-    new_img_hidden_states = torch.stack(img_hidden_states, dim=0)
+    # new_text_hidden_states = torch.stack(text_hidden_states, dim=0)
+    # new_img_hidden_states = torch.stack(img_hidden_states, dim=0)
 
-    return new_text_hidden_states, new_img_hidden_states
+    return text_hidden_states, img_hidden_states
+
+
+
+def pad_sequence(new_input_embeds, padding_side):
+    # # Truncate sequences to max length as image embeddings can make the sequence longer
+    # tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
+    # if tokenizer_model_max_length is not None:
+    #     new_input_embeds = [x[:tokenizer_model_max_length] for x in new_input_embeds]
+    #     new_labels = [x[:tokenizer_model_max_length] for x in new_labels]
+
+    # Combine them
+    max_len = max(x.shape[0] for x in new_input_embeds)
+
+    new_input_embeds_padded = []
+
+    for i, cur_new_embed in enumerate(new_input_embeds):
+        cur_len = cur_new_embed.shape[0]
+        if padding_side == "left":
+            new_input_embeds_padded.append(torch.cat((
+                torch.zeros((max_len - cur_len, cur_new_embed.shape[1]), dtype=cur_new_embed.dtype, device=cur_new_embed.device),
+                cur_new_embed
+            ), dim=0))
+
+        else:
+            new_input_embeds_padded.append(torch.cat((
+                cur_new_embed,
+                torch.zeros((max_len - cur_len, cur_new_embed.shape[1]), dtype=cur_new_embed.dtype, device=cur_new_embed.device)
+            ), dim=0))
+
+
+    new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
+    return new_input_embeds
 
     
     
