@@ -1256,11 +1256,16 @@ def train(attn_implementation=None):
 
     rank0_print(model)
 
+    for name, param in model.named_parameters():
+        if param.requires_grad:  # Shared tensor check
+            print(f"Parameter {name} is grad {param.requires_grad}.")
+
     # count parameters in the model
     count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     count_par = sum(p.numel() for p in model.parameters())
     rank0_print(f"Trainable parameters: {count_par_trainable}")
     rank0_print(f"Total parameters: {count_par}")
+
     
 
     data_module = make_supervised_data_module(tokenizer=tokenizer,

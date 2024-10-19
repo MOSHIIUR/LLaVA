@@ -623,9 +623,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
 
         print(f'Vision-Text-Shared Sparse Moe Block applied')
 
-        for name, param in self.named_parameters():
-            if param.storage().size() > 1:  # Shared tensor check
-                print(f"Parameter {name} is shared across components.")
                          
         for m in self.model.layers:
             m.forward = MoELlamaDecoderLayer_forward(m)
