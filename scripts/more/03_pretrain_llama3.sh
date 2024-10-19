@@ -5,6 +5,7 @@ export WANDB_PROJECT=FineTuneLLaVa
 export WANDB_MODE=offline
 export TOKENIZER_PATH=meta-llama/Meta-Llama-3-8B-Instruct
 export WANDB_API_KEY=
+export HF_TOKEN=
 
 IFS=',' read -r -a nodelist <<<$SLURM_NODELIST
 export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)

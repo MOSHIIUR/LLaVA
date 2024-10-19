@@ -1013,6 +1013,11 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer,
 def train(attn_implementation=None):
     global local_rank
 
+    print('*'*100)
+    print(f'HF_TOKEN: {os.environ['HF_TOKEN']}')
+    print(f'WANDB_API_KEY: {os.environ['WANDB_API_KEY']}')
+    print('*'*100)
+
     parser = transformers.HfArgumentParser(
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
