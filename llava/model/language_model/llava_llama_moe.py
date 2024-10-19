@@ -610,7 +610,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         for layer_idx in range(num_layers):
             # print(f'layer idx: {layer_idx}')
             # pretrained_state_dict = self.model.layers[layer_idx].mlp.state_dict()
-            llama_mlp = self.model.layers[layer_idx].mlp
+            from copy import deepcopy
+            llama_mlp = deepcopy(self.model.layers[layer_idx].mlp)
             self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, llama_mlp)
             self.model.layers[layer_idx].text_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
             self.model.layers[layer_idx].vision_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
