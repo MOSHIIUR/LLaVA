@@ -184,6 +184,11 @@ def MoELlamaDecoderLayer_forward(self):
             **kwargs,            
     ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
         
+        output_router_logits = (
+            output_router_logits if output_router_logits is not None else self.config.output_router_logits
+        )
+        print(f'output router logits: {output_router_logits}')
+        
         residual = hidden_states
         hidden_states = self.input_layernorm(hidden_states)
         # import ipdb
