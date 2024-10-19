@@ -183,8 +183,8 @@ def MoELlamaDecoderLayer_forward(self):
             position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
             **kwargs,            
     ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
+        
         residual = hidden_states
-
         hidden_states = self.input_layernorm(hidden_states)
         # import ipdb
         # ipdb.set_trace()
@@ -207,12 +207,16 @@ def MoELlamaDecoderLayer_forward(self):
         hidden_states = self.post_attention_layernorm(hidden_states)
         # hidden_states = self.mlp(hidden_states)
         hidden_states, router_logits = self.mlp(hidden_states) # replacing the llama mlp call 
+        hidden_states = residual + hidden_states
+        
         # import ipdb
         # ipdb.set_trace()
         outputs = (hidden_states,)
 
         if output_attentions:
             outputs += (self_attn_weights,)
+
+        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
 
         if use_cache:
             outputs += (present_key_value,)
@@ -240,6 +244,7 @@ def MoELlamaModel_forward(self):
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
     ) -> Union[Tuple, MoeModelOutputWithPast]:
+        
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
