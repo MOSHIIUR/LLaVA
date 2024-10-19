@@ -347,23 +347,6 @@ class LlavaMetaForCausalLM(ABC):
         new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
         sequence_splits = (text_splits, img_sequences)
 
-        # new_text_hidden_states, new_img_hidden_states = split_seqeunce(text_splits, img_sequences, new_input_embeds)
-        
-        # # padd_sqquence
-        # padding_side = getattr(self.config, 'tokenizer_padding_side', 'right')
-
-        # new_text_hidden_states = pad_sequence(new_text_hidden_states, padding_side)
-        # new_img_hidden_states = pad_sequence(new_img_hidden_states, padding_side)
-
-        # print('*'*100)
-        # print(f'new_text_hidden_states: {new_text_hidden_states.shape}')
-        # print(f'new_img_hidden_states: {new_img_hidden_states.shape}')
-        # print('*'*100)
-
-        # for idx, txt_feature in enumerate(new_text_hidden_states):
-        #     print(f'txt: {txt_feature.shape} + img:{new_img_hidden_states[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
-        # print('*'*100)
-
         if _labels is None:
             new_labels = None
         else:

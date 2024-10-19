@@ -66,16 +66,6 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             splits = [seq_len, hidden_state.shape[0] - seq_len]
             text_hidden_state, _ = torch.split(hidden_state, splits, dim=0)
             text_hidden_states.append(text_hidden_state)
-            
-            # print(f'sequence length: {seq_len}; hidden state shape: {hidden_state.shape[0]}')
-
-            # if seq_len < hidden_state.shape[0]:
-            #     text_hidden_state = torch.split(hidden_state, seq_len, dim=0)
-            #     print(f'length: {len(text_hidden_state)}')
-            #     text_hidden_states.append(text_hidden_state)
-            # else:
-            #     text_hidden_state = torch.split(hidden_state, seq_len, dim=0)
-            #     text_hidden_states.append(text_hidden_state)
         
         return text_hidden_states
     
@@ -122,9 +112,6 @@ def concat_hidden_states(text_hidden_states, img_hidden_states):
     combined_hidden_states = []
 
     for text_hidden_state, img_hidden_state in zip(text_hidden_states, img_hidden_states):
-        # print(f'text_hiden_state: {text_hidden_state.shape}')
-        # print(f'img_hidden_state: {img_hidden_state.shape}')
-        # print('*'*100)
         combined_state = torch.cat((text_hidden_state, img_hidden_state), dim=0)
         combined_hidden_states.append(combined_state)
 

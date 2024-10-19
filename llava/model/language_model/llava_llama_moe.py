@@ -500,9 +500,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
             logits = self.lm_head(hidden_states[:, -num_logits_to_keep:, :])
         
-        # logits = self.lm_head(hidden_states)
-        # logits = logits.float()
-
         loss = None
         if labels is not None:
             # Shift so that tokens < n predict n
@@ -523,9 +520,16 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 shared_logits, text_logits, vision_logits = output
                 shared_router_logits += (shared_logits,)                    
                 text_router_logits += (text_logits,)                    
-                vision_router_logits += (vision_logits,)                    
+                vision_router_logits += (vision_logits,)
                         
         else: raise ValueError(f'Expected router logits as tuple got {type(outputs.router_logits)}')
+
+        # splitting_seqeunce
+        text_splits, img_sequences = sequence_splits
+        text_tokens, img_tokens = split_seqeunce(text_splits, img_sequences, inputs_embeds)
+        padding_side = 'right'
+        _, text_attention_mask = pad_sequence(text_tokens, padding_side)
+        _, vision_attention_mask = pad_sequence(img_tokens, padding_side)
 
         aux_loss = None
         text_aux_loss = None
@@ -545,7 +549,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 text_router_logits,
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
-                attention_mask,
+                text_attention_mask,
             )
             print(f'Text -> Aux loss: {text_aux_loss}')
             
@@ -554,7 +558,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 vision_router_logits,
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
-                attention_mask,
+                vision_attention_mask,
             )
             print(f'Vision -> Aux loss: {vision_aux_loss}')
             
