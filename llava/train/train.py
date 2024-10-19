@@ -1116,7 +1116,9 @@ def train(attn_implementation=None):
         rank0_print("Adding LoRA adapters...")
         model = get_peft_model(model, lora_config)
 
-    rank0_print(f'moe_enable: {training_args.moe_enable}')
+    print('*'*100)
+    print(f'moe_enable: {training_args.moe_enable}')
+    print('*'*100)
 
     # initialize the moe module in llm
     if training_args.moe_enable:
