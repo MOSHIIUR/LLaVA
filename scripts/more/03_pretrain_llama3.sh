@@ -17,8 +17,8 @@ echo "MASTER PORT: ${MASTER_PORT}"
 
 epochs=1
 llama3_path=meta-llama/Meta-Llama-3.1-8B-Instruct
-images_path=playground/data/LLaVA-Pretrain/images
-data_train_path=playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json
+images_path=playground/data
+data_train_path=playground/data/llava_v1_5_mix665k.json
 vision_tower=openai/clip-vit-large-patch14-336
 
 job_name="llava-llama-llm-moe"
