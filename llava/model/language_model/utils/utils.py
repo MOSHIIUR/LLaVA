@@ -56,7 +56,7 @@ def pad_sequence(new_input_embeds, padding_side):
     new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
     return new_input_embeds, attention_mask
 
-def split_hidden_state(hidden_states, split_sizes, modality):
+def unpad_sequence(hidden_states, split_sizes, modality):
 
     if modality == 'text':
         text_hidden_states = []
@@ -85,28 +85,6 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             img_hidden_states.append(img_hidden_state)
         
         return img_hidden_states
-
-
-def unpad_sequence(hidden_states, attention_masks, padding_side):
-    unpad_hidden_states = []
-    for idx, hidden_state in enumerate(hidden_states):
-
-        cur_attn_mask = attention_masks[idx]
-
-        if padding_side == 'left':
-            slice_idx = cur_attn_mask.nonzero().max().item
-            unpad_hidden_state = hidden_state[slice_idx:]
-
-        else:
-            slice_idx = cur_attn_mask.sum().item()
-            if slice_idx != hidden_state.shape[0]:
-                unpad_hidden_state = hidden_state[:slice_idx]
-            
-            else : unpad_hidden_state = hidden_state
-
-        unpad_hidden_states.append(unpad_hidden_state)
-
-    return unpad_hidden_states
 
 def concat_hidden_states(text_hidden_states, img_hidden_states):
     combined_hidden_states = []

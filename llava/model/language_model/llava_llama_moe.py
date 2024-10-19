@@ -207,7 +207,6 @@ def MoELlamaDecoderLayer_forward(self):
         )
         hidden_states = residual + hidden_states
 
-        # Fully Connected
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
         
@@ -215,8 +214,8 @@ def MoELlamaDecoderLayer_forward(self):
         text_splits, img_sequences = sequence_splits
         text_hidden_states, img_hidden_states = split_seqeunce(text_splits, img_sequences, hidden_states)
         padding_side = 'right'
-        text_hidden_states, text_attention_mask = pad_sequence(text_hidden_states, padding_side)
-        img_hidden_states, vision_attention_mask = pad_sequence(img_hidden_states, padding_side)
+        text_hidden_states, _ = pad_sequence(text_hidden_states, padding_side)
+        img_hidden_states, _ = pad_sequence(img_hidden_states, padding_side)
 
         # moe calls
         # hidden_states = self.mlp(hidden_states)
@@ -224,16 +223,13 @@ def MoELlamaDecoderLayer_forward(self):
         vision_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
         hidden_states, shared_router_logits = self.mlp(hidden_states) # shared_Moe call
 
-        # packing router logita
+        # packing router logits
         router_logits = (shared_router_logits, text_router_logits, vision_router_logits)
         
-        # splits
-        text_splits, img_splits = sequence_splits
-
         # tying modality 
         # unpad modality state
-        language_hidden_states = split_hidden_state(language_hidden_states, text_splits, 'text')
-        vision_hidden_states = split_hidden_state(vision_hidden_states, img_splits, 'vision')
+        language_hidden_states = unpad_sequence(language_hidden_states, text_splits, 'text')
+        vision_hidden_states = unpad_sequence(vision_hidden_states, img_sequences, 'vision')
         
         # concat_modality_state
         combined_hidden_states = concat_hidden_states(language_hidden_states, vision_hidden_states)
