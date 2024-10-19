@@ -594,7 +594,7 @@ def preprocess_llama_3_1(
             cur_len += round_len
 
         target[cur_len:] = IGNORE_INDEX
-        # cur_len= cur_len + len(tokenizer(sep, add_special_tokens=False).input_ids)
+        cur_len= cur_len + len(tokenizer(sep, add_special_tokens=False).input_ids)
 
         # if cur_len > tokenizer.model_max_length: print(f"WARNING: max length context")
         if cur_len < tokenizer.model_max_length:
@@ -1116,6 +1116,9 @@ def train(attn_implementation=None):
         rank0_print("Adding LoRA adapters...")
         model = get_peft_model(model, lora_config)
 
+    # initialize the moe module in llm
+    if training_args.moe_enable:
+        model.initialize_moe_modules(model_args=model_args)
 
     if 'mpt' in model_args.model_name_or_path:
         tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -1210,14 +1213,6 @@ def train(attn_implementation=None):
         model.config.tokenizer_model_max_length = tokenizer.model_max_length
 
         model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
-        
-        print('*'*100)
-        print(f'moe_enable: {training_args.moe_enable}')
-        print('*'*100)
-
-        # initialize the moe module in llm
-        if training_args.moe_enable:
-            model.initialize_moe_modules(model_args=model_args)
 
         if model_args.tune_mm_mlp_adapter:
             model.requires_grad_(False)
@@ -1259,6 +1254,17 @@ def train(attn_implementation=None):
                         module = module.to(torch.bfloat16)
 
     rank0_print(model)
+
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            print(f'Parameter name: {name}, requires grad True')
+
+    # count parameters in the model
+    count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    count_par = sum(p.numel() for p in model.parameters())
+    rank0_print(f"Trainable parameters: {count_par_trainable}")
+    rank0_print(f"Total parameters: {count_par}")
+    
 
     data_module = make_supervised_data_module(tokenizer=tokenizer,
                                               data_args=data_args, model_args=model_args)

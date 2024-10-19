@@ -595,7 +595,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
 
     def initialize_moe_modules(self, model_args):
 
-        print('initializing moe modules')
 
         self.config.num_experts = model_args.num_experts
         self.config.num_experts_per_tok = model_args.num_experts_per_tok
@@ -603,7 +602,14 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         self.config.output_router_logits = True
         num_layers = self.config.num_hidden_layers
 
-        print(f'num_layers: {num_layers}')
+        params_to_enable_grad = ['gate_proj', 'up_proj', 'down_proj']
+        for n, p in self.named_parameters():
+            if any(name in n for name in params_to_enable_grad):
+                continue
+            else:
+                p.requires_grad = False  
+
+
 
         for layer_idx in range(num_layers):
             # print(f'layer idx: {layer_idx}')
