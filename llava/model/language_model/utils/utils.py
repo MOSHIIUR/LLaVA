@@ -67,7 +67,7 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             print(f'split size: {split_size}')
             print(f'hidden state shape: {hidden_state.shape}')
 
-            text_hidden_state = torch.split(hidden_state, split_size, dim=0)
+            text_hidden_state = torch.split(hidden_state, seq_len, dim=0)
             text_hidden_states.append(text_hidden_state)
         
         return text_hidden_states
