@@ -64,6 +64,7 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             
             seq_len = sum(split_size)
             text_hidden_state = torch.split(hidden_state, seq_len, dim=0)
+            print(f'type: {type(text_hidden_state)}')
             text_hidden_states.append(text_hidden_state)
         
         return text_hidden_states
@@ -75,10 +76,12 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             
             if split_size == 0:
                 img_hidden_state = hidden_state[0:0]
+                print(f'type: {type(img_hidden_state)}')
                 img_hidden_states.append(img_hidden_state)
                 continue
 
             img_hidden_state = torch.split(hidden_state, split_size, dim=0)
+            print(f'type: {type(img_hidden_state)}')
             img_hidden_states.append(img_hidden_state)
         
         return img_hidden_states
