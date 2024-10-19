@@ -426,7 +426,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         self.pretraining_tp = config.pretraining_tp
         self.vocab_size = config.vocab_size
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
-        self.padding_side = config.tokenizer_padding_side
         # Initialize weights and apply final processing
         self.post_init()
 
@@ -528,7 +527,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # get attention mask to calculate image/text load balancing loss
         text_splits, img_sequences = sequence_splits
         text_tokens, img_tokens = split_seqeunce(text_splits, img_sequences, inputs_embeds)
-        padding_side = self.padding_side
+        padding_side = self.config.tokenizer_padding_side
         _, text_attention_mask = pad_sequence(text_tokens, padding_side)
         _, vision_attention_mask = pad_sequence(img_tokens, padding_side)
 
