@@ -261,6 +261,7 @@ def MoELlamaModel_forward(self):
         print('*'*100)
         
         use_cache = use_cache if use_cache is not None else self.config.use_cache
+        
         print('*'*40+'llama-forward-layer-v2'+'*'*40)
         print(f"use_cache: {use_cache}, type: {type(use_cache)}")
         print('*'*100)
@@ -365,8 +366,13 @@ def MoELlamaModel_forward(self):
         if return_legacy_cache:
             next_cache = next_cache.to_legacy_cache()
 
+        print('*'*40+'llama-forward-layer-v3'+'*'*40)
+        print(f"use_cache: {next_cache}, type: {type(next_cache)}")
+        print('*'*100)
+
         if not return_dict:
             return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
+        
         return MoeModelOutputWithPast(
             last_hidden_state=hidden_states,
             past_key_values=next_cache,
