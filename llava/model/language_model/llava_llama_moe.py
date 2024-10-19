@@ -189,9 +189,6 @@ def MoELlamaDecoderLayer_forward(self):
         # import ipdb
         # ipdb.set_trace()
 
-        print('*'*40+'llama-decoder-layer'+'*'*40)
-        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
-        print('*'*100)
 
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
@@ -256,15 +253,9 @@ def MoELlamaModel_forward(self):
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
 
-        print('*'*40+'llama-forward-layer'+'*'*40)
-        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
-        print('*'*100)
         
         use_cache = use_cache if use_cache is not None else self.config.use_cache
         
-        print('*'*40+'llama-forward-layer-v2'+'*'*40)
-        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
-        print('*'*100)
         
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
@@ -418,11 +409,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # print('before prepare_inputs_labels_for_multimodal')
         # import ipdb
         # ipdb.set_trace()
-
-        print('*'*40+'llama-causal-LM'+'*'*40)
-        print(f"use_cache: {use_cache}, type: {type(use_cache)}")
-        print('*'*100)
-
 
 
         if inputs_embeds is None:
