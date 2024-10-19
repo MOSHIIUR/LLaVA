@@ -1014,8 +1014,8 @@ def train(attn_implementation=None):
     global local_rank
 
     print('*'*100)
-    print(f'HF_TOKEN: {os.environ['HF_TOKEN']}')
-    print(f'WANDB_API_KEY: {os.environ['WANDB_API_KEY']}')
+    print(f'HF_TOKEN: {os.environ["HF_TOKEN"]}')
+    print(f'WANDB_API_KEY: {os.environ["WANDB_API_KEY"]}')
     print('*'*100)
 
     parser = transformers.HfArgumentParser(
