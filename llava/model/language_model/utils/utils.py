@@ -12,6 +12,7 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
                              f'expected {total_seq_len}, but got {txt_seq_len + img_sequence + padded_sequence}')
 
         split_size = [txt_seq_len, img_sequence, padded_sequence]
+        print(f'split size: {split_size}')
 
         
 
