@@ -1209,6 +1209,11 @@ def train(attn_implementation=None):
         model.config.tokenizer_model_max_length = tokenizer.model_max_length
 
         model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
+        
+        # initialize the moe module in llm
+        if training_args.moe_enable:
+            model.initialize_moe_modules(model_args)
+
         if model_args.tune_mm_mlp_adapter:
             model.requires_grad_(False)
             for p in model.get_model().mm_projector.parameters():
