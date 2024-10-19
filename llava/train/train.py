@@ -1014,7 +1014,7 @@ def train(attn_implementation=None):
     global local_rank
 
     print('*'*100)
-    hf_token=os.environ.get('HF_TOEKN')
+    hf_token=os.environ.get('HF_TOKEN')
     wandb_api_key=os.environ.get('WANDB_API_KEY')
     print(f'HF_TOKEN: {hf_token}')
     print(f'WANDB_API_KEY: {wandb_api_key}')

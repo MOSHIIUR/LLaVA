@@ -1,9 +1,7 @@
 #!/bin/bash
 
-export WANDB_ENTITYproject_entity
 export WANDB_PROJECT=FineTuneLLaVa
-export WANDB_MODE=offline
-export TOKENIZER_PATH=meta-llama/Meta-Llama-3-8B-Instruct
+export TOKENIZER_PATH=meta-llama/Meta-Llama-3.1-8B-Instruct
 export WANDB_API_KEY=
 export HF_TOKEN=
 
@@ -18,8 +16,8 @@ echo "MASTER ADDR: ${MASTER_ADDR}"
 echo "MASTER PORT: ${MASTER_PORT}"
 
 epochs=1
-llama3_path=meta-llama/Meta-Llama-3-8B-Instruct
-images_path=playground/data/images
+llama3_path=meta-llama/Meta-Llama-3.1-8B-Instruct
+images_path=playground/data/LLaVA-Pretrain/images
 data_train_path=playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json
 vision_tower=openai/clip-vit-large-patch14-336
 
