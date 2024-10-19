@@ -1,13 +1,10 @@
 #!/bin/bash
 
-source activate more
-cd local/path
-
-export PYTHONPATH=.
 export WANDB_ENTITYproject_entity
-export WANDB_PROJECT=project_name
+export WANDB_PROJECT=FineTuneLLaVa
 export WANDB_MODE=offline
 export TOKENIZER_PATH=meta-llama/Meta-Llama-3-8B-Instruct
+export WANDB_API_KEY=
 
 IFS=',' read -r -a nodelist <<<$SLURM_NODELIST
 export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
@@ -20,12 +17,12 @@ echo "MASTER ADDR: ${MASTER_ADDR}"
 echo "MASTER PORT: ${MASTER_PORT}"
 
 epochs=1
-llama3_path=local/path
-images_path=local/path
-data_train_path=local/path
-vision_tower=local/path
+llama3_path=meta-llama/Meta-Llama-3-8B-Instruct
+images_path=playground/data/images
+data_train_path=playground/data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json
+vision_tower=openai/clip-vit-large-patch14-336
 
-job_name="your/job/name"
+job_name="llava-llama-llm-moe"
 echo "job name: $job_name"
 
 deepspeed llava/train/train_mem.py \
@@ -38,12 +35,16 @@ deepspeed llava/train/train_mem.py \
 --image_folder $images_path \
 --vision_tower $vision_tower \
 --mm_projector_type mlp2x_gelu \
+--moe_enable True \
+--num_experts 4 \
+--num_experts_per_tok 2 \
+--router_aux_loss_coef 0.01 \
 --tune_mm_mlp_adapter True \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
 --mm_use_im_patch_token False \
 --bf16 True \
---output_dir ./checkpoints/${job_name} \
+--output_dir ckpts/${job_name} \
 --num_train_epochs $epochs \
 --per_device_train_batch_size 16 \
 --per_device_eval_batch_size 4 \
