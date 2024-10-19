@@ -213,6 +213,8 @@ def MoELlamaDecoderLayer_forward(self):
         hidden_states = self.post_attention_layernorm(hidden_states)
         # hidden_states = self.mlp(hidden_states)
         hidden_states, router_logits = self.mlp(hidden_states) # replacing the llama mlp call 
+        hidden_states, router_logits = self.text_moe(hidden_states) # replacing the llama mlp call 
+        hidden_states, router_logits = self.vision_moe(hidden_states) # replacing the llama mlp call 
         hidden_states = residual + hidden_states
         
         # import ipdb
@@ -422,8 +424,6 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # import ipdb
         # ipdb.set_trace()
 
-        print(self.config)
-
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
@@ -546,8 +546,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # pretrained_state_dict = self.model.layers[layer_idx].mlp.state_dict()
             llama_mlp = self.model.layers[layer_idx].mlp
             self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, llama_mlp)
-            self.model.layers[layer_idx].text_mlp = self.model.layers[layer_idx].mlp
-            self.model.layers[layer_idx].vision_mlp = self.model.layers[layer_idx].mlp
+            self.model.layers[layer_idx].text_moe = self.model.layers[layer_idx].mlp
+            self.model.layers[layer_idx].vision_moe = self.model.layers[layer_idx].mlp
             # for e in self.model.layers[layer_idx].mlp.experts:  
             #     loaded_state_dict = e.state_dict()
             #     assert all([torch.allclose(pretrained_state_dict[k], v) for k, v in loaded_state_dict.items()])
