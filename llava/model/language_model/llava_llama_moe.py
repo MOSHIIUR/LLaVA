@@ -481,17 +481,17 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
 
     def initialize_moe_modules(self, model_args):
 
-        rank0_print('initializing moe modules')
+        print('initializing moe modules')
 
         self.config.num_experts = model_args.num_experts
         self.config.num_experts_per_tok = model_args.num_experts_per_tok
         self.config.router_aux_loss_coef = model_args.router_aux_loss_coef
         num_layers = self.config.num_hidden_layers
 
-        rank0_print(f'num_layers: {num_layers}')
+        print(f'num_layers: {num_layers}')
 
         for layer_idx in range(num_layers):
-            rank0_print(f'layer idx: {layer_idx}')
+            print(f'layer idx: {layer_idx}')
             pretrained_state_dict = self.model.layers[layer_idx].mlp.state_dict()
             llama_mlp = self.model.layers[layer_idx].mlp
             self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, llama_mlp)
@@ -500,13 +500,13 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 assert all([torch.allclose(pretrained_state_dict[k], v) for k, v in loaded_state_dict.items()])
                 assert all([torch.allclose(loaded_state_dict[k], v) for k, v in pretrained_state_dict.items()])
 
-        rank0_print(f'Sparse Moe Block applied')
+        print(f'Sparse Moe Block applied')
 
         for m in self.model.layers:
             m.forward = MoELlamaDecoderLayer_forward(m)
-        rank0_print(f'replace LlamaDecoderLayer.forward to MoELlamaDecoderLayer.forward')
+        print(f'replace LlamaDecoderLayer.forward to MoELlamaDecoderLayer.forward')
         self.model.forward = MoELlamaModel_forward(self.model)
-        rank0_print(f'replace LlamaModel.forward to MoELlamaModel.forward')
+        print(f'replace LlamaModel.forward to MoELlamaModel.forward')
 
 
 class EvalMoELLaVALlamaForCausalLM(MoELLaVALlamaForCausalLM):
