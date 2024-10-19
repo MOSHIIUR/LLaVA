@@ -226,7 +226,7 @@ def MoELlamaDecoderLayer_forward(self):
         hidden_states, shared_router_logits = self.mlp(hidden_states) # shared_Moe call
 
         # router_logits_tuple
-        router_logits = (shared_router_logits, text_router_logits, vision_router_logits)
+        router_logits += (shared_router_logits, text_router_logits, vision_router_logits)
         
         # splits
         text_splits, img_splits = sequence_splits
