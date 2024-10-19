@@ -178,6 +178,7 @@ def MoELlamaDecoderLayer_forward(self):
             past_key_value: Optional[Tuple[torch.Tensor]] = None,
             output_attentions: Optional[bool] = False,
             output_router_logits: Optional[bool] = False,
+            sequence_splits: Optional[tuple] = None,
             use_cache: Optional[bool] = False,
             cache_position: Optional[torch.LongTensor] = None,
             position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
@@ -245,6 +246,7 @@ def MoELlamaModel_forward(self):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         output_router_logits: Optional[bool] = None,
+        sequence_splits: Optional[tuple] = None,
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
     ) -> Union[Tuple, MoeModelOutputWithPast]:
@@ -324,7 +326,7 @@ def MoELlamaModel_forward(self):
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
                         # None for past_key_value
-                        return module(*inputs, past_key_value, output_attentions, output_router_logits)
+                        return module(*inputs, past_key_value, output_attentions, output_router_logits, sequence_splits)
 
                     return custom_forward
 
@@ -339,6 +341,8 @@ def MoELlamaModel_forward(self):
                     position_ids=position_ids,
                     past_key_value=past_key_values,
                     output_attentions=output_attentions,
+                    output_router_logits=output_router_logits,
+                    sequence_splits=sequence_splits,
                     use_cache=use_cache,
                     cache_position=cache_position,
                     position_embeddings=position_embeddings,
@@ -409,6 +413,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             output_attentions: Optional[bool] = None,
             output_hidden_states: Optional[bool] = None,
             output_router_logits: Optional[bool] = None,
+            sequence_splits: Optional[tuple] = None,
             images: Optional[torch.FloatTensor] = None,
             num_logits_to_keep: int = 0,
             return_dict: Optional[bool] = None,
@@ -430,7 +435,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 attention_mask,
                 past_key_values,
                 inputs_embeds,
-                labels
+                labels,
+                sequence_splits
             ) = self.prepare_inputs_labels_for_multimodal(
                 input_ids,
                 position_ids,
@@ -451,6 +457,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
             output_router_logits=output_router_logits,
+            sequence_splits = sequence_splits,
             return_dict=return_dict,
         )
         # import ipdb

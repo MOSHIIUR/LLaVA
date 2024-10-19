@@ -151,9 +151,11 @@ class LlavaMetaForCausalLM(ABC):
         self, input_ids, position_ids, attention_mask, past_key_values, labels,
         images, image_sizes=None
     ):
+        sequence_splits = ()
+
         vision_tower = self.get_vision_tower()
         if vision_tower is None or images is None or input_ids.shape[1] == 1:
-            return input_ids, position_ids, attention_mask, past_key_values, None, labels
+            return input_ids, position_ids, attention_mask, past_key_values, None, labels, sequence_splits
 
         # enter in this if from llava 1.6
         if type(images) is list or images.ndim == 5:
@@ -250,7 +252,7 @@ class LlavaMetaForCausalLM(ABC):
         new_input_embeds = []
         new_labels = []
         cur_image_idx = 0
-        all_split_sizes = []
+        text_splits = []
         img_sequences = []
         length_of_text_tokens = []
 
@@ -266,7 +268,7 @@ class LlavaMetaForCausalLM(ABC):
                 cur_image_idx += 1
                 split_sizes = [0, len(cur_input_embeds_1)]
                 img_sequences.append(0)
-                all_split_sizes.append(split_sizes)
+                text_splits.append(split_sizes)
                 length_of_text_tokens.append(cur_input_embeds.shape[0])
                 continue
 
@@ -279,7 +281,7 @@ class LlavaMetaForCausalLM(ABC):
                 cur_labels_noim.append(cur_labels[image_token_indices[i]+1:image_token_indices[i+1]])
             
             split_sizes = [x.shape[0] for x in cur_labels_noim]
-            all_split_sizes.append(split_sizes)
+            text_splits.append(split_sizes)
             img_sequences.append(image_features[batch_idx].shape[0])
             cur_input_embeds = self.get_model().embed_tokens(torch.cat(cur_input_ids_noim))
             length_of_text_tokens.append(cur_input_embeds.shape[0])
@@ -304,17 +306,6 @@ class LlavaMetaForCausalLM(ABC):
             new_input_embeds.append(cur_new_input_embeds)
             new_labels.append(cur_new_labels)
         
-        # print('-'*100)
-        # for split in all_split_sizes:
-        #     print(split)
-
-        # print('-'*100)
-
-        # for idx in range(len(all_split_sizes)):
-        #     print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
-        #     print(f'text tokens: {new_input_embeds[idx][:sum(all_split_sizes[idx])].shape}; image tokens: {new_input_embeds[idx][sum(all_split_sizes[idx]):].shape}')
-        # print('-'*100)
-
         # Truncate sequences to max length as image embeddings can make the sequence longer
         tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
         if tokenizer_model_max_length is not None:
@@ -354,14 +345,15 @@ class LlavaMetaForCausalLM(ABC):
 
 
         new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
+        sequence_splits = (text_splits, img_sequences)
 
-        new_text_hidden_states, new_img_hidden_states = split_seqeunce(all_split_sizes, img_sequences, new_input_embeds)
+        # new_text_hidden_states, new_img_hidden_states = split_seqeunce(text_splits, img_sequences, new_input_embeds)
         
-        # padd_sqquence
-        padding_side = getattr(self.config, 'tokenizer_padding_side', 'right')
+        # # padd_sqquence
+        # padding_side = getattr(self.config, 'tokenizer_padding_side', 'right')
 
-        new_text_hidden_states = pad_sequence(new_text_hidden_states, padding_side)
-        new_img_hidden_states = pad_sequence(new_img_hidden_states, padding_side)
+        # new_text_hidden_states = pad_sequence(new_text_hidden_states, padding_side)
+        # new_img_hidden_states = pad_sequence(new_img_hidden_states, padding_side)
 
         # print('*'*100)
         # print(f'new_text_hidden_states: {new_text_hidden_states.shape}')
@@ -385,7 +377,7 @@ class LlavaMetaForCausalLM(ABC):
         if _position_ids is None:
             position_ids = None
 
-        return None, position_ids, attention_mask, past_key_values, new_input_embeds, new_labels
+        return None, position_ids, attention_mask, past_key_values, new_input_embeds, new_labels, sequence_splits
 
     def initialize_vision_tokenizer(self, model_args, tokenizer):
         if model_args.mm_use_im_patch_token:
