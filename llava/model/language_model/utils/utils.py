@@ -58,22 +58,22 @@ def pad_sequence(new_input_embeds, padding_side):
 
 
 def unpad_sequence(hidden_states, attention_masks, padding_side):
-    unpad_hidden_sates = []
+    unpad_hidden_states = []
     for idx, hidden_state in enumerate(hidden_states):
 
         cur_attn_mask = attention_masks[idx]
 
         if padding_side == 'left':
             slice_idx = cur_attn_mask.nonzero().max().item
-            unpad_hidden_sate = hidden_state[slice_idx:]
+            unpad_hidden_state = hidden_state[slice_idx:]
 
         else:
-            slice_idx = cur_attn_mask.sum().item
-            unpad_hidden_sate = hidden_state[:slice_idx]
+            slice_idx = cur_attn_mask.sum().item()
+            unpad_hidden_state = hidden_state[:slice_idx]
 
-        unpad_hidden_sates.append(unpad_hidden_sate)
+        unpad_hidden_states.append(unpad_hidden_state)
 
-    return unpad_hidden_sates
+    return unpad_hidden_states
 
 def concat_hidden_states(text_hidden_states, img_hidden_states):
     combined_hidden_states = []
