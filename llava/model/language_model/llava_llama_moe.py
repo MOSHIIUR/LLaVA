@@ -225,8 +225,6 @@ def MoELlamaDecoderLayer_forward(self):
         vision_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
         hidden_states, router_logits = self.mlp(hidden_states) # shared_Moe call
         
-        print(f'hidden states: {hidden_states.shape}')
-
         # splits
         text_splits, img_splits = sequence_splits
 
@@ -243,9 +241,6 @@ def MoELlamaDecoderLayer_forward(self):
         # combined hidden states
         hidden_states = torch.stack([combined_hidden_states, hidden_states], dim=0)
         hidden_states = torch.mean(hidden_states, dim=0)
-
-        print(f'hidden states: [PROCESSED]: {hidden_states.shape}')
-
 
         hidden_states = residual + hidden_states
         
