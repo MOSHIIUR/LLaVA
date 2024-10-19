@@ -252,8 +252,8 @@ class LlavaMetaForCausalLM(ABC):
         all_split_sizes = []
 
         print('-'*100)
-        for cur_ids in cur_input_ids:
-            print(f'cur_ids length: {len(cur_ids)}')
+        for input_id in input_ids:
+            print(f'cur_ids length: {len(input_id)}')
 
         for batch_idx, cur_input_ids in enumerate(input_ids):
             num_images = (cur_input_ids == IMAGE_TOKEN_INDEX).sum()
