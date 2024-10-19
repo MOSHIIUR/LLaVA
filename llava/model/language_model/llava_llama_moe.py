@@ -486,6 +486,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         self.config.num_experts = model_args.num_experts
         self.config.num_experts_per_tok = model_args.num_experts_per_tok
         self.config.router_aux_loss_coef = model_args.router_aux_loss_coef
+        self.config.output_router_logits = True
         num_layers = self.config.num_hidden_layers
 
         print(f'num_layers: {num_layers}')
