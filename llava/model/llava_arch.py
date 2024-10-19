@@ -308,7 +308,7 @@ class LlavaMetaForCausalLM(ABC):
         print('-'*100)
         for idx in range(num_images):
             print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
-            print(f'text tokens: {new_input_embeds[:sum(all_split_sizes[idx])].shape}; image tokens: {new_input_embeds[sum(all_split_sizes[idx]):].shape}')
+            print(f'text tokens: {new_input_embeds[idx][:sum(all_split_sizes[idx])].shape}; image tokens: {new_input_embeds[idx][sum(all_split_sizes[idx]):].shape}')
         print('-'*100)
 
         # Truncate sequences to max length as image embeddings can make the sequence longer
