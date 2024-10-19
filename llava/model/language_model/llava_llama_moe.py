@@ -37,7 +37,7 @@ from torch.nn import CrossEntropyLoss
 from transformers.models.llama.modeling_llama import logger
 from transformers.models.llama.modeling_llama import LlamaMLP
 from transformers.utils import ModelOutput
-from utils.utils import split_seqeunce, pad_sequence
+from .utils.utils import split_seqeunce, pad_sequence
 
 local_rank = None
 
