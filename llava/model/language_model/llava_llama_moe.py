@@ -187,7 +187,6 @@ def MoELlamaDecoderLayer_forward(self):
         output_router_logits = (
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
-        print(f'output router logits: {output_router_logits}')
 
         residual = hidden_states
         hidden_states = self.input_layernorm(hidden_states)
@@ -226,7 +225,6 @@ def MoELlamaDecoderLayer_forward(self):
             outputs += (present_key_value,)
 
         if output_router_logits:
-            print(f'shape of router logits: decoder layer: {router_logits.shape}')
             outputs += (router_logits,)
             
 
@@ -354,7 +352,6 @@ def MoELlamaModel_forward(self):
                 all_self_attns += (layer_outputs[1],)
 
             if output_router_logits:
-                print(f'router logits -> layer_outputs[-1]: {layer_outputs[-1].shape}')
                 all_router_logits += (layer_outputs[-1],)
 
         hidden_states = self.norm(hidden_states)
@@ -478,8 +475,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
-        # for router_logit in outputs.router_logits:
-        #     print(f'shape of router logit: {router_logit.shape}')
+        for router_logit in outputs.router_logits:
+            print(f'shape of router logit: {router_logit.shape}')
 
         aux_loss = None
         if output_router_logits:
