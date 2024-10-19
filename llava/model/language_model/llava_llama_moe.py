@@ -426,6 +426,7 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         self.pretraining_tp = config.pretraining_tp
         self.vocab_size = config.vocab_size
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
+        self.padding_side = config.tokenizer_padding_side
         # Initialize weights and apply final processing
         self.post_init()
 
@@ -524,10 +525,10 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                         
         else: raise ValueError(f'Expected router logits as tuple got {type(outputs.router_logits)}')
 
-        # splitting_seqeunce
+        # get attention mask to calculate image/text load balancing loss
         text_splits, img_sequences = sequence_splits
         text_tokens, img_tokens = split_seqeunce(text_splits, img_sequences, inputs_embeds)
-        padding_side = 'right'
+        padding_side = self.padding_side
         _, text_attention_mask = pad_sequence(text_tokens, padding_side)
         _, vision_attention_mask = pad_sequence(img_tokens, padding_side)
 
@@ -610,8 +611,8 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             # pretrained_state_dict = self.model.layers[layer_idx].mlp.state_dict()
             llama_mlp = self.model.layers[layer_idx].mlp
             self.model.layers[layer_idx].mlp = LlamaSparseMoeBlock(self.config, llama_mlp)
-            self.model.layers[layer_idx].text_moe = self.model.layers[layer_idx].mlp
-            self.model.layers[layer_idx].vision_moe = self.model.layers[layer_idx].mlp
+            self.model.layers[layer_idx].text_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
+            self.model.layers[layer_idx].vision_moe = LlamaSparseMoeBlock(self.config, llama_mlp)
             # for e in self.model.layers[layer_idx].mlp.experts:  
             #     loaded_state_dict = e.state_dict()
             #     assert all([torch.allclose(pretrained_state_dict[k], v) for k, v in loaded_state_dict.items()])
