@@ -69,7 +69,7 @@ class LlamaSparseMoeBlock(nn.Module):
         # gating
         self.gate = nn.Linear(self.hidden_dim, self.num_experts, bias=False)
 
-        self.experts = nn.ModuleList([deepcopy(llama_mlp) for _ in range(self.num_experts)])
+        self.experts = nn.ModuleList([llama_mlp for _ in range(self.num_experts)])
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         """ """
