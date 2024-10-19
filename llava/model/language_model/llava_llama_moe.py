@@ -216,7 +216,7 @@ def MoELlamaDecoderLayer_forward(self):
         # splitting_seqeunce
         text_splits, img_sequences = sequence_splits
         text_hidden_states, img_hidden_states = split_seqeunce(text_splits, img_sequences, hidden_states)
-        padding_side = self.config.tokenizer_padding_side
+        padding_side = 'right'
         text_hidden_states = pad_sequence(text_hidden_states, padding_side)
         img_hidden_states = pad_sequence(img_hidden_states, padding_side)
 
