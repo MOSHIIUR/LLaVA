@@ -75,7 +75,6 @@ class LlamaSparseMoeBlock(nn.Module):
         hidden_states = hidden_states.view(-1, hidden_dim)
         # router_logits: (batch * sequence_length, n_experts)
         router_logits = self.gate(hidden_states)
-        print(f'Shape of router logits: {router_logits.shape}')
 
         routing_weights = F.softmax(router_logits, dim=1, dtype=torch.float)
         routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1)
@@ -471,6 +470,9 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
+        for router_logit in output.router_logits:
+            print(f'shape of router logit: {router_logit}')
+            
         aux_loss = None
         if output_router_logits:
             aux_loss = load_balancing_loss_func(
