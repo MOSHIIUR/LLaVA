@@ -30,7 +30,7 @@ def pad_sequence(new_input_embeds, padding_side):
     max_len = max(x.shape[0] for x in new_input_embeds)
     batch_size = len(new_input_embeds)
 
-    attention_mask = torch.zeros((batch_size, max_len), dtype=attention_mask.dtype, device=attention_mask.device)
+    attention_mask = torch.zeros((batch_size, max_len), dtype=new_input_embeds.dtype, device=new_input_embeds.device)
     
     new_input_embeds_padded = []
 
@@ -76,7 +76,7 @@ def unpad_sequence(hidden_states, attention_masks, padding_side):
 
 def concat_hidden_states(text_hidden_states, img_hidden_states):
     combined_hidden_states = []
-    
+
     for text_hidden_state, img_hidden_state in zip(text_hidden_states, img_hidden_states):
         combined_state = torch.cat((text_hidden_state, img_hidden_state), dim=0)
         combined_hidden_states.append(combined_state)
