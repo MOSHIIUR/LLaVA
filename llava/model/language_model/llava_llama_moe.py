@@ -323,7 +323,7 @@ def MoELlamaModel_forward(self):
             if self.gradient_checkpointing and self.training:
                 
                 print('*'*40+'llama-gradient_checkpointingv3'+'*'*40)
-                print(f"use_cache: {next_cache}, type: {type(next_cache)}")
+                print(f"use_cache: {use_cache}, type: {type(use_cache)}")
                 print('*'*100)
 
                 layer_outputs = self._gradient_checkpointing_func(
