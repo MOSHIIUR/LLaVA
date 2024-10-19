@@ -188,7 +188,7 @@ def MoELlamaDecoderLayer_forward(self):
             output_router_logits if output_router_logits is not None else self.config.output_router_logits
         )
         print(f'output router logits: {output_router_logits}')
-        
+
         residual = hidden_states
         hidden_states = self.input_layernorm(hidden_states)
         # import ipdb
@@ -325,7 +325,7 @@ def MoELlamaModel_forward(self):
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
                         # None for past_key_value
-                        return module(*inputs, past_key_value, output_attentions)
+                        return module(*inputs, past_key_value, output_attentions, output_router_logits)
 
                     return custom_forward
 
