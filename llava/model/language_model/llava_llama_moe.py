@@ -321,6 +321,11 @@ def MoELlamaModel_forward(self):
                 all_hidden_states += (hidden_states,)
 
             if self.gradient_checkpointing and self.training:
+                
+                print('*'*40+'llama-gradient_checkpointingv3'+'*'*40)
+                print(f"use_cache: {next_cache}, type: {type(next_cache)}")
+                print('*'*100)
+
                 layer_outputs = self._gradient_checkpointing_func(
                     decoder_layer.__call__,
                     hidden_states,
@@ -366,9 +371,6 @@ def MoELlamaModel_forward(self):
         if return_legacy_cache:
             next_cache = next_cache.to_legacy_cache()
 
-        print('*'*40+'llama-forward-layer-v3'+'*'*40)
-        print(f"use_cache: {next_cache}, type: {type(next_cache)}")
-        print('*'*100)
 
         if not return_dict:
             return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
