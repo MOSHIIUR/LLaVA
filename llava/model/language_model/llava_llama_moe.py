@@ -223,7 +223,10 @@ def MoELlamaDecoderLayer_forward(self):
         # hidden_states = self.mlp(hidden_states)
         language_hidden_states, text_router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
         vision_hidden_states, vision_router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
-        hidden_states, router_logits = self.mlp(hidden_states) # shared_Moe call
+        hidden_states, shared_router_logits = self.mlp(hidden_states) # shared_Moe call
+
+        # router_logits_tuple
+        router_logits = (shared_router_logits, text_router_logits, vision_router_logits)
         
         # splits
         text_splits, img_splits = sequence_splits
@@ -514,18 +517,41 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
-        # for router_logit in outputs.router_logits:
-        #     print(f'shape of router logit: {router_logit.shape}')
+        # unpack all router logits
+        shared_router_logits, text_router_logits, vision_router_logits = outputs.router_logits
 
         aux_loss = None
+        text_aux_loss = None
+        vision_aux_loss = None
+
         if output_router_logits:
             aux_loss = load_balancing_loss_func(
-                outputs.router_logits if return_dict else outputs[-1],
+                shared_router_logits if return_dict else outputs[-1],
                 self.config.num_experts,
                 self.config.num_experts_per_tok,
                 attention_mask,
             )
             print(f'Aux loss: {aux_loss}')
+
+            # text_load_balancing_loss
+            text_aux_loss = load_balancing_loss_func(
+                text_router_logits if return_dict else outputs[-1],
+                self.config.num_experts,
+                self.config.num_experts_per_tok,
+                attention_mask,
+            )
+            print(f'Aux loss text: {text_aux_loss}')
+            
+            # vision_load_balancing_loss
+            vision_aux_loss = load_balancing_loss_func(
+                vision_router_logits if return_dict else outputs[-1],
+                self.config.num_experts,
+                self.config.num_experts_per_tok,
+                attention_mask,
+            )
+            print(f'Aux loss vision: {vision_aux_loss}')
+            
+
             if labels is not None:
                 loss += self.config.router_aux_loss_coef * aux_loss.to(loss.device)  # make sure to reside in the same device
         
