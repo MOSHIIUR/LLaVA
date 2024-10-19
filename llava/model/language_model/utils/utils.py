@@ -63,8 +63,12 @@ def split_hidden_state(hidden_states, split_sizes, modality):
         for hidden_state, split_size in zip(hidden_states, split_sizes):
             
             seq_len = sum(split_size)
-            text_hidden_state, _ = torch.split(hidden_state, seq_len, dim=0)
-            text_hidden_states.append(text_hidden_state)
+            if seq_len != hidden_state.shape[0]:
+                text_hidden_state, _ = torch.split(hidden_state, seq_len, dim=0)
+                text_hidden_states.append(text_hidden_state)
+            else:
+                text_hidden_state, _ = torch.split(hidden_state, seq_len, dim=0)
+                text_hidden_states.append(text_hidden_state)
         
         return text_hidden_states
     
