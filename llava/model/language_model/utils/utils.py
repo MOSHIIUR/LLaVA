@@ -66,9 +66,13 @@ def split_hidden_state(hidden_states, split_sizes, modality):
             
             print(f'sequence length: {seq_len}; hidden state shape: {hidden_state.shape[0]}')
 
-            if seq_len != hidden_state.shape[0]:
-                text_hidden_state, _ = torch.split(hidden_state, seq_len, dim=0)
+            if seq_len < hidden_state.shape[0]:
+                text_hidden_state = torch.split(hidden_state, seq_len, dim=0)
+                for state in enumerate(text_hidden_state):
+                    print(state.shape)
+                print('*'*100)
                 text_hidden_states.append(text_hidden_state)
+                
             else:
                 text_hidden_state = torch.split(hidden_state, seq_len, dim=0)
                 text_hidden_states.append(text_hidden_state)
