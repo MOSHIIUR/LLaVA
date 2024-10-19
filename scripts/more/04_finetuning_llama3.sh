@@ -34,6 +34,7 @@ deepspeed llava/train/train_mem.py \
 --image_folder $images_path \
 --vision_tower $vision_tower \
 --mm_projector_type mlp2x_gelu \
+--tune_mm_mlp_adapter True \
 --moe_enable True \
 --num_experts 4 \
 --num_experts_per_tok 2 \

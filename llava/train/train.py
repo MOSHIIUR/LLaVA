@@ -1116,6 +1116,12 @@ def train(attn_implementation=None):
         rank0_print("Adding LoRA adapters...")
         model = get_peft_model(model, lora_config)
 
+    # count parameters in the model
+    count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    count_par = sum(p.numel() for p in model.parameters())
+    rank0_print(f"Trainable parameters: {count_par_trainable}")
+    rank0_print(f"Total parameters: {count_par}")
+    
     # initialize the moe module in llm
     if training_args.moe_enable:
         model.initialize_moe_modules(model_args=model_args)
@@ -1185,11 +1191,6 @@ def train(attn_implementation=None):
         else:
             conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1"]
 
-    # count parameters in the model
-    count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    count_par = sum(p.numel() for p in model.parameters())
-    rank0_print(f"Trainable parameters: {count_par_trainable}")
-    rank0_print(f"Total parameters: {count_par}")
     
     if model_args.vision_tower is not None:
         model.get_model().initialize_vision_modules(
@@ -1254,10 +1255,6 @@ def train(attn_implementation=None):
                         module = module.to(torch.bfloat16)
 
     rank0_print(model)
-
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            print(f'Parameter name: {name}, requires grad True')
 
     # count parameters in the model
     count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
