@@ -69,7 +69,10 @@ def unpad_sequence(hidden_states, attention_masks, padding_side):
 
         else:
             slice_idx = cur_attn_mask.sum().item()
-            unpad_hidden_state = hidden_state[:slice_idx]
+            if slice_idx != hidden_state.shape[0]:
+                unpad_hidden_state = hidden_state[:slice_idx]
+            
+            else : unpad_hidden_state = hidden_state
 
         unpad_hidden_states.append(unpad_hidden_state)
 
