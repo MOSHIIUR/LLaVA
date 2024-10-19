@@ -307,7 +307,7 @@ class LlavaMetaForCausalLM(ABC):
 
         print('-'*100)
         for idx in range(num_images):
-            print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {cur_new_input_embeds[idx].shape[0]}')
+            print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {new_input_embeds[idx].shape[0]}')
         print('-'*100)
 
         # Truncate sequences to max length as image embeddings can make the sequence longer
