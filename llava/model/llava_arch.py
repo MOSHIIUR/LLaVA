@@ -250,6 +250,7 @@ class LlavaMetaForCausalLM(ABC):
         new_labels = []
         cur_image_idx = 0
         all_split_sizes = []
+        length_of_text_tokens = []
 
         print('-'*100)
         for input_id in input_ids:
@@ -278,6 +279,7 @@ class LlavaMetaForCausalLM(ABC):
             split_sizes = [x.shape[0] for x in cur_labels_noim]
             all_split_sizes.append(split_sizes)
             cur_input_embeds = self.get_model().embed_tokens(torch.cat(cur_input_ids_noim))
+            length_of_text_tokens.append(cur_input_embeds.shape[0])
             cur_input_embeds_no_im = torch.split(cur_input_embeds, split_sizes, dim=0)
             cur_new_input_embeds = []
             cur_new_labels = []
@@ -304,10 +306,10 @@ class LlavaMetaForCausalLM(ABC):
             print(split)
 
         print('-'*100)
-        for new_input_embed in new_input_embeds:
-            print(f'shape: {new_input_embed.shape}')
+        for idx in range(num_images):
+            print(f'{length_of_text_tokens[idx]} + {image_features[idx].shape[0]} = {cur_new_input_embeds[idx].shape[0]}')
         print('-'*100)
-        
+
         # Truncate sequences to max length as image embeddings can make the sequence longer
         tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
         if tokenizer_model_max_length is not None:
