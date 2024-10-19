@@ -5,7 +5,7 @@ def split_seqeunce(text_splits, img_sequences, input_embeds):
     for text_split, img_sequence, input_embed in zip(text_splits, img_sequences, input_embeds):
         txt_seq_len = sum(text_split)
         total_seq_len = input_embed.shape[0]
-        padded_sequence = total_seq_len - (txt_seq_len + img_sequences)
+        padded_sequence = total_seq_len - (txt_seq_len + img_sequence)
 
         print(f'split size: {split_size}')
 
