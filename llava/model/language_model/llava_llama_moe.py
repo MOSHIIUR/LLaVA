@@ -37,6 +37,7 @@ from torch.nn import CrossEntropyLoss
 from transformers.models.llama.modeling_llama import logger
 from transformers.models.llama.modeling_llama import LlamaMLP
 from transformers.utils import ModelOutput
+from utils.utils import split_seqeunce, pad_sequence
 
 local_rank = None
 
@@ -211,10 +212,18 @@ def MoELlamaDecoderLayer_forward(self):
         # Fully Connected
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
+        
+        # splitting_seqeunce
+        text_splits, img_sequences = sequence_splits
+        text_hidden_states, img_hidden_states = split_seqeunce(text_splits, img_sequences, hidden_states)
+        padding_side = self.config.tokenizer_padding_side
+        text_hidden_states = pad_sequence(text_hidden_states, padding_side)
+        img_hidden_states = pad_sequence(img_hidden_states, padding_side)
+
         # hidden_states = self.mlp(hidden_states)
-        hidden_states, router_logits = self.mlp(hidden_states) # replacing the llama mlp call 
-        hidden_states, router_logits = self.text_moe(hidden_states) # replacing the llama mlp call 
-        hidden_states, router_logits = self.vision_moe(hidden_states) # replacing the llama mlp call 
+        hidden_states, router_logits = self.text_moe(text_hidden_states) # text_moe for text tokens
+        hidden_states, router_logits = self.vision_moe(img_hidden_states) # vision_moe for image tokens
+        hidden_states, router_logits = self.mlp(hidden_states) # shared_Moe call
         hidden_states = residual + hidden_states
         
         # import ipdb
