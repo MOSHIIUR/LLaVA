@@ -260,16 +260,6 @@ def MoELlamaDecoderLayer_forward(self):
         if output_router_logits:
             outputs += (router_logits,)
 
-        print('*'*100)
-        if isinstance(outputs, tuple):
-            for output in outputs:
-                if isinstance(output, tuple):
-                    print(f'len: {len(output)}')
-                else: print(f'type: {type(output)}')
-        else: print(type(outputs))
-        print('*'*100)
-            
-
         return outputs
 
     return forward
@@ -526,6 +516,16 @@ class MoELLaVALlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
+        print('*'*100)
+        if isinstance(outputs, tuple):
+            print(f'Total outputs length: {len(outputs)}')
+            for output in outputs:
+                if isinstance(output, tuple):
+                    print(f'len: {len(output)}')
+                else: print(f'type: {type(output)}')
+        else: print(type(outputs))
+        print('*'*100)
+        
         # unpack all router logits
         shared_router_logits, text_router_logits, vision_router_logits = outputs.router_logits
 
