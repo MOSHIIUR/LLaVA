@@ -909,6 +909,10 @@ class LazySupervisedDataset(Dataset):
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
         if 'image' in sources[0]:
             image_file = self.list_data_dict[i]['image']
+            # ===================================================
+            if isinstance(image_file, list):
+                image_file = image_file[0]
+            # ===================================================
             image_folder = self.data_args.image_folder
             processor = self.data_args.image_processor
             image_file = image_file if isinstance(image_file, list) else image_file
