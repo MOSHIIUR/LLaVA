@@ -25,7 +25,7 @@ llama3_path=meta-llama/Meta-Llama-3.1-8B-Instruct
 images_path=/scratch/mi8uu/mrm/LLaVA/playground/data/moe_llava
 data_train_path=/scratch/mi8uu/mrm/LLaVA/playground/data/moe_llava/train_json
 vision_tower=openai/clip-vit-large-patch14-336
-mm_projector_path=pretrained_weight/LLaVA_MORE-llama_3_1-8B-pretrain
+mm_projector_path=pretrained_weight/LLaVA_MORE-llama_3_1-8B-pretrain/mm_projector.bin
 
 
 job_name="finetune-moe-llava-v01"
