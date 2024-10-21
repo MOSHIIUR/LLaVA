@@ -18,6 +18,7 @@ export WANDB_PROJECT=FineTuneLLaVa
 export TOKENIZER_PATH=aimagelab/LLaVA_MORE-llama_3_1-8B-finetuning
 
 
+
 module purge
 module load apptainer
 
