@@ -911,6 +911,7 @@ class LazySupervisedDataset(Dataset):
             image_file = self.list_data_dict[i]['image']
             image_folder = self.data_args.image_folder
             processor = self.data_args.image_processor
+            image_file = image_file if isinstance(image_file, list) else image_file
             image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
             if self.data_args.image_aspect_ratio == 'pad':
                 def expand2square(pil_img, background_color):
@@ -928,6 +929,7 @@ class LazySupervisedDataset(Dataset):
                 image = expand2square(image, tuple(int(x*255) for x in processor.image_mean))
                 image_size = image.size
                 image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+            
             elif self.data_args.image_aspect_ratio == "anyres":
                 image_size = image.size
                 image = process_anyres_image(image, processor, self.data_args.image_grid_pinpoints, self.siglip) # torch.Size([5, 3, 336, 336])
