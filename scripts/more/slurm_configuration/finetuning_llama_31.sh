@@ -21,8 +21,7 @@ cd /your/path
 
 export PYTHONPATH=.
 export WANDB_ENTITYproject_entity
-export WANDB_PROJECT=project_name
-export WANDB_MODE=offline
+export WANDB_PROJECT=
 export TOKENIZER_PATH=aimagelab/LLaVA_MORE-llama_3_1-8B-finetuning
 
 IFS=',' read -r -a nodelist <<<$SLURM_NODELIST
