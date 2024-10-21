@@ -8,7 +8,6 @@
 #SBATCH --gres=gpu:a40:6
 #SBATCH -N 1 
 #SBATCH --mem=256G
-#SBATCH --constraint=a100_80gb
 #SBATCH --output=log/slurm/llama/log-%A-%a.log 
 #SBATCH -J moe-llama
 
@@ -16,7 +15,6 @@ export TORCH_HOME=/project/CollabRoboGroup/.cache
 export TRANSFORMERS_CACHE=/project/CollabRoboGroup/.cache
 export WANDB_PROJECT=FineTuneLLaVa
 export TOKENIZER_PATH=aimagelab/LLaVA_MORE-llama_3_1-8B-finetuning
-
 
 
 module purge
@@ -27,7 +25,8 @@ llama3_path=meta-llama/Meta-Llama-3.1-8B-Instruct
 images_path=/scratch/mi8uu/mrm/LLaVA/playground/data/moe_llava
 data_train_path=/scratch/mi8uu/mrm/LLaVA/playground/data/moe_llava/train_json
 vision_tower=openai/clip-vit-large-patch14-336
-mm_projector_path=LLaVA_MORE-llama_3_1-8B-pretrain
+mm_projector_path=pretrained_weight/LLaVA_MORE-llama_3_1-8B-pretrain
+
 
 job_name="finetune-moe-llava-v01"
 echo "job name: $job_name"
