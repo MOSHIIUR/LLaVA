@@ -593,7 +593,7 @@ def preprocess_llama_3_1(
             cur_len += round_len
 
         target[cur_len:] = IGNORE_INDEX
-        # cur_len= cur_len + len(tokenizer(sep, add_special_tokens=False).input_ids)
+        cur_len= cur_len + len(tokenizer(sep, add_special_tokens=False).input_ids)
 
         # if cur_len > tokenizer.model_max_length: print(f"WARNING: max length context")
         if cur_len < tokenizer.model_max_length:
@@ -1261,10 +1261,6 @@ def train(attn_implementation=None):
                         module = module.to(torch.bfloat16)
 
     rank0_print(model)
-
-    for name, param in model.named_parameters():
-        if param.requires_grad:  # Shared tensor check
-            print(f"Parameter {name} is grad {param.requires_grad}.")
 
     # count parameters in the model
     count_par_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
