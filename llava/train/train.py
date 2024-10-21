@@ -1093,6 +1093,7 @@ def train(attn_implementation=None):
             **bnb_model_from_pretrained_args
         )
     model.config.use_cache = False
+    model.config.moe_enable = training_args.moe_enable
 
     if model_args.freeze_backbone:
         model.model.requires_grad_(False)

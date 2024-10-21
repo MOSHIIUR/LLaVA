@@ -155,7 +155,10 @@ class LlavaMetaForCausalLM(ABC):
 
         vision_tower = self.get_vision_tower()
         if vision_tower is None or images is None or input_ids.shape[1] == 1:
-            return input_ids, position_ids, attention_mask, past_key_values, None, labels, sequence_splits
+            if self.config.moe_enable:
+                return input_ids, position_ids, attention_mask, past_key_values, None, labels, sequence_splits
+            else: return input_ids, position_ids, attention_mask, past_key_values, None, labels
+        
 
         # enter in this if from llava 1.6
         if type(images) is list or images.ndim == 5:
@@ -345,7 +348,7 @@ class LlavaMetaForCausalLM(ABC):
 
 
         new_input_embeds = torch.stack(new_input_embeds_padded, dim=0)
-        sequence_splits = (text_splits, img_sequences)
+        
 
         if _labels is None:
             new_labels = None
@@ -359,8 +362,12 @@ class LlavaMetaForCausalLM(ABC):
 
         if _position_ids is None:
             position_ids = None
+        
+        if self.config.moe_enable:
+            sequence_splits = (text_splits, img_sequences)
+            return None, position_ids, attention_mask, past_key_values, new_input_embeds, new_labels, sequence_splits
 
-        return None, position_ids, attention_mask, past_key_values, new_input_embeds, new_labels, sequence_splits
+        else: return None, position_ids, attention_mask, past_key_values, new_input_embeds, new_labels
 
     def initialize_vision_tokenizer(self, model_args, tokenizer):
         if model_args.mm_use_im_patch_token:
